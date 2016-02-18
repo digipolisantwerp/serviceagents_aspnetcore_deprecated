@@ -1,0 +1,16 @@
+﻿{
+  "TestAgent": {
+    "AuthScheme": "None",
+    "Host": "test.be",
+    "Path": "api",
+    "Port": "5001",
+    "Scheme": "http"
+  },
+  "OtherTestAgent": {
+    "AuthScheme": "Bearer",
+    "Host": "other.be",
+    "Path": "path",
+    "Port": "5002",
+    "Scheme": "https"
+  }
+}
