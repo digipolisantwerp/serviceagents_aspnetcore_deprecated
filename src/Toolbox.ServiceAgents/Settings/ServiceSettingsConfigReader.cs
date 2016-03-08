@@ -9,7 +9,7 @@ namespace Toolbox.ServiceAgents.Settings
 {
     internal class ServiceSettingsConfigReader
     {
-        public ServiceAgentSettings ReadSettingsFile(IConfigurationRoot config)
+        public ServiceAgentSettings ReadConfig(IConfigurationRoot config)
         {
             var serviceAgentSettings = new ServiceAgentSettings();
 

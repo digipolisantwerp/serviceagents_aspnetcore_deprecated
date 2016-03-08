@@ -85,8 +85,7 @@ namespace Toolbox.ServiceAgents
             var config = builder.Build();
             
             var configReader = new ServiceSettingsConfigReader();
-            //Check niet nodig ofdat file bestaat gebeurt hierboven al
-            var serviceAgentSettings = configReader.ReadSettingsFile(config);
+            var serviceAgentSettings = configReader.ReadConfig(config);
 
             return serviceAgentSettings;
         }
