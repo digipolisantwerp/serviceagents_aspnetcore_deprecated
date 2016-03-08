@@ -30,13 +30,10 @@ namespace Toolbox.ServiceAgents
             _client.DefaultRequestHeaders.Accept.Clear();
             _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-            switch (settings.AuthSettings.AuthScheme)
+            switch (settings.AuthScheme)
             {
                 case AuthScheme.Bearer:
                     SetBearerAuthHeader();
-                    break;
-                case AuthScheme.Basic:
-                    setBasicAuthHeader(settings.AuthSettings);
                     break;
                 default:
                     break;
@@ -53,12 +50,6 @@ namespace Toolbox.ServiceAgents
             var authContext = _serviceProvider.GetService<IAuthContext>();
             if (authContext == null) throw new NullReferenceException($"{nameof(IAuthContext)} cannot be null.");
             _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(AuthScheme.Bearer, authContext.UserToken);
-        }
-
-        private void setBasicAuthHeader(AuthSettings authSettings)
-        {
-            var credentialBase64 = Convert.ToBase64String(Encoding.ASCII.GetBytes($"{authSettings.Domain}\\{authSettings.User}:{authSettings.Password}"));
-            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", credentialBase64);
         }
     }
 }
