@@ -58,8 +58,6 @@ namespace Toolbox.ServiceAgents
             }
         }
 
-
-
         protected async Task<T> GetAsync<T>(string requestUri)
         { 
             var response = await _client.GetAsync(requestUri);

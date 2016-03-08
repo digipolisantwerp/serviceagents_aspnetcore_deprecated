@@ -1,6 +1,6 @@
 {
 	"version": "1.0.0",
-	"description": "Toolobx for ServiceAgents in ASP.NET Core..",
+	"description": "Toolbox for ServiceAgents in ASP.NET Core.",
 	"authors": [ "digipolis.be" ],
 	"tags": [ "" ],
 	"projectUrl": "",
