@@ -4,8 +4,7 @@ namespace Toolbox.ServiceAgents.Settings
 {
     public class ServiceSettings
     {
-        public string AuthScheme { get; set; } = Defaults.ServiceSettings.AuthScheme;
-
+        public AuthSettings AuthSettings { get; set; } = new AuthSettings();
         public string Scheme { get; set; } = Defaults.ServiceSettings.Scheme;
         public string Host { get; set; }
         public string Port { get; set; }
