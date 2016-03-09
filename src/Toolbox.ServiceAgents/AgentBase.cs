@@ -21,14 +21,12 @@ namespace Toolbox.ServiceAgents
         protected HttpClient _client;
         private IServiceProvider _serviceProvider;
 
-        public AgentBase(IServiceProvider serviceProvider, IOptions<ServiceAgentSettings> options, string key)
+        public AgentBase(IServiceProvider serviceProvider, IOptions<ServiceAgentSettings> options)
         {
             if (options.Value == null) throw new ArgumentNullException(nameof(ServiceAgentSettings), $"{nameof(ServiceAgentSettings)} cannot be null.");
-            if (String.IsNullOrWhiteSpace(key)) throw new ArgumentNullException(nameof(key), $"{nameof(key)} cannot be null.");
-            if (options.Value.Services[key] == null) throw new NullReferenceException($"{nameof(ServiceSettings)} for {key} cannot be null.");
 
             _serviceProvider = serviceProvider;
-            _settings = options.Value.Services[key];
+            _settings = options.Value.Services[this.GetType().Name];
 
             var clientFactory = serviceProvider.GetService<IHttpClientFactory>();
             _client = clientFactory.CreateClient(_settings);

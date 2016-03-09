@@ -13,7 +13,7 @@ namespace SampleApi.ServiceAgents
     public class DemoAgent : AgentBase, IDemoAgent
     {
         public DemoAgent(IServiceProvider serviceProvider, IOptions<ServiceAgentSettings> options) 
-            : base(serviceProvider, options, "DemoAgent")
+            : base(serviceProvider, options)
         {
         }
 

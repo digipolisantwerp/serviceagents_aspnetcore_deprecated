@@ -10,7 +10,7 @@ namespace Toolbox.ServiceAgents.UnitTests.Utilities
     public class InterfaceImplementingAgent : AgentBase, IInterfaceImplementingAgent
     {
         public InterfaceImplementingAgent(IServiceProvider serviceProvider, IOptions<ServiceAgentSettings> options)
-            :base(serviceProvider, options, "InterfaceImplementingAgent")
+            :base(serviceProvider, options)
         {
 
         }

@@ -83,10 +83,9 @@ namespace Toolbox.ServiceAgents
         {
             var builder = new ConfigurationBuilder().AddJsonFile(serviceSettingsJsonFile.FileName);
             var config = builder.Build();
-
-            var fileReader = new ServiceSettingsFileReader();
-
-            var serviceAgentSettings = fileReader.ReadSettingsFile(serviceSettingsJsonFile.FileName);
+            
+            var configReader = new ServiceSettingsConfigReader();
+            var serviceAgentSettings = configReader.ReadConfig(config);
 
             return serviceAgentSettings;
         }

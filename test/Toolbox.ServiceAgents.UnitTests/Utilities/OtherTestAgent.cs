@@ -10,7 +10,7 @@ namespace Toolbox.ServiceAgents.UnitTests.Utilities
     public class OtherTestAgent : AgentBase
     {
         public OtherTestAgent(IServiceProvider serviceProvider, IOptions<ServiceAgentSettings> options)
-            : base(serviceProvider, options, "OtherTestAgent")
+            : base(serviceProvider, options)
         {
         }
     }

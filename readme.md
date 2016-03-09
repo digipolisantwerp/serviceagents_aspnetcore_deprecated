@@ -65,7 +65,7 @@ The structure of the json file is:
 }
 ```
 
-Each object (section) in the json represents a service agent type. The object name has to match the service agent type name.
+Each object (section) in the json represents a service agent type. **The object name has to match the service agent type name**.
 See section creating a service agent for more info on creating the service agents.
 
 Following options can be set per section (service agent):
@@ -90,7 +90,7 @@ Important notice: the action gets invoked for every service agent when multuple 
         s.FileName = "serviceagents.json";
         s.Section = "TestAgent";
     }, 
-    client => 
+    (serviceProvider, client) => 
     {
         //customize the client
     });
@@ -105,13 +105,11 @@ In order to create a service agent you need to create a type that derives from *
     public class DemoAgent : AgentBase
     {
         public DemoAgent(IServiceProvider serviceProvider, IOptions<ServiceAgentSettings> options) 
-            : base(serviceProvider, options, "DemoAgent")
+            : base(serviceProvider, options)
         {
         }
     }
 ```
-
-The name of the type has to be passed as the "key" parameter to the base class constructor.
 
 The **AgentBase** class contains several protected methods to perform the basic http actions (get, post, put and delete). All the methods are async. 
 
@@ -123,7 +121,7 @@ Implement a get operation
     public class DemoAgent : AgentBase
     {
         public DemoAgent(IServiceProvider serviceProvider, IOptions<ServiceAgentSettings> options) 
-            : base(serviceProvider, options, "DemoAgent")
+            : base(serviceProvider, options)
         {
         }
 
@@ -177,7 +175,7 @@ In that case you need to request an instance of the interface type:
     public class DemoAgent : AgentBase, IDemoAgent
     {
         public DemoAgent(IServiceProvider serviceProvider, IOptions<ServiceAgentSettings> options) 
-            : base(serviceProvider, options, "DemoAgent")
+            : base(serviceProvider, options)
         {
         }
 
