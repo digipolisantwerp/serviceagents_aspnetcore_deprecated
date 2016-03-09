@@ -81,7 +81,7 @@ Scheme | The scheme of the url for the service agent. | "https"
 The settings without default are manadatory!
 All the url parts form the basic url for the service agent: {scheme}://{host}:{port}/{path}
 
-An overload for both **AddSingleServiceAgent&lt;T>** and **AddServiceAgents** is available where you can pass an action of type **Action&lt;HttpClient>** that gets invoked when the underlaying HttpClient gets created. That way you can customize the created client.
+An overload for both **AddSingleServiceAgent&lt;T>** and **AddServiceAgents** is available where you can pass an action of type **Action&lt;IServiceProvider, HttpClient>** that gets invoked when the underlaying HttpClient gets created. That way you can customize the created client.
 
 Important notice: the action gets invoked for every service agent when multuple are registrated!
 ``` csharp
