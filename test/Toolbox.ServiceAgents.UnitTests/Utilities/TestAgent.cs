@@ -12,7 +12,7 @@ namespace Toolbox.ServiceAgents.UnitTests.Utilities
     public class TestAgent : AgentBase
     {
         public TestAgent(IServiceProvider serviceProvider, IOptions<ServiceAgentSettings> options)
-            : base(serviceProvider, options, "TestAgent")
+            : base(serviceProvider, options)
         {
         }
 
