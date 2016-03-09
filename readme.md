@@ -90,7 +90,7 @@ Important notice: the action gets invoked for every service agent when multuple 
         s.FileName = "serviceagents.json";
         s.Section = "TestAgent";
     }, 
-    client => 
+    (serviceProvider, client) => 
     {
         //customize the client
     });
