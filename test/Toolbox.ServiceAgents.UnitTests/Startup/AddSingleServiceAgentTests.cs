@@ -41,6 +41,7 @@ namespace Toolbox.ServiceAgents.UnitTests.Startup
         [Fact]
         private void HttpClientFactoryClientActionIsPassed()
         {
+            var serviceAgentSettings = new ServiceAgentSettings();
             HttpClient passedClient = null;
             var services = new ServiceCollection();
             services.AddSingleServiceAgent<TestAgent>(settings => { }, (sp, client) => passedClient = client);
@@ -50,7 +51,7 @@ namespace Toolbox.ServiceAgents.UnitTests.Startup
 
             //Manually call the CreateClient on the factory (this normally happens when the service agent gets resolved
             var factory = registration.ImplementationFactory.Invoke(null) as HttpClientFactory;
-            factory.CreateClient(new ServiceSettings { Host = "test.be" });
+            factory.CreateClient(serviceAgentSettings, new ServiceSettings { Host = "test.be" });
 
             Assert.NotNull(passedClient);
         }
@@ -66,6 +67,8 @@ namespace Toolbox.ServiceAgents.UnitTests.Startup
                 settings.Path = "api";
                 settings.Port = "5000";
                 settings.Scheme = HttpSchema.Http;
+                settings.UseGlobalApiKey = true;
+                settings.ApiKey = "localapikey";
             });
 
             var registrations = services.Where(sd => sd.ServiceType == typeof(IConfigureOptions<ServiceAgentSettings>))
@@ -90,6 +93,8 @@ namespace Toolbox.ServiceAgents.UnitTests.Startup
             Assert.Equal("api", serviceSettings.Path);
             Assert.Equal("5000", serviceSettings.Port);
             Assert.Equal(HttpSchema.Http, serviceSettings.Scheme);
+            Assert.False(serviceSettings.UseGlobalApiKey);
+            Assert.Equal("localapikey", serviceSettings.ApiKey);
         }
 
         [Fact]

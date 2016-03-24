@@ -22,7 +22,7 @@ namespace Toolbox.ServiceAgents.UnitTests.Startup
 
             var ex = Assert.Throws<ArgumentNullException>(() => services.AddServiceAgents(nullAction));
 
-            Assert.Equal("setupAction", ex.ParamName);
+            Assert.Equal("jsonSetupAction", ex.ParamName);
         }
 
         [Fact]
@@ -45,6 +45,7 @@ namespace Toolbox.ServiceAgents.UnitTests.Startup
         [Fact]
         private void HttpClientFactoryClientActionIsPassed()
         {
+            var serviceAgentSettings = new ServiceAgentSettings();
             HttpClient passedClient = null;
             IServiceProvider passedServiceProvider = null;
             var services = new ServiceCollection();
@@ -63,9 +64,46 @@ namespace Toolbox.ServiceAgents.UnitTests.Startup
 
             //Manually call the CreateClient on the factory (this normally happens when the service agent gets resolved
             var factory = registration.ImplementationFactory.Invoke(null) as HttpClientFactory;
-            factory.CreateClient(new ServiceSettings {  Host = "test.be" });
+            factory.CreateClient(serviceAgentSettings, new ServiceSettings {  Host = "test.be" });
 
             Assert.NotNull(passedClient);
+        }
+
+        [Fact]
+        private void ServiceAgentSettingsActionIsPassed()
+        {
+            var serviceAgentSettings = new ServiceAgentSettings();
+            HttpClient passedClient = null;
+            IServiceProvider passedServiceProvider = null;
+            var services = new ServiceCollection();
+            services.AddServiceAgents(json =>
+            {
+                json.FileName = "_TestData/serviceagentconfig_1.json";
+            }, settings =>
+            {
+                settings.GlobalApiKey = "globalkeyfromcode";
+                settings.Services["TestAgent"].ApiKey = "localapikeyfromcode";
+            }, null);
+
+            var registrations = services.Where(sd => sd.ServiceType == typeof(IConfigureOptions<ServiceAgentSettings>))
+                                        .ToArray();
+
+            Assert.Equal(1, registrations.Count());
+            Assert.Equal(ServiceLifetime.Singleton, registrations[0].Lifetime);
+
+            var configOptions = registrations[0].ImplementationInstance as IConfigureOptions<ServiceAgentSettings>;
+            Assert.NotNull(configOptions);
+
+            serviceAgentSettings = new ServiceAgentSettings();
+            configOptions.Configure(serviceAgentSettings);
+
+            Assert.Equal(1, serviceAgentSettings.Services.Count);
+            Assert.Equal("globalkeyfromcode", serviceAgentSettings.GlobalApiKey);
+
+            var serviceSettings = serviceAgentSettings.Services["TestAgent"];
+            Assert.NotNull(serviceSettings);
+
+            Assert.Equal("localapikeyfromcode", serviceSettings.ApiKey);
         }
 
         [Fact]
@@ -90,15 +128,18 @@ namespace Toolbox.ServiceAgents.UnitTests.Startup
             configOptions.Configure(serviceAgentSettings);
 
             Assert.Equal(1, serviceAgentSettings.Services.Count);
+            Assert.Equal("globalapikey", serviceAgentSettings.GlobalApiKey);
 
             var serviceSettings = serviceAgentSettings.Services["TestAgent"];
             Assert.NotNull(serviceSettings);
-
+            
             Assert.Equal(AuthScheme.None, serviceSettings.AuthScheme);
             Assert.Equal("test.be", serviceSettings.Host);
             Assert.Equal("api", serviceSettings.Path);
             Assert.Equal("5001", serviceSettings.Port);
             Assert.Equal(HttpSchema.Http, serviceSettings.Scheme);
+            Assert.False(serviceSettings.UseGlobalApiKey);
+            Assert.Equal("localapikey", serviceSettings.ApiKey);
         }
 
         [Fact]

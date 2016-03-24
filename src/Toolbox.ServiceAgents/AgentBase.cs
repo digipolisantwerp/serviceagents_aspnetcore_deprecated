@@ -26,10 +26,12 @@ namespace Toolbox.ServiceAgents
             if (options.Value == null) throw new ArgumentNullException(nameof(ServiceAgentSettings), $"{nameof(ServiceAgentSettings)} cannot be null.");
 
             _serviceProvider = serviceProvider;
-            _settings = options.Value.Services[this.GetType().Name];
+
+            var serviceAgentSettings = options.Value;
+            _settings = serviceAgentSettings.Services[this.GetType().Name];
 
             var clientFactory = serviceProvider.GetService<IHttpClientFactory>();
-            _client = clientFactory.CreateClient(_settings);
+            _client = clientFactory.CreateClient(serviceAgentSettings, _settings);
 
             _formatters = new MediaTypeFormatter[] { _formatter };
         }

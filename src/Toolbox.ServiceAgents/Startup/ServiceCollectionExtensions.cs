@@ -32,6 +32,7 @@ namespace Toolbox.ServiceAgents
 
             var serviceSettings = new ServiceSettings();
             setupAction.Invoke(serviceSettings);
+            serviceSettings.UseGlobalApiKey = false;
 
             var type = typeof(T);
 
@@ -47,27 +48,41 @@ namespace Toolbox.ServiceAgents
 
         public static IServiceCollection AddServiceAgents(this IServiceCollection services, Action<ServiceSettingsJsonFile> setupAction)
         {
-            return AddServiceAgents(services, Assembly.GetCallingAssembly(), setupAction, null);
+            return AddServiceAgents(services, Assembly.GetCallingAssembly(), setupAction, null, null);
         }
 
         public static IServiceCollection AddServiceAgents(this IServiceCollection services, Action<ServiceSettingsJsonFile> setupAction, Action<IServiceProvider, HttpClient> clientAction)
         {
-            return AddServiceAgents(services, Assembly.GetCallingAssembly(), setupAction, clientAction);
+            return AddServiceAgents(services, Assembly.GetCallingAssembly(), setupAction, null, clientAction);
+        }
+
+        public static IServiceCollection AddServiceAgents(this IServiceCollection services, 
+            Action<ServiceSettingsJsonFile> jsonSetupAction,
+            Action<ServiceAgentSettings> settingsSetupAction,
+            Action<IServiceProvider, HttpClient> clientAction)
+        {
+            return AddServiceAgents(services, Assembly.GetCallingAssembly(), jsonSetupAction, settingsSetupAction, clientAction);
         }
 
         private static IServiceCollection AddServiceAgents(this IServiceCollection services,
-            Assembly callingAssembly, 
-            Action<ServiceSettingsJsonFile> setupAction, 
+            Assembly callingAssembly,
+            Action<ServiceSettingsJsonFile> jsonSetupAction,
+            Action<ServiceAgentSettings> settingsSetupAction,
             Action<IServiceProvider, HttpClient> clientAction)
         {
-            if (setupAction == null) throw new ArgumentNullException(nameof(setupAction), $"{nameof(setupAction)} cannot be null.");
+            if (jsonSetupAction == null) throw new ArgumentNullException(nameof(jsonSetupAction), $"{nameof(jsonSetupAction)} cannot be null.");
 
             var serviceSettingsJsonFile = new ServiceSettingsJsonFile();
-            setupAction.Invoke(serviceSettingsJsonFile);
+            jsonSetupAction.Invoke(serviceSettingsJsonFile);
 
             var serviceAgentSettings = ConfigureServiceAgentSettings(services, serviceSettingsJsonFile);
+
+            if (settingsSetupAction != null)
+                settingsSetupAction.Invoke(serviceAgentSettings);
+
             services.Configure<ServiceAgentSettings>(s =>
             {
+                s.GlobalApiKey = serviceAgentSettings.GlobalApiKey;
                 foreach (var item in serviceAgentSettings.Services)
                 {
                     s.Services.Add(item.Key, item.Value);

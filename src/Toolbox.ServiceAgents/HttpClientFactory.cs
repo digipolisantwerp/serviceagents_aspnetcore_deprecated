@@ -19,7 +19,7 @@ namespace Toolbox.ServiceAgents
             _serviceProvider = serviceProvider;
         }
 
-        public HttpClient CreateClient(ServiceSettings settings)
+        public HttpClient CreateClient(ServiceAgentSettings serviceAgentSettings, ServiceSettings settings)
         {
             _client = new HttpClient
             {
@@ -34,6 +34,9 @@ namespace Toolbox.ServiceAgents
                 case AuthScheme.Bearer:
                     SetBearerAuthHeader();
                     break;
+                case AuthScheme.ApiKey:
+                    SetApiKeyAuthHeader(serviceAgentSettings, settings);
+                    break;
                 default:
                     break;
             }
@@ -42,6 +45,18 @@ namespace Toolbox.ServiceAgents
                 AfterClientCreated(_serviceProvider, _client);
 
             return _client;
+        }
+
+        private void SetApiKeyAuthHeader(ServiceAgentSettings serviceAgentSettings, ServiceSettings settings)
+        {
+            if (settings.UseGlobalApiKey)
+            {
+                _client.DefaultRequestHeaders.Add(AuthScheme.ApiKey, serviceAgentSettings.GlobalApiKey);
+            }
+            else
+            {
+                _client.DefaultRequestHeaders.Add(AuthScheme.ApiKey, settings.ApiKey);
+            }
         }
 
         private void SetBearerAuthHeader()

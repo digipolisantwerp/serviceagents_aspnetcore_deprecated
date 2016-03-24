@@ -16,10 +16,11 @@ namespace Toolbox.ServiceAgents.UnitTests.HttpClientFactoryTests
         [Fact]
         public void CreateDefaultClient()
         {
+            var serviceAgentSettings = new ServiceAgentSettings();
             var settings = new ServiceSettings { Scheme = HttpSchema.Http, Host = "test.be", Path = "api"};
             var clientFactory = new HttpClientFactory(CreateServiceProvider(settings));
 
-            var client = clientFactory.CreateClient(settings);
+            var client = clientFactory.CreateClient(serviceAgentSettings, settings);
 
             Assert.NotNull(client);
             Assert.Equal("http://test.be/api", client.BaseAddress.AbsoluteUri);
@@ -30,10 +31,11 @@ namespace Toolbox.ServiceAgents.UnitTests.HttpClientFactoryTests
         [Fact]
         public void CreateClientWithBearerAuth()
         {
+            var serviceAgentSettings = new ServiceAgentSettings();
             var settings = new ServiceSettings {  AuthScheme = AuthScheme.Bearer, Scheme = HttpSchema.Http, Host = "test.be", Path = "api" };
             var clientFactory = new HttpClientFactory(CreateServiceProvider(settings));
 
-            var client = clientFactory.CreateClient(settings);
+            var client = clientFactory.CreateClient(serviceAgentSettings, settings);
 
             Assert.NotNull(client);
             Assert.Equal("http://test.be/api", client.BaseAddress.AbsoluteUri);
@@ -43,14 +45,41 @@ namespace Toolbox.ServiceAgents.UnitTests.HttpClientFactoryTests
         }
 
         [Fact]
+        public void CreateClientWithLocalApiKeyByDefault()
+        {
+            var serviceAgentSettings = new ServiceAgentSettings();
+            var settings = new ServiceSettings { AuthScheme = AuthScheme.ApiKey, ApiKey = "localapikey", Scheme = HttpSchema.Http, Host = "test.be", Path = "api" };
+            var clientFactory = new HttpClientFactory(CreateServiceProvider(settings));
+
+            var client = clientFactory.CreateClient(serviceAgentSettings, settings);
+
+            Assert.NotNull(client);
+            Assert.Equal("localapikey", client.DefaultRequestHeaders.First(h => h.Key == AuthScheme.ApiKey).Value.First());
+        }
+
+        [Fact]
+        public void CreateClientWithGlobalApiKey()
+        {
+            var serviceAgentSettings = new ServiceAgentSettings { GlobalApiKey = "globalapikey" };
+            var settings = new ServiceSettings { AuthScheme = AuthScheme.ApiKey, ApiKey = "localapikey", UseGlobalApiKey = true, Scheme = HttpSchema.Http, Host = "test.be", Path = "api" };
+            var clientFactory = new HttpClientFactory(CreateServiceProvider(settings));
+
+            var client = clientFactory.CreateClient(serviceAgentSettings, settings);
+
+            Assert.NotNull(client);
+            Assert.Equal("globalapikey", client.DefaultRequestHeaders.First(h => h.Key == AuthScheme.ApiKey).Value.First());
+        }
+
+        [Fact]
         public void AfterClientCreatedGetsRaised()
         {
+            var serviceAgentSettings = new ServiceAgentSettings();
             var settings = new ServiceSettings { AuthScheme = AuthScheme.Bearer, Scheme = HttpSchema.Http, Host = "test.be", Path = "api" };
             var clientFactory = new HttpClientFactory(CreateServiceProvider(settings));
             HttpClient passedClient = null;
             clientFactory.AfterClientCreated += (sp,c) => passedClient = c;
 
-            clientFactory.CreateClient(settings);
+            clientFactory.CreateClient(serviceAgentSettings, settings);
 
             Assert.NotNull(passedClient);
         }

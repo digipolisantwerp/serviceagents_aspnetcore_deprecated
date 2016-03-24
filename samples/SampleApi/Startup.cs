@@ -37,6 +37,8 @@ namespace SampleApi
             {
                 settings.Scheme = HttpSchema.Http;
                 settings.Host = "test.be";
+                settings.AuthScheme = AuthScheme.ApiKey;
+                settings.ApiKey = "myapikey";
             });
 
             //To use a json configuration file use the AddServiceAgents extension

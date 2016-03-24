@@ -13,31 +13,32 @@ namespace Toolbox.ServiceAgents.Settings
         {
             var serviceAgentSettings = new ServiceAgentSettings();
 
-            try
+            var sections = config.GetChildren().ToDictionary(s => s.Key);
+
+            if (sections.ContainsKey("Global"))
             {
-                var sections = config.GetChildren().ToDictionary(s => s.Key);
+                var globalSection = sections["Global"];
 
-                foreach (var item in sections)
+                globalSection.Bind(serviceAgentSettings);
+                sections.Remove("Global");
+            }
+
+            foreach (var item in sections)
+            {
+                try
                 {
-                    var properties = GetWritableProperties();
-
                     var settings = new ServiceSettings();
 
-                    foreach (var property in properties)
-                    {
-                        var value = config.GetSection(item.Key)[property.Name];
-                        property.SetValue(settings, value);
-                    }
+                    item.Value.Bind(settings);
+
                     serviceAgentSettings.Services.Add(item.Key, settings);
                 }
+                catch (Exception)
+                {
+                }
+            }
 
-                return serviceAgentSettings;
-            }
-            catch (FormatException formatEx)
-            {
-                //throw AuthExceptionProvider.InvalidAuthConfigFile(formatEx);
-            }
-            return null;
+            return serviceAgentSettings;
         }
 
         private PropertyInfo[] GetWritableProperties()

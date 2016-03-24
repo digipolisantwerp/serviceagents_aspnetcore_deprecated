@@ -5,6 +5,6 @@ namespace Toolbox.ServiceAgents
 {
     public interface IHttpClientFactory
     {
-        HttpClient CreateClient(ServiceSettings settings);
+        HttpClient CreateClient(ServiceAgentSettings serviceAgentSettings, ServiceSettings settings);
     }
 }

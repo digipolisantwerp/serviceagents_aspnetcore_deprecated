@@ -9,5 +9,6 @@ namespace Toolbox.ServiceAgents.Settings
     {
         public const string None = "None";
         public const string Bearer = "Bearer";
+        public const string ApiKey = "ApiKey";
     }
 }
