@@ -25,9 +25,11 @@ To add the toolbox to a project, you add the package to the project.json :
 
 ``` json 
     "dependencies": {
-        "Toolbox.ServiceAgents":  "1.0.0"
+        "Toolbox.ServiceAgents":  "1.2.1"
     }
 ``` 
+
+ALWAYS check the latest version [here](https://github.com/digipolisantwerp/serviceagents_aspnetcore/blob/master/src/Toolbox.ServiceAgents/project.json) before adding the above line !
 
 In Visual Studio you can also use the NuGet Package Manager to do this.
 
@@ -164,7 +166,6 @@ If you want to return the response as string you can use the **GetStringAsync** 
     }
 ```
 
-Text.
 
 ## Using a service agent
 
