@@ -36,10 +36,17 @@ namespace SampleApi
             services.AddSingleServiceAgent<DemoAgent>(settings =>
             {
                 settings.Scheme = HttpSchema.Http;
-                settings.Host = "test.be";
+                settings.Host = "localhost";
+                settings.Port = "50267";
+                //settings.Path = "api/";
                 settings.AuthScheme = AuthScheme.ApiKey;
                 settings.ApiKey = "myapikey";
             });
+
+            //services.AddServiceAgents(settings =>
+            //{
+            //    settings.FileName = "serviceagentconfig.json";
+            //});
 
             //To use a json configuration file use the AddServiceAgents extension
             //services.AddServiceAgents(settings =>

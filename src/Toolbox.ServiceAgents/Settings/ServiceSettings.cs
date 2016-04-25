@@ -26,7 +26,7 @@ namespace Toolbox.ServiceAgents.Settings
         {
             get
             {
-                return $"{Scheme}://{Host}{(String.IsNullOrWhiteSpace(Port) ? "" : $":{ Port}")}/{Path}";
+                return $"{Scheme}://{Host}{(String.IsNullOrWhiteSpace(Port) ? "" : $":{ Port}")}/{Path}{(String.IsNullOrWhiteSpace(Path) ? "" : "/")}";
             }
         }
     }

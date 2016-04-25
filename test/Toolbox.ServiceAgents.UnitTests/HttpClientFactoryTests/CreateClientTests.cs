@@ -23,7 +23,7 @@ namespace Toolbox.ServiceAgents.UnitTests.HttpClientFactoryTests
             var client = clientFactory.CreateClient(serviceAgentSettings, settings);
 
             Assert.NotNull(client);
-            Assert.Equal("http://test.be/api", client.BaseAddress.AbsoluteUri);
+            Assert.Equal("http://test.be/api/", client.BaseAddress.AbsoluteUri);
             Assert.Equal("application/json", client.DefaultRequestHeaders.Accept.Single().MediaType);
             Assert.Null(client.DefaultRequestHeaders.Authorization);
         }
@@ -38,7 +38,7 @@ namespace Toolbox.ServiceAgents.UnitTests.HttpClientFactoryTests
             var client = clientFactory.CreateClient(serviceAgentSettings, settings);
 
             Assert.NotNull(client);
-            Assert.Equal("http://test.be/api", client.BaseAddress.AbsoluteUri);
+            Assert.Equal("http://test.be/api/", client.BaseAddress.AbsoluteUri);
             Assert.Equal("application/json", client.DefaultRequestHeaders.Accept.Single().MediaType);
             Assert.Equal(AuthScheme.Bearer, client.DefaultRequestHeaders.Authorization.Scheme);
             Assert.Equal("TokenValue", client.DefaultRequestHeaders.Authorization.Parameter);

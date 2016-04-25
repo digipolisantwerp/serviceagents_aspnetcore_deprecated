@@ -30,7 +30,7 @@ namespace Toolbox.ServiceAgents.UnitTests.Settings
                 Path = "api"
             };
 
-            Assert.Equal("http://test.com:80/api", settings.Url);
+            Assert.Equal("http://test.com:80/api/", settings.Url);
         }
 
         [Fact]
@@ -43,7 +43,20 @@ namespace Toolbox.ServiceAgents.UnitTests.Settings
                 Path = "api"
             };
 
-            Assert.Equal("http://test.com/api", settings.Url);
+            Assert.Equal("http://test.com/api/", settings.Url);
+        }
+
+        [Fact]
+        public void ConstuctUrlWithoutPath()
+        {
+            var settings = new ServiceSettings
+            {
+                Scheme = HttpSchema.Http,
+                Host = "test.com",
+                Path = ""
+            };
+
+            Assert.Equal("http://test.com/", settings.Url);
         }
     }
 }

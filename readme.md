@@ -96,7 +96,7 @@ UseGlobalApiKey | A Boolean to indicate to use the globally defined api key for 
 ApiKey | The locally defined api key for authentication. | ""   
 
 The settings without default are mandatory!
-All the url parts form the basic url for the service agent: {scheme}://{host}:{port}/{path}
+All the url parts form the basic url for the service agent: {scheme}://{host}:{port}/{path}/
 
 An overload for both **AddSingleServiceAgent&lt;T>** and **AddServiceAgents** is available where you can pass an action of type **Action&lt;IServiceProvider, HttpClient>** that gets invoked when the underlying HttpClient gets created. That way you can customize the created client.
 
@@ -154,6 +154,15 @@ Implement a get operation
         }
     }
 ``` 
+
+If you want to return the response as string you can use the **GetStringAsync** method on the **Agentbase**.
+
+``` csharp
+    public Task<string> GetAddressAsStringAsync(int id)
+    {
+        return base.GetStringAsync($"adress?id={id}");
+    }
+```
 
 Text.
 

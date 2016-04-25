@@ -8,5 +8,7 @@ namespace SampleApi.ServiceAgents
     {
         Task<Address> GetAddressAsync(int id);
         Task<Address> PostAddressAsync(Address adress);
+
+        Task<string> GetAsStringAsync();
     }
 }

@@ -17,6 +17,11 @@ namespace SampleApi.ServiceAgents
         {
         }
 
+        public Task<string> GetAsStringAsync()
+        {
+            return GetStringAsync("values/getsomevalue");
+        }
+
         //A basic get operation
         public Task<Address> GetAddressAsync(int id)
         {

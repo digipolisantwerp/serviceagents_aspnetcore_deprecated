@@ -24,7 +24,7 @@
   "frameworks": {
     "dnx451": {
       "dependencies": {
-        "Toolbox.ServiceAgents": "1.0.0"
+        "Toolbox.ServiceAgents": "1.2.0"
       }
     }
   },

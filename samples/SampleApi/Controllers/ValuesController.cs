@@ -22,17 +22,27 @@ namespace SampleApi.Controllers
         [HttpGet]
         public async Task<string> Get()
         {
+            string result = String.Empty;
             try
             {
                 //The call will throw an exception since no service is listening
-                var result = await _serviceAgent.GetAddressAsync(1);
+                //result = await _serviceAgent.GetAddressAsync(1);
+
+                result = await _serviceAgent.GetAsStringAsync();
             }
             catch (Exception ex)
             {
                 return ex.Message;
             }
 
-            return "Get completed";
+            return result;
+        }
+
+        [HttpGet]
+        [Route("getsomevalue")]
+        public string GetSomeValue()
+        {
+            return "Some string value";
         }
 
     }

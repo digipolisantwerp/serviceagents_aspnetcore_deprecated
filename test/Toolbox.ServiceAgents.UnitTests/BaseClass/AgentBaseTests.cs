@@ -29,6 +29,20 @@ namespace Toolbox.ServiceAgents.UnitTests.BaseClass
         }
 
         [Fact]
+        public async void GetAsString()
+        {
+            var settings = CreateServiceAgentSettings();
+            var serviceProvider = CreateServiceProvider(settings);
+            var agent = new TestAgent(serviceProvider, Options.Create(settings));
+            agent.HttpClient = CreateClient();
+
+            var response = await agent.GetTestDataAsStringAsync();
+
+            Assert.NotNull(response);
+            Assert.Equal("{\"Name\":\"Name\",\"Number\":150}", response);
+        }
+
+        [Fact]
         public async void Post()
         {
             var settings = CreateServiceAgentSettings();

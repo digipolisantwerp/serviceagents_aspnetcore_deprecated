@@ -65,7 +65,12 @@ namespace Toolbox.ServiceAgents
             return await response.Content.ReadAsAsync<T>(_formatters);
         }
 
-
+        protected async Task<string> GetStringAsync(string requestUri)
+        {
+            var response = await _client.GetAsync(requestUri);
+            if (!response.IsSuccessStatusCode) ParseJsonError(response);
+            return await response.Content.ReadAsStringAsync();
+        }
 
         protected async Task<T> PostAsync<T>(string requestUri, T item)
         {

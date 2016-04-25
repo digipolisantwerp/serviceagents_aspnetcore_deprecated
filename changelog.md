@@ -11,3 +11,8 @@
 ## 1.2.0
 
 - Added ApiKey authentication feature
+
+## 1.2.1
+
+- Bugfix in Url creation in ServiceSettings
+- Added GetStringAsync to Agentbase for string type responses

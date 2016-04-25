@@ -28,6 +28,11 @@ namespace Toolbox.ServiceAgents.UnitTests.Utilities
             return base.GetAsync<TestModel>($"test/1");
         }
 
+        public Task<string> GetTestDataAsStringAsync()
+        {
+            return base.GetStringAsync($"test/1");
+        }
+
         public Task<TestModel> GetPreviousDataAsync()
         {
             return base.GetAsync<TestModel>($"test/previousData");
