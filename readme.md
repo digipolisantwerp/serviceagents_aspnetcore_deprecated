@@ -92,7 +92,7 @@ Option              | Description                                               
 AuthScheme              | The authentication scheme to be used by the service agent. | "None"
 Host | The host part of the url for the service agent. | ""
 Path | The path part of the url for the service agent. | "api" 
-Port | The port for the service agent. | "80" 
+Port | The port for the service agent. | ""
 Scheme | The scheme of the url for the service agent. | "https" 
 UseGlobalApiKey | A Boolean to indicate to use the globally defined api key for authentication. | false 
 ApiKey | The locally defined api key for authentication. | ""   
