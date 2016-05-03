@@ -12,15 +12,18 @@ namespace Toolbox.ServiceAgents.Settings
 
         /// <summary>
         /// A bool to indicate if the globaly defined api key should be used for this service agent when the AuthScheme is set to 'ApiKey'. 
-        /// The api key is set as header with key 'apikey'.
         /// </summary>
         public bool UseGlobalApiKey { get; set; }
 
         /// <summary>
         /// The api key to use for this service agent when the AuthScheme is set to 'ApiKey' and the UseGlobalApiKey is set to 'false'. 
-        /// The api key is set as header with key 'apikey'.
         /// </summary>
         public string ApiKey { get; set; }
+
+        /// <summary>
+        /// The string used as header name for the api key. Default = "ApiKey".
+        /// </summary>
+        public string ApiKeyHeaderName { get; set; } = Toolbox.ServiceAgents.Settings.AuthScheme.ApiKey;
 
         public string Url
         {

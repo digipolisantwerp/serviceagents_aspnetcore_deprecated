@@ -51,11 +51,11 @@ namespace Toolbox.ServiceAgents
         {
             if (settings.UseGlobalApiKey)
             {
-                _client.DefaultRequestHeaders.Add(AuthScheme.ApiKey, serviceAgentSettings.GlobalApiKey);
+                _client.DefaultRequestHeaders.Add(settings.ApiKeyHeaderName, serviceAgentSettings.GlobalApiKey);
             }
             else
             {
-                _client.DefaultRequestHeaders.Add(AuthScheme.ApiKey, settings.ApiKey);
+                _client.DefaultRequestHeaders.Add(settings.ApiKeyHeaderName, settings.ApiKey);
             }
         }
 

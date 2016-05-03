@@ -1,5 +1,5 @@
 {
-	"version": "1.2.1",
+	"version": "1.2.2",
 	"description": "Toolbox for ServiceAgents in ASP.NET Core.",
 	"authors": [ "digipolis.be" ],
 	"tags": [ "" ],

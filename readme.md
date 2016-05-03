@@ -95,7 +95,8 @@ Path | The path part of the url for the service agent. | "api"
 Port | The port for the service agent. | ""
 Scheme | The scheme of the url for the service agent. | "https" 
 UseGlobalApiKey | A Boolean to indicate to use the globally defined api key for authentication. | false 
-ApiKey | The locally defined api key for authentication. | ""   
+ApiKey | The locally defined api key for authentication. | "" 
+ApiKeyHeaderName | The string used as header name for the api key. | "ApiKey"
 
 The settings without default are mandatory!
 All the url parts form the basic url for the service agent: {scheme}://{host}:{port}/{path}/
@@ -252,7 +253,8 @@ The token is extracted from the **UserToken** property of the **AuthContext** ob
 With the ApiKey scheme the authentication is done through use of the apikey header:
 
     ApiKey yyy
-where yyy is the api key.
+where yyy is the api key.  
+It is possible to override the default header name by setting an other value in the **ApiKeyHeaderName** property of the service settings.
 
 To use the ApiKey scheme set the **AuthScheme** property of the **ServiceSettings** object to the value "ApiKey".
 
@@ -305,6 +307,7 @@ In the example below two agents that use different keys are configured.
     "Port": "5001",
     "Scheme": "http",
     "AuthScheme": "ApiKey",
+    "ApiKeyHeaderName": "api-key",
     "UseGlobalApiKey": false,
     "ApiKey": "apikeyforsecondagent"
   }

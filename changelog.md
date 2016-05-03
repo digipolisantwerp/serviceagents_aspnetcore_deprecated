@@ -16,3 +16,7 @@
 
 - Bugfix in Url creation in ServiceSettings
 - Added GetStringAsync to Agentbase for string type responses
+
+## 1.2.2
+
+- Added customization of the api key header name

@@ -58,6 +58,19 @@ namespace Toolbox.ServiceAgents.UnitTests.HttpClientFactoryTests
         }
 
         [Fact]
+        public void CreateClientWithCustomApiKeyHeader()
+        {
+            var serviceAgentSettings = new ServiceAgentSettings();
+            var settings = new ServiceSettings { AuthScheme = AuthScheme.ApiKey, ApiKeyHeaderName = "api-key", ApiKey = "localapikey", Scheme = HttpSchema.Http, Host = "test.be", Path = "api" };
+            var clientFactory = new HttpClientFactory(CreateServiceProvider(settings));
+
+            var client = clientFactory.CreateClient(serviceAgentSettings, settings);
+
+            Assert.NotNull(client);
+            Assert.Equal("localapikey", client.DefaultRequestHeaders.First(h => h.Key == "api-key").Value.First());
+        }
+
+        [Fact]
         public void CreateClientWithGlobalApiKey()
         {
             var serviceAgentSettings = new ServiceAgentSettings { GlobalApiKey = "globalapikey" };
@@ -68,6 +81,19 @@ namespace Toolbox.ServiceAgents.UnitTests.HttpClientFactoryTests
 
             Assert.NotNull(client);
             Assert.Equal("globalapikey", client.DefaultRequestHeaders.First(h => h.Key == AuthScheme.ApiKey).Value.First());
+        }
+
+        [Fact]
+        public void CreateClientWithGlobalApiKeyWithCustomHeader()
+        {
+            var serviceAgentSettings = new ServiceAgentSettings { GlobalApiKey = "globalapikey" };
+            var settings = new ServiceSettings { AuthScheme = AuthScheme.ApiKey, ApiKeyHeaderName = "api-key", ApiKey = "localapikey", UseGlobalApiKey = true, Scheme = HttpSchema.Http, Host = "test.be", Path = "api" };
+            var clientFactory = new HttpClientFactory(CreateServiceProvider(settings));
+
+            var client = clientFactory.CreateClient(serviceAgentSettings, settings);
+
+            Assert.NotNull(client);
+            Assert.Equal("globalapikey", client.DefaultRequestHeaders.First(h => h.Key == "api-key").Value.First());
         }
 
         [Fact]
