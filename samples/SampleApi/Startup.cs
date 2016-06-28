@@ -35,12 +35,15 @@ namespace SampleApi
             //To add a single serviceAgent just use the AddSingleServiceAgent<T> extension
             services.AddSingleServiceAgent<DemoAgent>(settings =>
             {
-                settings.Scheme = HttpSchema.Http;
-                settings.Host = "localhost";
-                settings.Port = "50267";
-                //settings.Path = "api/";
-                settings.AuthScheme = AuthScheme.ApiKey;
-                settings.ApiKey = "myapikey";
+                settings.Scheme = HttpSchema.Https;
+                settings.Host = "api-gw-o.antwerpen.be";
+                settings.Port = "443";
+                settings.Path = "myhappyplace/testoauthtoolbox/v1/";
+                settings.AuthScheme = AuthScheme.None;
+                settings.ApiKey = "";
+
+
+
             });
 
             //services.AddServiceAgents(settings =>
