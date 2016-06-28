@@ -8,6 +8,7 @@
   "dependencies": {
     "Microsoft.Extensions.Logging.Abstractions": "1.0.0-rc1-final",
     "Microsoft.Extensions.DependencyInjection.Abstractions": "1.0.0-rc1-final",
+    "Microsoft.Extensions.Caching.Memory": "1.0.0-rc1-final",
     "Toolbox.Json": "1.0.0",
     "Newtonsoft.Json": "7.0.1",
     "Microsoft.Extensions.OptionsModel": "1.0.0-rc1-final",
