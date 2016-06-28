@@ -45,7 +45,7 @@ namespace Toolbox.ServiceAgents.Settings
         {
             get
             {
-                return $"{Url}/{OAuthPathAddition}";
+                return $"{Url}{OAuthPathAddition}";
             }
         }
 
