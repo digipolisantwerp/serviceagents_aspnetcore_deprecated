@@ -10,6 +10,14 @@ namespace Toolbox.ServiceAgents.Settings
         public string Port { get; set; }
         public string Path { get; set; } = Defaults.ServiceSettings.Path;
 
+        public string OAuthPathAddition { get; set; }
+
+        public string OAuthClientId { get; set; }
+
+        public string OAuthClientSecret { get; set; }
+        public string OAuthScope { get; set; }
+
+
         /// <summary>
         /// A bool to indicate if the globaly defined api key should be used for this service agent when the AuthScheme is set to 'ApiKey'. 
         /// </summary>
@@ -32,5 +40,14 @@ namespace Toolbox.ServiceAgents.Settings
                 return $"{Scheme}://{Host}{(String.IsNullOrWhiteSpace(Port) ? "" : $":{ Port}")}/{Path}{(String.IsNullOrWhiteSpace(Path) ? "" : "/")}";
             }
         }
+
+        public string OAuthTokenEndpoint
+        {
+            get
+            {
+                return $"{Url}/{OAuthPathAddition}";
+            }
+        }
+
     }
 }

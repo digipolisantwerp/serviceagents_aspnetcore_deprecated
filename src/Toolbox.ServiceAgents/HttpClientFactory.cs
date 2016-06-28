@@ -4,19 +4,20 @@ using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using Toolbox.ServiceAgents.Settings;
+using Toolbox.ServiceAgents.OAuth;
 
 namespace Toolbox.ServiceAgents
 {
     public class HttpClientFactory : IHttpClientFactory
     {
         private IServiceProvider _serviceProvider;
-        private HttpClient _client;
+        private HttpClient _client;        
 
         public event Action<IServiceProvider, HttpClient> AfterClientCreated;
 
         public HttpClientFactory(IServiceProvider serviceProvider)
         {
-            _serviceProvider = serviceProvider;
+            _serviceProvider = serviceProvider;           
         }
 
         public HttpClient CreateClient(ServiceAgentSettings serviceAgentSettings, ServiceSettings settings)
@@ -31,6 +32,9 @@ namespace Toolbox.ServiceAgents
 
             switch (settings.AuthScheme)
             {
+                case AuthScheme.OAuthClientCredentials:
+                    SetOAuthClientCredentialsAuthHeader(settings);
+                    break;
                 case AuthScheme.Bearer:
                     SetBearerAuthHeader();
                     break;
@@ -65,5 +69,16 @@ namespace Toolbox.ServiceAgents
             if (authContext == null) throw new NullReferenceException($"{nameof(IAuthContext)} cannot be null.");
             _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(AuthScheme.Bearer, authContext.UserToken);
         }
+
+        private void SetOAuthClientCredentialsAuthHeader(ServiceSettings settings)
+        {
+            
+            var tokenHelper = _serviceProvider.GetService<ITokenHelper>();
+            if (tokenHelper == null) throw new NullReferenceException($"{nameof(ITokenHelper)} cannot be null.");
+            var token = tokenHelper.ReadOrRetrieveToken(settings).Result.access_token;
+            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(AuthScheme.Bearer, token);
+        }
+
+
     }
 }
