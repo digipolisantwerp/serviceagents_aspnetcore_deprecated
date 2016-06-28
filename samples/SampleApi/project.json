@@ -14,12 +14,13 @@
     "Microsoft.Extensions.Configuration.Json": "1.0.0-rc1-final",
     "Microsoft.Extensions.Logging": "1.0.0-rc1-final",
     "Microsoft.Extensions.Logging.Console": "1.0.0-rc1-final",
-    "Microsoft.Extensions.Logging.Debug": "1.0.0-rc1-final"
+    "Microsoft.Extensions.Logging.Debug": "1.0.0-rc1-final",
+    "Microsoft.Extensions.SecretManager": "1.0.0-rc1-final"
   },
 
   "commands": {
-    "web": "Microsoft.AspNet.Server.Kestrel",
-  },
+    "web": "Microsoft.AspNet.Server.Kestrel"
+  },  
 
   "frameworks": {
     "dnx451": {

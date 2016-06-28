@@ -49,13 +49,13 @@ namespace SampleApi
             services.AddSingleServiceAgent<OAuthDemoAgent>(settings =>
             {
                 settings.Scheme = HttpSchema.Https;
-                settings.Host = "api-gw-o.antwerpen.be";
+                settings.Host = "mycompany.com";
                 settings.Port = "443";
-                settings.Path = "myhappyplace/testoauthtoolbox/v2";
+                settings.Path = "testoauthtoolbox/v2";
                 settings.AuthScheme = AuthScheme.OAuthClientCredentials;
-                settings.OAuthClientId = "f44d3241-8249-440d-a6e5-61b7b4893184";
-                settings.OAuthClientSecret = "265f485f-f0be-4526-bb7a-0541365351f5";
-                settings.OAuthScope = "myhappyplace.testoauthtoolbox.v2.all";
+                settings.OAuthClientId = "f44d3641-8249-440d-a6e5-61b7b4893184";
+                settings.OAuthClientSecret = "2659485f-f0be-4526-bb7a-0541365351f5";
+                settings.OAuthScope = "testoauthtoolbox.v2.all";
                 settings.OAuthPathAddition = "oauth2/token";
                 settings.ApiKey = "";
 
