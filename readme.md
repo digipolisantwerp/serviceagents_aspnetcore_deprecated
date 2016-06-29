@@ -24,11 +24,11 @@ Toolbox for ServiceAgents in ASP.NET Core.
 
 To add the toolbox to a project, you add the package to the project.json :
 
-``` json 
+``` json
     "dependencies": {
         "Toolbox.ServiceAgents":  "1.3.0"
     }
-``` 
+```
 
 ALWAYS check the latest version [here](https://github.com/digipolisantwerp/serviceagents_aspnetcore/blob/master/src/Toolbox.ServiceAgents/project.json) before adding the above line !
 
@@ -81,7 +81,7 @@ The structure of the json file is:
 ```
 
 A first object (section) section named **Global** can optionally be defined.
-In this section a **GlobalApiKey** option can be set. See the [Authentication schemes](#authentication-schemes) section for more details. 
+In this section a **GlobalApiKey** option can be set. See the [Authentication schemes](#authentication-schemes) section for more details.
 
 Each other object (section) in the json represents a service agent type. **The object name has to match the service agent type name**.
 See the [Creating a service agent](#creating-a-service-agent) section for more info on creating the service agents.
@@ -92,11 +92,11 @@ Option              | Description                                               
 ------------------ | ----------------------------------------------------------- | --------------------------------------
 AuthScheme              | The authentication scheme to be used by the service agent. | "None"
 Host | The host part of the url for the service agent. | ""
-Path | The path part of the url for the service agent. | "api" 
+Path | The path part of the url for the service agent. | "api"
 Port | The port for the service agent. | ""
-Scheme | The scheme of the url for the service agent. | "https" 
-UseGlobalApiKey | A Boolean to indicate to use the globally defined api key for authentication. | false 
-ApiKey | The locally defined api key for authentication. | "" 
+Scheme | The scheme of the url for the service agent. | "https"
+UseGlobalApiKey | A Boolean to indicate to use the globally defined api key for authentication. | false
+ApiKey | The locally defined api key for authentication. | ""
 ApiKeyHeaderName | The string used as header name for the api key. | "ApiKey"
 
 The settings without default are mandatory!
@@ -110,8 +110,8 @@ Important notice: the action gets invoked for every service agent when multiple 
     {
         s.FileName = "serviceagents.json";
         s.Section = "TestAgent";
-    }, 
-    (serviceProvider, client) => 
+    },
+    (serviceProvider, client) =>
     {
         //customize the client
     });
@@ -124,14 +124,14 @@ In order to create a service agent you need to create a type that derives from *
 ``` csharp
     public class DemoAgent : AgentBase
     {
-        public DemoAgent(IServiceProvider serviceProvider, IOptions<ServiceAgentSettings> options) 
+        public DemoAgent(IServiceProvider serviceProvider, IOptions<ServiceAgentSettings> options)
             : base(serviceProvider, options)
         {
         }
     }
 ```
 
-The **AgentBase** class contains several protected methods to perform the basic http actions (get, post, put and delete). All the methods are async. 
+The **AgentBase** class contains several protected methods to perform the basic http actions (get, post, put and delete). All the methods are async.
 
 Some examples:
 
@@ -140,7 +140,7 @@ Implement a get operation
 ``` csharp
     public class DemoAgent : AgentBase
     {
-        public DemoAgent(IServiceProvider serviceProvider, IOptions<ServiceAgentSettings> options) 
+        public DemoAgent(IServiceProvider serviceProvider, IOptions<ServiceAgentSettings> options)
             : base(serviceProvider, options)
         {
         }
@@ -157,7 +157,7 @@ Implement a get operation
             return base.PostAsync<Address>("adress", adress);
         }
     }
-``` 
+```
 
 If you want to return the response as string you can use the **GetStringAsync** method on the **Agentbase**.
 
@@ -189,9 +189,9 @@ For example in a controller:
         public async Task<string> Get()
         {
             var result = await _serviceAgent.GetAddressAsync(1);
-            
+
             //do something...
-            
+
             return "somestring";
         }
     }
@@ -204,14 +204,14 @@ In that case you need to request an instance of the interface type:
     //The service agent implementation
     public class DemoAgent : AgentBase, IDemoAgent
     {
-        public DemoAgent(IServiceProvider serviceProvider, IOptions<ServiceAgentSettings> options) 
+        public DemoAgent(IServiceProvider serviceProvider, IOptions<ServiceAgentSettings> options)
             : base(serviceProvider, options)
         {
         }
 
         //Some implementation
     }
-    
+
     //The usage
     public class ValuesController : Controller
     {
@@ -223,7 +223,7 @@ In that case you need to request an instance of the interface type:
         }
     }
 ```  
-  
+
 ## Authentication schemes
 
 Different schemes are available to be used with the service agents.
@@ -260,7 +260,7 @@ It is possible to override the default header name by setting an other value in 
 
 To use the ApiKey scheme set the **AuthScheme** property of the **ServiceSettings** object to the value "ApiKey".
 
-If multiple or all agents use the same api key to authenticate you can set the key in the **GlobalApiKey** field of the **Global** section in the json config file. 
+If multiple or all agents use the same api key to authenticate you can set the key in the **GlobalApiKey** field of the **Global** section in the json config file.
 This in combination with the **UseGlobalApiKey** in the service agent section.
 
 In the example below two agents that use the same key are configured.
@@ -327,22 +327,21 @@ to alter the values of the service settings after they have been loaded from the
     {
         serviceAgentSettings.GlobalApiKey = "globalkeyfromcode";
     }, null);
-```
+ ```
 
 ### OAuthClientCredentials
-	This will use the OAuth2 client credentials flow to obtain a (bearer)token from a token endpoint.
 
-	To use the OAuth Clientcredentials scheme set the **AuthScheme** property of the **ServiceSettings** object to the value "OAuthClientCredentials".
+This will use the OAuth2 client credentials flow to obtain a (bearer)token from a token endpoint.
 
-	You must also supply following settings in the ServiceSettings:
+To use the OAuth Clientcredentials scheme set the **AuthScheme** property of the **ServiceSettings** object to the value "OAuthClientCredentials".
 
-	OAuthClientId = "f44d3641-8249-440d-a6e5-61b7b4893184";
-    OAuthClientSecret = "2659485f-f0be-4526-bb7a-0541365351f5";
-    OAuthScope = "testoauthtoolbox.v2.all";
-    OAuthPathAddition = "oauth2/token";
+You must also supply following settings in the ServiceSettings:
 
+```csharp
+  OAuthClientId = "f44d3641-8249-440d-a6e5-61b7b4893184";
+  OAuthClientSecret = "2659485f-f0be-4526-bb7a-0541365351f5";
+  OAuthScope = "testoauthtoolbox.v2.all";
+  OAuthPathAddition = "oauth2/token";
+```
 
-	See the SampleApi for more info.
-	
-
-
+See the SampleApi for more info.
