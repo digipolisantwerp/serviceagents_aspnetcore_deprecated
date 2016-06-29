@@ -16,6 +16,7 @@ Toolbox for ServiceAgents in ASP.NET Core.
   - [None](#none)
   - [Bearer](#bearer)
   - [ApiKey](#apikey)
+  - [OAuthClientCredentials](#oauthclientcredentials)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -25,7 +26,7 @@ To add the toolbox to a project, you add the package to the project.json :
 
 ``` json 
     "dependencies": {
-        "Toolbox.ServiceAgents":  "1.2.1"
+        "Toolbox.ServiceAgents":  "1.3.0"
     }
 ``` 
 
