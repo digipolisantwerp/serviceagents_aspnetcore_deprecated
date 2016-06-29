@@ -12,7 +12,7 @@ using Toolbox.ServiceAgents.Settings;
 
 namespace Toolbox.ServiceAgents.OAuth
 {
-    public class TokenHelper: ITokenHelper
+    public class TokenHelper : ITokenHelper
     {
         private readonly IMemoryCache _cache;
 
@@ -20,9 +20,9 @@ namespace Toolbox.ServiceAgents.OAuth
         public TokenHelper(IMemoryCache cache)
         {
             if (cache == null) throw new ArgumentNullException(nameof(cache), $"{nameof(cache)} cannot be null");
-            
+
             _cache = cache;
-            
+
         }
 
         public async Task<TokenReply> ReadOrRetrieveToken(ServiceSettings options, bool forceNewRetrieval = false)
@@ -57,59 +57,54 @@ namespace Toolbox.ServiceAgents.OAuth
 
         private async Task<TokenReply> RetrieveToken(string clientID, string clientSecret, string scope, string tokenEndpoint)
         {
-            TokenReply tokenReply;
+            TokenReply tokenReply = null;
 
             var builder = new UriBuilder(tokenEndpoint);
 
 
             string query;
-            using (var content = new FormUrlEncodedContent(new KeyValuePair<string, string>[]{
-    new KeyValuePair<string, string>("client_id", clientID),
-    new KeyValuePair<string, string>("client_secret", clientSecret),
-    new KeyValuePair<string, string>("grant_type", "client_credentials"),
-    new KeyValuePair<string, string>("scope", scope),
-}))
+            using (var content = new FormUrlEncodedContent(new KeyValuePair<string, string>[]
+                             {
+                               new KeyValuePair<string, string>("client_id", clientID),
+                               new KeyValuePair<string, string>("client_secret", clientSecret),
+                               new KeyValuePair<string, string>("grant_type", "client_credentials"),
+                               new KeyValuePair<string, string>("scope", scope),
+                             })
+                   )
             {
                 query = content.ReadAsStringAsync().Result;
             }
 
-            //NameValueCollection query = new NameValueCollection();
-
-            //query["client_id"] = clientID;
-            //query["client_secret"] = clientSecret;
-            //query["grant_type"] = "client_credentials";
-            //query["scope"] = scope;
-          
             builder.Query = query;
-           
-           
-            var stringUri = builder.ToString(); 
 
-
-            //Dictionary<string, string> post = null;
-            
-            //post = new Dictionary<string, string>
-            //                    {
-            //                        {"client_id", clientID},
-            //                        {"client_secret", clientSecret},
-            //                        { "grant_type", "client_credentials"},
-            //                        { "scope", scope}
-            //                    };
-
-
+            var stringUri = builder.ToString();
 
             using (var client = new HttpClient())
             {
-                //using (var postContent = new FormUrlEncodedContent(post))
-                //{
-                    //TODO rc01831: errorhandling
-                    var response = await client.PostAsync(stringUri,null);
-                    var content = await response.Content.ReadAsStringAsync();
+                string content;
+                try
+                {                  
+                    var response = await client.PostAsync(stringUri, null);
+                    content = await response.Content.ReadAsStringAsync();
+                }
+                catch (Exception ex)
+                {
 
-                    // received tokens from authorization server
-                    tokenReply = JsonConvert.DeserializeObject<TokenReply>(content);
+                    throw new Exception("Error retrieving token: " + ex.Message, ex);
+                }
 
-                //}
+                // received tokens from authorization server
+                if (content != null)
+                {
+                    try
+                    {
+                        tokenReply = JsonConvert.DeserializeObject<TokenReply>(content);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new Exception("Error parsing token: " + ex.Message, ex);
+                    }
+                }
             }
 
             return tokenReply;

@@ -42,10 +42,8 @@ namespace SampleApi
                 settings.AuthScheme = AuthScheme.ApiKey;
                 settings.ApiKey = "myapikey";
             });
-
-
-            //To add 
-
+            
+            
             services.AddSingleServiceAgent<OAuthDemoAgent>(settings =>
             {
                 settings.Scheme = HttpSchema.Https;
