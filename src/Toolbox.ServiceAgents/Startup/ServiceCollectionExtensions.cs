@@ -110,6 +110,8 @@ namespace Toolbox.ServiceAgents
             RegisterClientFactory(services, clientAction);
 
             RegisterAgentType(services, assembly.GetTypes(), typeof(T));
+
+            DependencyRegistration.AddBusinessServices(services);
         }
 
         private static void RegisterServices(IServiceCollection services, ServiceAgentSettings settings, Assembly assembly, Action<IServiceProvider, HttpClient> clientAction)
