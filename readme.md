@@ -232,6 +232,7 @@ Possible schemes:
 * None
 * Bearer
 * ApiKey
+* OAuthClientCredentials
 
 Check the [Creating a service agent](#creating-a-service-agent) section to see how to define the scheme for your service agents.
 
@@ -245,7 +246,7 @@ With the Bearer scheme the authentication is done through use of the authorizati
 
     Authorization Bearer xxx
 where xxx is the token.
-To use the ApiKey scheme set the **AuthScheme** property of the **ServiceSettings** object to the value "Bearer".
+To use the Bearer scheme set the **AuthScheme** property of the **ServiceSettings** object to the value "Bearer".
 The token is extracted from the **UserToken** property of the **AuthContext** object provided by the dependency injection infrastructure.
 
 ### ApiKey
@@ -326,3 +327,21 @@ to alter the values of the service settings after they have been loaded from the
         serviceAgentSettings.GlobalApiKey = "globalkeyfromcode";
     }, null);
 ```
+
+### OAuthClientCredentials
+	This will use the OAuth2 client credentials flow to obtain a (bearer)token from a token endpoint.
+
+	To use the OAuth Clientcredentials scheme set the **AuthScheme** property of the **ServiceSettings** object to the value "OAuthClientCredentials".
+
+	You must also supply following settings in the ServiceSettings:
+
+	OAuthClientId = "f44d3641-8249-440d-a6e5-61b7b4893184";
+    OAuthClientSecret = "2659485f-f0be-4526-bb7a-0541365351f5";
+    OAuthScope = "testoauthtoolbox.v2.all";
+    OAuthPathAddition = "oauth2/token";
+
+
+	See the SampleApi for more info.
+	
+
+
