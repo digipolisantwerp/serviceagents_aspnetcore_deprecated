@@ -9,6 +9,7 @@ using Microsoft.Extensions.Options;
 using Toolbox.ServiceAgents.Settings;
 using Toolbox.ServiceAgents.UnitTests.Utilities;
 using System.Net.Http;
+using System.Reflection;
 
 namespace Toolbox.ServiceAgents.UnitTests.Startup
 {
@@ -115,7 +116,8 @@ namespace Toolbox.ServiceAgents.UnitTests.Startup
         private void ServiceAgentInterfaceIsRegistratedAsScoped()
         {
             var services = new ServiceCollection();
-            services.AddSingleServiceAgent<InterfaceImplementingAgent>(settings => { });
+            services.AddSingleServiceAgent<InterfaceImplementingAgent>(settings => { },
+                assembly: typeof(InterfaceImplementingAgent).GetTypeInfo().Assembly);
 
             var registrations = services.Where(sd => sd.ServiceType == typeof(IInterfaceImplementingAgent) &&
                                                      sd.ImplementationType == typeof(InterfaceImplementingAgent))
