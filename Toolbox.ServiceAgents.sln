@@ -1,10 +1,11 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{58491237-F5EC-386A-7D34-13DD19686027}"
 	ProjectSection(SolutionItems) = preProject
 		global.json = global.json
+		LICENSE.txt = LICENSE.txt
 		readme.md = readme.md
 	EndProjectSection
 	ProjectSection(FolderGlobals) = preProject

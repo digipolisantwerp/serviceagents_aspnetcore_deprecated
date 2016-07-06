@@ -26,7 +26,7 @@ To add the toolbox to a project, you add the package to the project.json :
 
 ``` json
     "dependencies": {
-        "Toolbox.ServiceAgents":  "1.3.0"
+        "Toolbox.ServiceAgents":  "2.0.0"
     }
 ```
 
@@ -57,6 +57,16 @@ If you want to configure the agent using a configuration file or if you want to 
     {
         settings.FileName = "serviceagents.json";
     });
+```
+
+If your agents are located in a different assembly then the executing assembly, you can pass that assembly as a parameter, this is optional.
+
+``` csharp
+    services.AddServiceAgents(settings =>
+    {
+        settings.FileName = "serviceagents.json";
+    },
+	assembly: AssemblyWithAgents);
 ```
 
 The json file contains one or multiple sections, one per service agent.

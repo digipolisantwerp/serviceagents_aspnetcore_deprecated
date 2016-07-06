@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.OptionsModel;
 using System;
 using System.Net.Http;
 using System.Net.Http.Headers;

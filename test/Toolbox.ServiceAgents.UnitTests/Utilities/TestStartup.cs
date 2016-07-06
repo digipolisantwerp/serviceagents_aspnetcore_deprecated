@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNet.Builder;
-using Microsoft.AspNet.Hosting;
+﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -7,8 +7,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Toolbox.ServiceAgents.Settings;
 using Microsoft.Extensions.Configuration;
-using Microsoft.AspNet.TestHost;
-using Microsoft.AspNet.Http;
+using Microsoft.AspNetCore.TestHost;
+using Microsoft.AspNetCore.Http;
 
 namespace Toolbox.ServiceAgents.UnitTests.Utilities
 {
@@ -34,6 +34,14 @@ namespace Toolbox.ServiceAgents.UnitTests.Utilities
             app.UseMvc();
         }
 
-        public static void Main(string[] args) => WebApplication.Run<TestStartup>(args);
+        public static void Main(string[] args)
+        {
+            var host = new WebHostBuilder()
+            .UseStartup<TestStartup>()
+            .Build();
+            host.Run();
+        }
+
+        //=> WebApplication.Run<TestStartup>(args);
     }
 }

@@ -13,14 +13,16 @@ namespace Toolbox.ServiceAgents
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddSingleServiceAgent<T>(this IServiceCollection services, Action<ServiceSettings> setupAction) where T : AgentBase
+        public static IServiceCollection AddSingleServiceAgent<T>(this IServiceCollection services, Action<ServiceSettings> setupAction, Assembly assembly = null) where T : AgentBase
         {
-            return AddSingleServiceAgent<T>(services, Assembly.GetCallingAssembly(), setupAction, null);
+            assembly = assembly == null ? Assembly.GetEntryAssembly() : assembly;
+            return AddSingleServiceAgent<T>(services, assembly, setupAction, null);
         }
 
-        public static IServiceCollection AddSingleServiceAgent<T>(this IServiceCollection services, Action<ServiceSettings> setupAction, Action<IServiceProvider, HttpClient> clientAction) where T : AgentBase
+        public static IServiceCollection AddSingleServiceAgent<T>(this IServiceCollection services, Action<ServiceSettings> setupAction, Action<IServiceProvider, HttpClient> clientAction, Assembly assembly = null) where T : AgentBase
         {
-            return AddSingleServiceAgent<T>(services, Assembly.GetCallingAssembly(), setupAction, clientAction);
+            assembly = assembly == null ? Assembly.GetEntryAssembly() : assembly;
+            return AddSingleServiceAgent<T>(services, assembly, setupAction, clientAction);
         }
 
         private static IServiceCollection AddSingleServiceAgent<T>(this IServiceCollection services,
@@ -46,22 +48,26 @@ namespace Toolbox.ServiceAgents
             return services;
         }
 
-        public static IServiceCollection AddServiceAgents(this IServiceCollection services, Action<ServiceSettingsJsonFile> setupAction)
+        public static IServiceCollection AddServiceAgents(this IServiceCollection services, Action<ServiceSettingsJsonFile> setupAction, Assembly assembly = null)
         {
-            return AddServiceAgents(services, Assembly.GetCallingAssembly(), setupAction, null, null);
+            assembly = assembly == null ? Assembly.GetEntryAssembly() : assembly;
+            return AddServiceAgents(services, assembly, setupAction, null, null);
         }
 
-        public static IServiceCollection AddServiceAgents(this IServiceCollection services, Action<ServiceSettingsJsonFile> setupAction, Action<IServiceProvider, HttpClient> clientAction)
+        public static IServiceCollection AddServiceAgents(this IServiceCollection services, Action<ServiceSettingsJsonFile> setupAction, Action<IServiceProvider, HttpClient> clientAction, Assembly assembly = null)
         {
-            return AddServiceAgents(services, Assembly.GetCallingAssembly(), setupAction, null, clientAction);
+            assembly = assembly == null ? Assembly.GetEntryAssembly() : assembly;
+            return AddServiceAgents(services, assembly, setupAction, null, clientAction);
         }
 
         public static IServiceCollection AddServiceAgents(this IServiceCollection services, 
             Action<ServiceSettingsJsonFile> jsonSetupAction,
             Action<ServiceAgentSettings> settingsSetupAction,
-            Action<IServiceProvider, HttpClient> clientAction)
+            Action<IServiceProvider, HttpClient> clientAction,
+            Assembly assembly = null)
         {
-            return AddServiceAgents(services, Assembly.GetCallingAssembly(), jsonSetupAction, settingsSetupAction, clientAction);
+            assembly = assembly == null ? Assembly.GetEntryAssembly() : assembly;
+            return AddServiceAgents(services, assembly, jsonSetupAction, settingsSetupAction, clientAction);
         }
 
         private static IServiceCollection AddServiceAgents(this IServiceCollection services,
@@ -122,7 +128,7 @@ namespace Toolbox.ServiceAgents
 
             foreach (var item in settings.Services)
             {
-                var type = assemblyTypes.Single(t => t.BaseType == typeof(AgentBase) &&
+                var type = assemblyTypes.Single(t => t.GetTypeInfo().BaseType == typeof(AgentBase) &&
                                                     t.Name == item.Key);
 
                 RegisterAgentType(services, assemblyTypes, type);
@@ -145,7 +151,7 @@ namespace Toolbox.ServiceAgents
         private static void RegisterAgentType(IServiceCollection services, Type[] assemblyTypes, Type implementationType)
         {
             var interfaceTypeName = $"I{implementationType.Name}";
-            var interfaceType = assemblyTypes.SingleOrDefault(t => t.Name == interfaceTypeName && t.IsInterface);
+            var interfaceType = assemblyTypes.SingleOrDefault(t => t.Name == interfaceTypeName && t.GetTypeInfo().IsInterface);
 
             if (interfaceType != null)
             {
@@ -160,7 +166,7 @@ namespace Toolbox.ServiceAgents
         private static Type TryGetInterface(Type[] assemblyTypes, Type type)
         {
             var interfaceTypeName = $"I{type.Name}";
-            var interfaceType = assemblyTypes.SingleOrDefault(t => t.Name == interfaceTypeName && t.IsInterface);
+            var interfaceType = assemblyTypes.SingleOrDefault(t => t.Name == interfaceTypeName && t.GetTypeInfo().IsInterface);
             return interfaceType;
         }
     }

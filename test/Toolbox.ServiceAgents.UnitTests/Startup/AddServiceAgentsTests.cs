@@ -5,10 +5,11 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 using Toolbox.ServiceAgents;
-using Microsoft.Extensions.OptionsModel;
+using Microsoft.Extensions.Options;
 using Toolbox.ServiceAgents.Settings;
 using Toolbox.ServiceAgents.UnitTests.Utilities;
 using System.Net.Http;
+using System.Reflection;
 
 namespace Toolbox.ServiceAgents.UnitTests.Startup
 {
@@ -30,10 +31,11 @@ namespace Toolbox.ServiceAgents.UnitTests.Startup
         {
             var services = new ServiceCollection();
             services.AddServiceAgents(settings =>
-            {
-                settings.FileName = "_TestData/serviceagentconfig_1.json";
-                settings.Section = "TestAgent";
-            });
+                {
+                    settings.FileName = "_TestData/serviceagentconfig_1.json";
+                    settings.Section = "TestAgent";
+                },
+                assembly: typeof(AddServiceAgentsTests).GetTypeInfo().Assembly);
 
             var registrations = services.Where(sd => sd.ServiceType == typeof(IHttpClientFactory))
                                         .ToArray();
@@ -57,14 +59,16 @@ namespace Toolbox.ServiceAgents.UnitTests.Startup
             {
                 passedClient = client;
                 passedServiceProvider = serviceProvider;
-            });
+            },
+            assembly: typeof(AddServiceAgentsTests).GetTypeInfo().Assembly
+            );
 
             ///get the registrated HttpFactory
             var registration = services.Single(sd => sd.ServiceType == typeof(IHttpClientFactory));
 
             //Manually call the CreateClient on the factory (this normally happens when the service agent gets resolved
             var factory = registration.ImplementationFactory.Invoke(null) as HttpClientFactory;
-            factory.CreateClient(serviceAgentSettings, new ServiceSettings {  Host = "test.be" });
+            factory.CreateClient(serviceAgentSettings, new ServiceSettings { Host = "test.be" });
 
             Assert.NotNull(passedClient);
         }
@@ -83,7 +87,8 @@ namespace Toolbox.ServiceAgents.UnitTests.Startup
             {
                 settings.GlobalApiKey = "globalkeyfromcode";
                 settings.Services["TestAgent"].ApiKey = "localapikeyfromcode";
-            }, null);
+            }, null,
+            assembly: typeof(AddServiceAgentsTests).GetTypeInfo().Assembly);
 
             var registrations = services.Where(sd => sd.ServiceType == typeof(IConfigureOptions<ServiceAgentSettings>))
                                         .ToArray();
@@ -113,7 +118,8 @@ namespace Toolbox.ServiceAgents.UnitTests.Startup
             services.AddServiceAgents(settings =>
             {
                 settings.FileName = "_TestData/serviceagentconfig_1.json";
-            });
+            },
+            assembly: typeof(AddServiceAgentsTests).GetTypeInfo().Assembly);
 
             var registrations = services.Where(sd => sd.ServiceType == typeof(IConfigureOptions<ServiceAgentSettings>))
                                         .ToArray();
@@ -132,7 +138,7 @@ namespace Toolbox.ServiceAgents.UnitTests.Startup
 
             var serviceSettings = serviceAgentSettings.Services["TestAgent"];
             Assert.NotNull(serviceSettings);
-            
+
             Assert.Equal(AuthScheme.None, serviceSettings.AuthScheme);
             Assert.Equal("test.be", serviceSettings.Host);
             Assert.Equal("api", serviceSettings.Path);
@@ -146,7 +152,8 @@ namespace Toolbox.ServiceAgents.UnitTests.Startup
         private void ServiceAgentIsRegistratedAsScoped()
         {
             var services = new ServiceCollection();
-            services.AddSingleServiceAgent<TestAgent>(settings => { });
+            services.AddSingleServiceAgent<TestAgent>(settings => { },
+            assembly: typeof(AddServiceAgentsTests).GetTypeInfo().Assembly);
 
             var registrations = services.Where(sd => sd.ServiceType == typeof(TestAgent) &&
                                                      sd.ImplementationType == typeof(TestAgent))
@@ -163,7 +170,8 @@ namespace Toolbox.ServiceAgents.UnitTests.Startup
             services.AddServiceAgents(settings =>
             {
                 settings.FileName = "_TestData/serviceagentconfig_2.json";
-            });
+            },
+            assembly: typeof(AddServiceAgentsTests).GetTypeInfo().Assembly);
 
             var registrations = services.Where(sd => sd.ServiceType == typeof(IConfigureOptions<ServiceAgentSettings>))
                                         .ToArray();
@@ -202,7 +210,8 @@ namespace Toolbox.ServiceAgents.UnitTests.Startup
             services.AddServiceAgents(settings =>
             {
                 settings.FileName = "_TestData/serviceagentconfig_2.json";
-            });
+            },
+            assembly: typeof(AddServiceAgentsTests).GetTypeInfo().Assembly);
 
             var registrations = services.Where(sd => sd.ServiceType == typeof(TestAgent) ||
                                                      sd.ServiceType == typeof(OtherTestAgent))
@@ -223,7 +232,8 @@ namespace Toolbox.ServiceAgents.UnitTests.Startup
             services.AddServiceAgents(settings =>
             {
                 settings.FileName = "_TestData/serviceagentconfig_3.json";
-            });
+            },
+            assembly: typeof(AddServiceAgentsTests).GetTypeInfo().Assembly);
 
             var registrations = services.Where(sd => sd.ServiceType == typeof(IInterfaceImplementingAgent) &&
                                                      sd.ImplementationType == typeof(InterfaceImplementingAgent))

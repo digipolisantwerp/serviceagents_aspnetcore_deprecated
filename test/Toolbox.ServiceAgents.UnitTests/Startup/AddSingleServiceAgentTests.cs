@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 using Toolbox.ServiceAgents;
-using Microsoft.Extensions.OptionsModel;
+using Microsoft.Extensions.Options;
 using Toolbox.ServiceAgents.Settings;
 using Toolbox.ServiceAgents.UnitTests.Utilities;
 using System.Net.Http;

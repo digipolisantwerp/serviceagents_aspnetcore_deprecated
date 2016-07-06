@@ -1,10 +1,12 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.OptionsModel;
+using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
 using System;
 using System.Net;
 using System.Net.Http;
-using System.Net.Http.Formatting;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Toolbox.ServiceAgents.Settings;
@@ -15,8 +17,7 @@ namespace Toolbox.ServiceAgents
     {
         protected readonly ServiceSettings _settings;
 
-        protected readonly JsonMediaTypeFormatter _formatter = new JsonMediaTypeFormatter();
-        protected readonly MediaTypeFormatter[] _formatters;
+        protected readonly JsonSerializerSettings _jsonSerializerSettings = new JsonSerializerSettings();
 
         protected HttpClient _client;
         private IServiceProvider _serviceProvider;
@@ -32,14 +33,12 @@ namespace Toolbox.ServiceAgents
 
             var clientFactory = serviceProvider.GetService<IHttpClientFactory>();
             _client = clientFactory.CreateClient(serviceAgentSettings, _settings);
-
-            _formatters = new MediaTypeFormatter[] { _formatter };
         }
 
-        protected Task<T> ParseResult<T>(HttpResponseMessage response)
+        protected async Task<T> ParseResult<T>(HttpResponseMessage response)
         {
             if (!response.IsSuccessStatusCode) ParseJsonError(response);
-            return response.Content.ReadAsAsync<T>(_formatters);
+            return JsonConvert.DeserializeObject<T>(await response.Content.ReadAsStringAsync(), _jsonSerializerSettings);
         }
 
         protected void ParseJsonError(HttpResponseMessage response)
@@ -62,25 +61,35 @@ namespace Toolbox.ServiceAgents
         { 
             var response = await _client.GetAsync(requestUri);
             if (!response.IsSuccessStatusCode) ParseJsonError(response);
-            return await response.Content.ReadAsAsync<T>(_formatters);
+            return JsonConvert.DeserializeObject<T>(await response.Content.ReadAsStringAsync(), _jsonSerializerSettings);
         }
 
         protected async Task<string> GetStringAsync(string requestUri)
         {
-            var response = await _client.GetAsync(requestUri);
-            if (!response.IsSuccessStatusCode) ParseJsonError(response);
-            return await response.Content.ReadAsStringAsync();
+            try
+            {
+                var response = await _client.GetAsync(requestUri);
+                if (!response.IsSuccessStatusCode) ParseJsonError(response);
+                return await response.Content.ReadAsStringAsync();
+            }
+            catch (Exception e)
+            {
+
+                throw;
+            }
         }
 
         protected async Task<T> PostAsync<T>(string requestUri, T item)
         {
-            var response = await _client.PostAsync(requestUri, item, _formatter);
+            HttpContent contentPost = new StringContent(JsonConvert.SerializeObject(item, _jsonSerializerSettings), Encoding.UTF8, "application/json");
+            var response = await _client.PostAsync(requestUri, contentPost);
             return await ParseResult<T>(response);
         }
 
         protected async Task<TReponse> PostAsync<TRequest, TReponse>(string requestUri, TRequest item)
         {
-            var response = await _client.PostAsync(requestUri, item, _formatter);
+            HttpContent contentPost = new StringContent(JsonConvert.SerializeObject(item, _jsonSerializerSettings), Encoding.UTF8, "application/json");
+            var response = await _client.PostAsync(requestUri, contentPost);
             return await ParseResult<TReponse>(response);
         }
 
@@ -88,31 +97,30 @@ namespace Toolbox.ServiceAgents
 
         protected async Task<T> PutAsync<T>(string requestUri, T item)
         {
-            var response = await _client.PutAsync(requestUri, item, _formatter);
+            HttpContent contentPost = new StringContent(JsonConvert.SerializeObject(item, _jsonSerializerSettings), Encoding.UTF8, "application/json");
+            var response = await _client.PutAsync(requestUri, contentPost);
             return await ParseResult<T>(response);
         }
 
         protected async Task<TReponse> PutAsync<TRequest, TReponse>(string requestUri, TRequest item)
         {
-            var response = await _client.PutAsync(requestUri, item, _formatter);
+            HttpContent contentPost = new StringContent(JsonConvert.SerializeObject(item, _jsonSerializerSettings), Encoding.UTF8, "application/json");
+            var response = await _client.PutAsync(requestUri, contentPost);
             return await ParseResult<TReponse>(response);
         }
 
         protected async Task PutWithEmptyResultAsync<T>(string requestUri, T item)
         {
-            var response = await _client.PutAsync(requestUri, item, _formatter);
+            HttpContent contentPost = new StringContent(JsonConvert.SerializeObject(item, _jsonSerializerSettings), Encoding.UTF8, "application/json");
+            var response = await _client.PutAsync(requestUri, contentPost);
             if (!response.IsSuccessStatusCode) ParseJsonError(response);
         }
-
-
 
         protected async Task DeleteAsync(string requestUri)
         {
             var response = await _client.DeleteAsync(requestUri);
             if (!response.IsSuccessStatusCode) ParseJsonError(response);
         }
-
-
 
         public void Dispose()
         {

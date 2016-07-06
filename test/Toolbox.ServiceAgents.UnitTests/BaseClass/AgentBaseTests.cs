@@ -1,8 +1,11 @@
-﻿using Microsoft.Extensions.OptionsModel;
+﻿using Microsoft.Extensions.DependencyModel;
+using Microsoft.Extensions.Options;
 using Moq;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Toolbox.ServiceAgents.Settings;
@@ -18,7 +21,7 @@ namespace Toolbox.ServiceAgents.UnitTests.BaseClass
         {
             var settings = CreateServiceAgentSettings();
             var serviceProvider = CreateServiceProvider(settings);
-            var agent = new TestAgent(serviceProvider, Options.Create(settings));
+            var agent = new TestAgent(serviceProvider, Utilities.Options.Create(settings));
             agent.HttpClient = CreateClient();
 
             var response = await agent.GetTestDataAsync();
@@ -33,13 +36,13 @@ namespace Toolbox.ServiceAgents.UnitTests.BaseClass
         {
             var settings = CreateServiceAgentSettings();
             var serviceProvider = CreateServiceProvider(settings);
-            var agent = new TestAgent(serviceProvider, Options.Create(settings));
+            var agent = new TestAgent(serviceProvider, Utilities.Options.Create(settings));
             agent.HttpClient = CreateClient();
 
             var response = await agent.GetTestDataAsStringAsync();
 
             Assert.NotNull(response);
-            Assert.Equal("{\"Name\":\"Name\",\"Number\":150}", response);
+            Assert.Equal("{\"name\":\"Name\",\"number\":150}", response);
         }
 
         [Fact]
@@ -47,7 +50,7 @@ namespace Toolbox.ServiceAgents.UnitTests.BaseClass
         {
             var settings = CreateServiceAgentSettings();
             var serviceProvider = CreateServiceProvider(settings);
-            var agent = new TestAgent(serviceProvider, Options.Create(settings));
+            var agent = new TestAgent(serviceProvider, Utilities.Options.Create(settings));
             agent.HttpClient = CreateClient();
 
             var response = await agent.PostTestDataAsync(new TestModel { Name = "Name2", Number = 250 });
@@ -62,7 +65,7 @@ namespace Toolbox.ServiceAgents.UnitTests.BaseClass
         {
             var settings = CreateServiceAgentSettings();
             var serviceProvider = CreateServiceProvider(settings);
-            var agent = new TestAgent(serviceProvider, Options.Create(settings));
+            var agent = new TestAgent(serviceProvider, Utilities.Options.Create(settings));
             agent.HttpClient = CreateClient();
 
             var response = await agent.PostTestDataWithOtherReturnTypeAsync(new TestModel { Name = "Name2", Number = 250 });
@@ -77,7 +80,7 @@ namespace Toolbox.ServiceAgents.UnitTests.BaseClass
         {
             var settings = CreateServiceAgentSettings();
             var serviceProvider = CreateServiceProvider(settings);
-            var agent = new TestAgent(serviceProvider, Options.Create(settings));
+            var agent = new TestAgent(serviceProvider, Utilities.Options.Create(settings));
             agent.HttpClient = CreateClient();
 
             var response = await agent.PutTestDataAsync(new TestModel { Name = "Name2", Number = 250 });
@@ -92,7 +95,7 @@ namespace Toolbox.ServiceAgents.UnitTests.BaseClass
         {
             var settings = CreateServiceAgentSettings();
             var serviceProvider = CreateServiceProvider(settings);
-            var agent = new TestAgent(serviceProvider, Options.Create(settings));
+            var agent = new TestAgent(serviceProvider, Utilities.Options.Create(settings));
             agent.HttpClient = CreateClient();
 
             await agent.PutWithEmptyResultAsync(new TestModel { Name = "Name3", Number = 350 });
@@ -108,7 +111,7 @@ namespace Toolbox.ServiceAgents.UnitTests.BaseClass
         {
             var settings = CreateServiceAgentSettings();
             var serviceProvider = CreateServiceProvider(settings);
-            var agent = new TestAgent(serviceProvider, Options.Create(settings));
+            var agent = new TestAgent(serviceProvider, Utilities.Options.Create(settings));
             agent.HttpClient = CreateClient();
 
             await agent.DeleteAsync();
@@ -131,7 +134,7 @@ namespace Toolbox.ServiceAgents.UnitTests.BaseClass
             var serviceProviderMock = new Mock<IServiceProvider>();
 
             if (settings != null)
-                serviceProviderMock.Setup(p => p.GetService(typeof(IOptions<ServiceAgentSettings>))).Returns(Options.Create(settings));
+                serviceProviderMock.Setup(p => p.GetService(typeof(IOptions<ServiceAgentSettings>))).Returns(Utilities.Options.Create(settings));
 
             var authContextMock = new Mock<IAuthContext>();
             authContextMock.Setup(c => c.UserToken).Returns("TokenValue");

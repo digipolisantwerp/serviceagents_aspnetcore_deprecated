@@ -5,7 +5,6 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.OptionsModel;
 using Newtonsoft.Json;
 using Toolbox.ServiceAgents.Models;
 using Toolbox.ServiceAgents.Settings;

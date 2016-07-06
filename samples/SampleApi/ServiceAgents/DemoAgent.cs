@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Extensions.OptionsModel;
+using Microsoft.Extensions.Options;
 using Toolbox.ServiceAgents;
 using Toolbox.ServiceAgents.Settings;
 using SampleApi.Models;

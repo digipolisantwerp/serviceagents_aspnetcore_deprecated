@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNet.Builder;
-using Microsoft.AspNet.Hosting;
-using Microsoft.AspNet.TestHost;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.PlatformAbstractions;
 
@@ -20,8 +20,7 @@ namespace Toolbox.ServiceAgents.UnitTests.Utilities
 
         public ServiceAgentTestBase()
         {
-            var appEnv = CallContextServiceLocator.Locator.ServiceProvider.GetRequiredService<IApplicationEnvironment>();
-
+            var appEnv = PlatformServices.Default.Application;
             _startup = new TestStartup();
 
             _configureAppAction = (app =>
@@ -41,7 +40,8 @@ namespace Toolbox.ServiceAgents.UnitTests.Utilities
 
         public TestServer CreateTestServer()
         {
-            return TestServer.Create(_configureAppAction, _configureServicesAction);
+            var hostBuilder = new WebHostBuilder().ConfigureServices(_configureServicesAction).Configure(_configureAppAction);
+            return new TestServer(hostBuilder);
         }
 
         protected System.Net.Http.HttpClient CreateClient()
