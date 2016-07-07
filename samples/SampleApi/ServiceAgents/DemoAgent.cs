@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
-using Toolbox.ServiceAgents;
-using Toolbox.ServiceAgents.Settings;
+using Digipolis.ServiceAgents;
+using Digipolis.ServiceAgents.Settings;
 using SampleApi.Models;
 using System.Threading;
 

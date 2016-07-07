@@ -7,9 +7,10 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Toolbox.ServiceAgents;
+using Digipolis.ServiceAgents;
 using SampleApi.ServiceAgents;
-using Toolbox.ServiceAgents.Settings;
+using Digipolis.ServiceAgents.Settings;
+using System.IO;
 
 namespace SampleApi
 {
@@ -19,7 +20,7 @@ namespace SampleApi
         {
             // Set up configuration sources.
             var builder = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json", false, true);
+                .AddJsonFile(Path.Combine(Directory.GetCurrentDirectory(), "appsettings.json"), false, true);
 
             builder.AddEnvironmentVariables();
             Configuration = builder.Build();
@@ -53,7 +54,7 @@ namespace SampleApi
             //    settings.AuthScheme = AuthScheme.OAuthClientCredentials;
             //    settings.OAuthClientId = "f44d3641-8249-440d-a6e5-61b7b4893184";
             //    settings.OAuthClientSecret = "2659485f-f0be-4526-bb7a-0541365351f5";
-            //    settings.OAuthScope = "testoauthtoolbox.v2.all";
+            //    settings.OAuthScope = "testoauthDigipolis.v2.all";
             //    settings.OAuthPathAddition = "oauth2/token";
             //    settings.ApiKey = "";
 
@@ -68,10 +69,10 @@ namespace SampleApi
             //To use a json configuration file use the AddServiceAgents extension
             services.AddServiceAgents(settings =>
             {
-                settings.FileName = "serviceagents.json";
+                settings.FileName = Path.Combine(Directory.GetCurrentDirectory(), "Configs/serviceagents.json");
             });
 
-            //When combined with CorrelationId use an overload to add client behaviour (Dependency on Toolbox.WebApi required)
+            //When combined with CorrelationId use an overload to add client behaviour (Dependency on Digipolis.WebApi required)
             //services.AddServiceAgents(settings =>
             //{
             //    settings.FileName = "serviceagents.json";

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using SampleApi.ServiceAgents;
-using Toolbox.ServiceAgents;
+using Digipolis.ServiceAgents;
 
 namespace SampleApi.Controllers
 {

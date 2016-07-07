@@ -26,11 +26,11 @@ To add the toolbox to a project, you add the package to the project.json :
 
 ``` json
     "dependencies": {
-        "Toolbox.ServiceAgents":  "2.0.0"
+        "Digipolis.ServiceAgents":  "2.0.0"
     }
 ```
 
-ALWAYS check the latest version [here](https://github.com/digipolisantwerp/serviceagents_aspnetcore/blob/master/src/Toolbox.ServiceAgents/project.json) before adding the above line !
+ALWAYS check the latest version [here](https://github.com/digipolisantwerp/serviceagents_aspnetcore/blob/master/src/Digipolis.ServiceAgents/project.json) before adding the above line !
 
 In Visual Studio you can also use the NuGet Package Manager to do this.
 
@@ -350,7 +350,7 @@ You must also supply following settings in the ServiceSettings:
 ```csharp
   OAuthClientId = "f44d3641-8249-440d-a6e5-61b7b4893184";
   OAuthClientSecret = "2659485f-f0be-4526-bb7a-0541365351f5";
-  OAuthScope = "testoauthtoolbox.v2.all";
+  OAuthScope = "testoauthDigipolis.v2.all";
   OAuthPathAddition = "oauth2/token";
 ```
 
