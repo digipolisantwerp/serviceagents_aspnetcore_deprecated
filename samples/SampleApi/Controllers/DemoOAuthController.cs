@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNet.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using SampleApi.ServiceAgents;
-using Toolbox.ServiceAgents;
+using Digipolis.ServiceAgents;
 
 namespace SampleApi.Controllers
 {
