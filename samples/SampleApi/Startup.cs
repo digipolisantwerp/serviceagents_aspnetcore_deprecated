@@ -2,14 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNet.Builder;
-using Microsoft.AspNet.Hosting;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Toolbox.ServiceAgents;
+using Digipolis.ServiceAgents;
 using SampleApi.ServiceAgents;
-using Toolbox.ServiceAgents.Settings;
+using Digipolis.ServiceAgents.Settings;
+using System.IO;
 
 namespace SampleApi
 {
@@ -19,10 +20,10 @@ namespace SampleApi
         {
             // Set up configuration sources.
             var builder = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json");
+                .AddJsonFile(Path.Combine(Directory.GetCurrentDirectory(), "appsettings.json"), false, true);
 
             builder.AddEnvironmentVariables();
-            Configuration = builder.Build().ReloadOnChanged("appsettings.json");
+            Configuration = builder.Build();
         }
 
         public IConfigurationRoot Configuration { get; set; }
@@ -33,32 +34,32 @@ namespace SampleApi
             // Add framework services.
 
             //To add a single serviceAgent just use the AddSingleServiceAgent<T> extension
-            services.AddSingleServiceAgent<DemoAgent>(settings =>
-            {
-                settings.Scheme = HttpSchema.Http;
-                settings.Host = "localhost";
-                settings.Port = "50267";
-                //settings.Path = "api/";
-                settings.AuthScheme = AuthScheme.ApiKey;
-                settings.ApiKey = "myapikey";
-            });
-            
-            
-            services.AddSingleServiceAgent<OAuthDemoAgent>(settings =>
-            {
-                settings.Scheme = HttpSchema.Https;
-                settings.Host = "mycompany.com";
-                settings.Port = "443";
-                settings.Path = "testoauthtoolbox/v2";
-                settings.AuthScheme = AuthScheme.OAuthClientCredentials;
-                settings.OAuthClientId = "f44d3641-8249-440d-a6e5-61b7b4893184";
-                settings.OAuthClientSecret = "2659485f-f0be-4526-bb7a-0541365351f5";
-                settings.OAuthScope = "testoauthtoolbox.v2.all";
-                settings.OAuthPathAddition = "oauth2/token";
-                settings.ApiKey = "";
+            //services.AddSingleServiceAgent<DemoAgent>(settings =>
+            //{
+            //    settings.Scheme = HttpSchema.Http;
+            //    settings.Host = "localhost";
+            //    settings.Port = "50267";
+            //    //settings.Path = "api/";
+            //    settings.AuthScheme = AuthScheme.ApiKey;
+            //    settings.ApiKey = "myapikey";
+            //});
 
 
-            });
+            //services.AddSingleServiceAgent<OAuthDemoAgent>(settings =>
+            //{
+            //    settings.Scheme = HttpSchema.Https;
+            //    settings.Host = "mycompany.com";
+            //    settings.Port = "443";
+            //    settings.Path = "testoauthtoolbox/v2";
+            //    settings.AuthScheme = AuthScheme.OAuthClientCredentials;
+            //    settings.OAuthClientId = "f44d3641-8249-440d-a6e5-61b7b4893184";
+            //    settings.OAuthClientSecret = "2659485f-f0be-4526-bb7a-0541365351f5";
+            //    settings.OAuthScope = "testoauthDigipolis.v2.all";
+            //    settings.OAuthPathAddition = "oauth2/token";
+            //    settings.ApiKey = "";
+
+
+            //});
 
             //services.AddServiceAgents(settings =>
             //{
@@ -66,12 +67,12 @@ namespace SampleApi
             //});
 
             //To use a json configuration file use the AddServiceAgents extension
-            //services.AddServiceAgents(settings =>
-            //{
-            //    settings.FileName = "serviceagents.json";
-            //});
+            services.AddServiceAgents(settings =>
+            {
+                settings.FileName = Path.Combine(Directory.GetCurrentDirectory(), "Configs/serviceagents.json");
+            });
 
-            //When combined with CorrelationId use an overload to add client behaviour (Dependency on Toolbox.WebApi required)
+            //When combined with CorrelationId use an overload to add client behaviour (Dependency on Digipolis.WebApi required)
             //services.AddServiceAgents(settings =>
             //{
             //    settings.FileName = "serviceagents.json";
@@ -84,14 +85,8 @@ namespace SampleApi
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
-            loggerFactory.AddDebug();
-
-            app.UseIISPlatformHandler();
 
             app.UseMvc();
         }
-
-        // Entry point for the application.
-        public static void Main(string[] args) => WebApplication.Run<Startup>(args);
     }
 }
