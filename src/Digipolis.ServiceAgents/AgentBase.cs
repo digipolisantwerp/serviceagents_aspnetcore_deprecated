@@ -58,7 +58,7 @@ namespace Digipolis.ServiceAgents
         }
 
         protected async Task<T> GetAsync<T>(string requestUri)
-        { 
+        {
             var response = await _client.GetAsync(requestUri);
             if (!response.IsSuccessStatusCode) ParseJsonError(response);
             return JsonConvert.DeserializeObject<T>(await response.Content.ReadAsStringAsync(), _jsonSerializerSettings);
@@ -66,17 +66,9 @@ namespace Digipolis.ServiceAgents
 
         protected async Task<string> GetStringAsync(string requestUri)
         {
-            try
-            {
-                var response = await _client.GetAsync(requestUri);
-                if (!response.IsSuccessStatusCode) ParseJsonError(response);
-                return await response.Content.ReadAsStringAsync();
-            }
-            catch (Exception e)
-            {
-
-                throw;
-            }
+            var response = await _client.GetAsync(requestUri);
+            if (!response.IsSuccessStatusCode) ParseJsonError(response);
+            return await response.Content.ReadAsStringAsync();
         }
 
         protected async Task<T> PostAsync<T>(string requestUri, T item)
