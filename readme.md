@@ -96,6 +96,8 @@ In this section a **GlobalApiKey** option can be set. See the [Authentication sc
 Each other object (section) in the json represents a service agent type. **The object name has to match the service agent type name**.
 See the [Creating a service agent](#creating-a-service-agent) section for more info on creating the service agents.
 
+If you have a generic service agent, the section name must match the class name of the agent, without the generic part. For example, for a generic agent of type **GenericAgent&lt;T&gt;** the section name must be **GenericAgent**.
+
 Following options can be set per section (service agent):
 
 Option              | Description                                                | Default

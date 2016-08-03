@@ -243,5 +243,36 @@ namespace Digipolis.ServiceAgents.UnitTests.Startup
             Assert.Equal(1, registrations.Count());
             Assert.Equal(ServiceLifetime.Scoped, registrations[0].Lifetime);
         }
+
+        [Fact]
+        private void GenericAgentIsRegistratedAsScoped()
+        {
+            var services = new ServiceCollection();
+            services.AddServiceAgents(settings =>
+            {
+                settings.FileName = Path.Combine(Directory.GetCurrentDirectory(), "_TestData/serviceagentconfig_4.json");
+            },
+            assembly: typeof(AddServiceAgentsTests).GetTypeInfo().Assembly);
+
+            var registrations = services.Where(sd => sd.ServiceType == typeof(GenericAgent<>))
+                                        .ToArray();
+
+            Assert.Equal(1, registrations.Count());
+            Assert.Equal(ServiceLifetime.Scoped, registrations[0].Lifetime);
+
+            registrations = services.Where(sd => sd.ServiceType == typeof(IConfigureOptions<ServiceAgentSettings>))
+                                        .ToArray();
+
+            var configOptions = registrations[0].ImplementationInstance as IConfigureOptions<ServiceAgentSettings>;
+            Assert.NotNull(configOptions);
+
+            var serviceAgentSettings = new ServiceAgentSettings();
+            configOptions.Configure(serviceAgentSettings);
+
+            Assert.Equal(1, serviceAgentSettings.Services.Count);
+
+            var serviceSettings = serviceAgentSettings.Services["GenericAgent"];
+            Assert.NotNull(serviceSettings);
+        }
     }
 }

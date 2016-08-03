@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Digipolis.ServiceAgents.Settings;
+using System.Linq;
 
 namespace Digipolis.ServiceAgents
 {
@@ -29,10 +30,25 @@ namespace Digipolis.ServiceAgents
             _serviceProvider = serviceProvider;
 
             var serviceAgentSettings = options.Value;
-            _settings = serviceAgentSettings.Services[this.GetType().Name];
+            _settings = GetServiceSettings(serviceAgentSettings);
 
             var clientFactory = serviceProvider.GetService<IHttpClientFactory>();
             _client = clientFactory.CreateClient(serviceAgentSettings, _settings);
+        }
+
+        private ServiceSettings GetServiceSettings(ServiceAgentSettings serviceAgentSettings)
+        {
+            if (serviceAgentSettings.Services.Any(s => s.Key == this.GetType().Name))
+            {
+                return serviceAgentSettings.Services[this.GetType().Name];
+            }
+
+            if (serviceAgentSettings.Services.Any(s => this.GetType().Name.Contains(s.Key)))
+            {
+                return serviceAgentSettings.Services.FirstOrDefault(s => this.GetType().Name.Contains(s.Key)).Value;
+            }
+
+            throw new NotFoundException($"Settings not found for service agent {this.GetType().Name}");
         }
 
         protected async Task<T> ParseResult<T>(HttpResponseMessage response)
