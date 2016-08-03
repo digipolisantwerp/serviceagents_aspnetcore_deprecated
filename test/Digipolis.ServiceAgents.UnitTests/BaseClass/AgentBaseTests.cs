@@ -21,7 +21,7 @@ namespace Digipolis.ServiceAgents.UnitTests.BaseClass
         {
             var settings = CreateServiceAgentSettings();
             var serviceProvider = CreateServiceProvider(settings);
-            var agent = new TestAgent(serviceProvider, Utilities.Options.Create(settings));
+            var agent = new TestAgent(serviceProvider, Options.Create(settings));
             agent.HttpClient = CreateClient();
 
             var response = await agent.GetTestDataAsync();
@@ -36,7 +36,7 @@ namespace Digipolis.ServiceAgents.UnitTests.BaseClass
         {
             var settings = CreateServiceAgentSettings();
             var serviceProvider = CreateServiceProvider(settings);
-            var agent = new TestAgent(serviceProvider, Utilities.Options.Create(settings));
+            var agent = new TestAgent(serviceProvider, Options.Create(settings));
             agent.HttpClient = CreateClient();
 
             var response = await agent.GetTestDataAsStringAsync();
@@ -50,7 +50,7 @@ namespace Digipolis.ServiceAgents.UnitTests.BaseClass
         {
             var settings = CreateServiceAgentSettings();
             var serviceProvider = CreateServiceProvider(settings);
-            var agent = new TestAgent(serviceProvider, Utilities.Options.Create(settings));
+            var agent = new TestAgent(serviceProvider, Options.Create(settings));
             agent.HttpClient = CreateClient();
 
             var response = await agent.PostTestDataAsync(new TestModel { Name = "Name2", Number = 250 });
@@ -65,7 +65,7 @@ namespace Digipolis.ServiceAgents.UnitTests.BaseClass
         {
             var settings = CreateServiceAgentSettings();
             var serviceProvider = CreateServiceProvider(settings);
-            var agent = new TestAgent(serviceProvider, Utilities.Options.Create(settings));
+            var agent = new TestAgent(serviceProvider, Options.Create(settings));
             agent.HttpClient = CreateClient();
 
             var response = await agent.PostTestDataWithOtherReturnTypeAsync(new TestModel { Name = "Name2", Number = 250 });
@@ -80,7 +80,7 @@ namespace Digipolis.ServiceAgents.UnitTests.BaseClass
         {
             var settings = CreateServiceAgentSettings();
             var serviceProvider = CreateServiceProvider(settings);
-            var agent = new TestAgent(serviceProvider, Utilities.Options.Create(settings));
+            var agent = new TestAgent(serviceProvider, Options.Create(settings));
             agent.HttpClient = CreateClient();
 
             var response = await agent.PutTestDataAsync(new TestModel { Name = "Name2", Number = 250 });
@@ -95,7 +95,7 @@ namespace Digipolis.ServiceAgents.UnitTests.BaseClass
         {
             var settings = CreateServiceAgentSettings();
             var serviceProvider = CreateServiceProvider(settings);
-            var agent = new TestAgent(serviceProvider, Utilities.Options.Create(settings));
+            var agent = new TestAgent(serviceProvider, Options.Create(settings));
             agent.HttpClient = CreateClient();
 
             await agent.PutWithEmptyResultAsync(new TestModel { Name = "Name3", Number = 350 });
@@ -111,7 +111,7 @@ namespace Digipolis.ServiceAgents.UnitTests.BaseClass
         {
             var settings = CreateServiceAgentSettings();
             var serviceProvider = CreateServiceProvider(settings);
-            var agent = new TestAgent(serviceProvider, Utilities.Options.Create(settings));
+            var agent = new TestAgent(serviceProvider, Options.Create(settings));
             agent.HttpClient = CreateClient();
 
             await agent.DeleteAsync();
@@ -134,7 +134,7 @@ namespace Digipolis.ServiceAgents.UnitTests.BaseClass
             var serviceProviderMock = new Mock<IServiceProvider>();
 
             if (settings != null)
-                serviceProviderMock.Setup(p => p.GetService(typeof(IOptions<ServiceAgentSettings>))).Returns(Utilities.Options.Create(settings));
+                serviceProviderMock.Setup(p => p.GetService(typeof(IOptions<ServiceAgentSettings>))).Returns(Options.Create(settings));
 
             var authContextMock = new Mock<IAuthContext>();
             authContextMock.Setup(c => c.UserToken).Returns("TokenValue");

@@ -115,7 +115,7 @@ namespace Digipolis.ServiceAgents.UnitTests.HttpClientFactoryTests
             var serviceProviderMock = new Mock<IServiceProvider>();
 
             if (settings != null)
-                serviceProviderMock.Setup(p => p.GetService(typeof(IOptions<ServiceSettings>))).Returns(Utilities.Options.Create(settings));
+                serviceProviderMock.Setup(p => p.GetService(typeof(IOptions<ServiceSettings>))).Returns(Options.Create(settings));
 
             var authContextMock = new Mock<IAuthContext>();
             authContextMock.Setup(c => c.UserToken).Returns("TokenValue");

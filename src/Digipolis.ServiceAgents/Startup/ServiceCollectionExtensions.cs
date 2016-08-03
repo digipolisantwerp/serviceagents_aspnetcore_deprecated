@@ -129,7 +129,7 @@ namespace Digipolis.ServiceAgents
             foreach (var item in settings.Services)
             {
                 var type = assemblyTypes.Single(t => t.GetTypeInfo().BaseType == typeof(AgentBase) &&
-                                                    t.Name == item.Key);
+                                                     t.Name.StartsWith(item.Key));
 
                 RegisterAgentType(services, assemblyTypes, type);
             }

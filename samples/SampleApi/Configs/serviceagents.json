@@ -9,5 +9,13 @@
     "Port": "50267",
     "Path": "api/",
     "ApiKey": "myapikey"
+  },
+  "GenericAgent": {
+    "Scheme": "http",
+    "UseGlobalApiKey": false,
+    "Host": "localhost",
+    "Port": "50267",
+    "Path": "api/",
+    "ApiKey": "myapikey"
   }
 }

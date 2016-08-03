@@ -5,17 +5,20 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using SampleApi.ServiceAgents;
 using Digipolis.ServiceAgents;
+using SampleApi.Models;
 
 namespace SampleApi.Controllers
 {
     [Route("api/[controller]")]
     public class ValuesController : Controller
     {
+        private readonly GenericAgent<Address> _addressAgent;
         private IDemoAgent _serviceAgent;
 
-        public ValuesController(IDemoAgent serviceAgent)
+        public ValuesController(IDemoAgent serviceAgent, GenericAgent<Address> addressAgent)
         {
             _serviceAgent = serviceAgent;
+            _addressAgent = addressAgent;
         }
 
         // GET: api/values
