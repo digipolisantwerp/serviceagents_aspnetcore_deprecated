@@ -70,7 +70,7 @@ namespace Digipolis.ServiceAgents
                 if (errorResponse.Messages == null || ! errorResponse.Messages.Any())
                 {
                     // If there are no error messages the JSON format was probably not Digipolis.Errors.Error
-                    throw new BaseException(errorJson);
+                    errorResponse.AddMessage(errorJson);
                 }
 
                 // Throw proper exception based on HTTP status
