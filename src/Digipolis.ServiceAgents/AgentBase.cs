@@ -54,7 +54,7 @@ namespace Digipolis.ServiceAgents
 
         protected async Task<T> ParseResult<T>(HttpResponseMessage response)
         {
-            if (!response.IsSuccessStatusCode) ParseJsonError(response);
+            if (!response.IsSuccessStatusCode) await ParseJsonError(response);
             return JsonConvert.DeserializeObject<T>(await response.Content.ReadAsStringAsync(), _jsonSerializerSettings);
         }
 
@@ -142,13 +142,15 @@ namespace Digipolis.ServiceAgents
         {
             HttpContent contentPost = new StringContent(JsonConvert.SerializeObject(item, _jsonSerializerSettings), Encoding.UTF8, "application/json");
             var response = await _client.PutAsync(requestUri, contentPost);
-            if (!response.IsSuccessStatusCode) ParseJsonError(response);
+            if (!response.IsSuccessStatusCode)
+                await ParseJsonError(response);
         }
 
         protected async Task DeleteAsync(string requestUri)
         {
             var response = await _client.DeleteAsync(requestUri);
-            if (!response.IsSuccessStatusCode) ParseJsonError(response);
+            if (!response.IsSuccessStatusCode)
+                await ParseJsonError(response);
         }
 
         public void Dispose()
