@@ -20,3 +20,7 @@
 ## 1.2.2
 
 - Added customization of the api key header name
+
+## 3.0.0
+
+- Changed error handling to the standard Digipolis.Errors format
