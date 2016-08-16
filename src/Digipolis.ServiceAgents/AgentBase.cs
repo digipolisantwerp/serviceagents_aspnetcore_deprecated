@@ -61,16 +61,21 @@ namespace Digipolis.ServiceAgents
         protected async Task ParseJsonError(HttpResponseMessage response)
         {
             string errorJson = await response.Content.ReadAsStringAsync();
+            Errors.Error errorResponse = new Errors.Error();
 
             try
             {
-                // Get Error object from JSON
-                Digipolis.Errors.Error errorResponse = JsonConvert.DeserializeObject<Digipolis.Errors.Error>(errorJson, _jsonSerializerSettings);
-
-                if (errorResponse.Messages == null || ! errorResponse.Messages.Any())
+                // if there is a response
+                if(errorJson.Length > 0)
                 {
-                    // If there are no error messages the JSON format was probably not Digipolis.Errors.Error
-                    errorResponse.AddMessage(errorJson);
+                    // Try to get Error object from JSON
+                    errorResponse = JsonConvert.DeserializeObject<Digipolis.Errors.Error>(errorJson, _jsonSerializerSettings);
+                    
+                    if (errorResponse == null || errorResponse?.Messages == null || ! errorResponse.Messages.Any())
+                    {
+                        // If the json couldn't be parsed -> create new error object with custom json
+                        errorResponse = new Errors.Error("id", new Errors.ErrorMessage("json", errorJson));
+                    }
                 }
 
                 // Throw proper exception based on HTTP status
