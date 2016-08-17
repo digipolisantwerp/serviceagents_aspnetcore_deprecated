@@ -60,8 +60,8 @@ namespace Digipolis.ServiceAgents
 
         protected async Task ParseJsonError(HttpResponseMessage response)
         {
-            string errorJson = await response.Content.ReadAsStringAsync();
-            Errors.Error errorResponse = new Errors.Error();
+            var errorJson = await response.Content.ReadAsStringAsync();
+            var errorResponse = new Errors.Error();
 
             try
             {
