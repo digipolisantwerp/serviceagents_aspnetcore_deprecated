@@ -24,3 +24,7 @@
 ## 3.0.0
 
 - Changed error handling to the standard Digipolis.Errors format
+
+## 3.0.1
+
+- Bugfix where empty request would throw a NullReferenceException
