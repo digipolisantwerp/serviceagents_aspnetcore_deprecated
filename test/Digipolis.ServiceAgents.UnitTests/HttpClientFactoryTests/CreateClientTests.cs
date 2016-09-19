@@ -9,6 +9,8 @@ using Digipolis.ServiceAgents.Settings;
 using Digipolis.ServiceAgents.UnitTests.Utilities;
 using Xunit;
 using Digipolis.Errors.Exceptions;
+using Digipolis.ServiceAgents.OAuth;
+using Digipolis.ServiceAgents.Models;
 
 namespace Digipolis.ServiceAgents.UnitTests.HttpClientFactoryTests
 {
@@ -112,6 +114,20 @@ namespace Digipolis.ServiceAgents.UnitTests.HttpClientFactoryTests
         }
 
         [Fact]
+        public void CreateClientWithOAuthClientCredentials()
+        {
+            var serviceAgentSettings = new ServiceAgentSettings { };
+            var settings = new ServiceSettings { AuthScheme = AuthScheme.OAuthClientCredentials, OAuthClientId = "clientId", OAuthClientSecret = "clientSecret", Host = "test.be", Path = "api" };
+            var clientFactory = new HttpClientFactory(CreateServiceProvider(settings));
+
+            var client = clientFactory.CreateClient(serviceAgentSettings, settings);
+
+            Assert.NotNull(client);
+            Assert.Equal(AuthScheme.Bearer, client.DefaultRequestHeaders.Authorization.Scheme);
+            Assert.Equal("AccessToken", client.DefaultRequestHeaders.Authorization.Parameter);
+        }
+
+        [Fact]
         public void ThrowExceptionWhenNonHttpsSchemeUsedWithBasicAuthentication()
         {
             var serviceAgentSettings = new ServiceAgentSettings { };
@@ -146,6 +162,12 @@ namespace Digipolis.ServiceAgents.UnitTests.HttpClientFactoryTests
             authContextMock.Setup(c => c.UserToken).Returns("TokenValue");
 
             serviceProviderMock.Setup(p => p.GetService(typeof(IAuthContext))).Returns(authContextMock.Object);
+
+            var mockTokenHelper = new Mock<ITokenHelper>();
+            mockTokenHelper.Setup(h => h.ReadOrRetrieveToken(settings))
+                .ReturnsAsync(new TokenReply {  access_token = "AccessToken", expires_in = 7200 });
+
+            serviceProviderMock.Setup(p => p.GetService(typeof(ITokenHelper))).Returns(mockTokenHelper.Object);
 
             return serviceProviderMock.Object;
         }

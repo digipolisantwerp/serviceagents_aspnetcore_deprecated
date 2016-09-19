@@ -8,6 +8,7 @@ using System.Net.Http;
 using System.Reflection;
 using System.Threading.Tasks;
 using Digipolis.ServiceAgents.Settings;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Digipolis.ServiceAgents
 {
@@ -133,6 +134,8 @@ namespace Digipolis.ServiceAgents
 
                 RegisterAgentType(services, assemblyTypes, type);
             }
+
+            services.TryAddSingleton<HttpMessageHandler, HttpClientHandler>();
         }
 
         private static void RegisterClientFactory(IServiceCollection services, Action<IServiceProvider, HttpClient> clientAction)

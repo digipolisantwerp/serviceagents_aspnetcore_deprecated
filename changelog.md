@@ -28,3 +28,9 @@
 ## 3.0.1
 
 - Bugfix where empty request would throw a NullReferenceException
+
+## 3.1.0
+
+- Agents registred as Singleton instead of Scoped
+- Added Basic authentication
+- Refactored OAuthClientCredentials 

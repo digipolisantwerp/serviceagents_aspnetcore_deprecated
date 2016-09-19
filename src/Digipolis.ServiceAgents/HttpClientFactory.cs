@@ -90,7 +90,5 @@ namespace Digipolis.ServiceAgents
             var token = tokenHelper.ReadOrRetrieveToken(settings).Result.access_token;
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(AuthScheme.Bearer, token);
         }
-
-
     }
 }

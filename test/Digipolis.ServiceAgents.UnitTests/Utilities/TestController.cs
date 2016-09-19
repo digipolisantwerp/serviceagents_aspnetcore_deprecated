@@ -1,7 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Digipolis.ServiceAgents.UnitTests.Utilities
@@ -9,7 +6,7 @@ namespace Digipolis.ServiceAgents.UnitTests.Utilities
     [Route("[controller]")]
     public class TestController : Controller
     {
-        private static TestModel _previousData; 
+        private static TestModel _previousData;
 
         [HttpGet("1")]
         public TestModel Get()

@@ -1,56 +1,47 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Linq;
-using System.Net.Http;
-using System.Threading.Tasks;
+﻿using Digipolis.ServiceAgents.Models;
+using Digipolis.ServiceAgents.Settings;
 using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
-using Digipolis.ServiceAgents.Models;
-using Digipolis.ServiceAgents.Settings;
+using System;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace Digipolis.ServiceAgents.OAuth
 {
     public class TokenHelper : ITokenHelper
     {
         private readonly IMemoryCache _cache;
-
+        internal HttpClient _client;
 
         public TokenHelper(IMemoryCache cache)
         {
             if (cache == null) throw new ArgumentNullException(nameof(cache), $"{nameof(cache)} cannot be null");
 
             _cache = cache;
-
+            _client = new HttpClient();
         }
 
-        public async Task<TokenReply> ReadOrRetrieveToken(ServiceSettings options, bool forceNewRetrieval = false)
+        public async Task<TokenReply> ReadOrRetrieveToken(ServiceSettings options)
         {
             TokenReply tokenReplyResult = null;
+            var cacheKey = options.OAuthClientId + options.OAuthClientSecret + options.OAuthScope + options.OAuthTokenEndpoint;
 
+            tokenReplyResult = _cache.Get<TokenReply>(cacheKey);
 
-            if (!forceNewRetrieval)
-            {
-                //Does it exist in cache???
-                tokenReplyResult = _cache.Get<TokenReply>(options.OAuthClientId + options.OAuthClientSecret + options.OAuthScope + options.OAuthTokenEndpoint);
-            }
-
-            //Not in cache => retrieve
             if (tokenReplyResult == null)
             {
                 tokenReplyResult = await RetrieveToken(options.OAuthClientId, options.OAuthClientSecret, options.OAuthScope, options.OAuthTokenEndpoint);
 
-                //Save in cache for future reference
-                int expiration;
+                var cacheExpiration = tokenReplyResult.expires_in - 60;
+                cacheExpiration = cacheExpiration > 0 ? cacheExpiration : 0;
 
-                if (int.TryParse(tokenReplyResult.expires_in, out expiration))
+                if (cacheExpiration > 0)
                 {
-                    _cache.Set(options.OAuthClientId + options.OAuthClientSecret + options.OAuthScope + options.OAuthTokenEndpoint, tokenReplyResult, new MemoryCacheEntryOptions { AbsoluteExpirationRelativeToNow = new TimeSpan(0, 0, 0, expiration) });
+                    _cache.Set(cacheKey, tokenReplyResult, new MemoryCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(cacheExpiration) });
                 }
             }
 
             return tokenReplyResult;
-
         }
 
 
@@ -58,56 +49,28 @@ namespace Digipolis.ServiceAgents.OAuth
         {
             TokenReply tokenReply = null;
 
-            var builder = new UriBuilder(tokenEndpoint);
+            var content = $"client_id={clientID}&client_secret={clientSecret}&grant_type=client_credentials{(String.IsNullOrWhiteSpace(scope) ? "" : $"&scope={scope}")}";
 
+            var response = await _client.PostAsync(tokenEndpoint, new StringContent(content));
 
-            string query;
-            using (var content = new FormUrlEncodedContent(new KeyValuePair<string, string>[]
-                             {
-                               new KeyValuePair<string, string>("client_id", clientID),
-                               new KeyValuePair<string, string>("client_secret", clientSecret),
-                               new KeyValuePair<string, string>("grant_type", "client_credentials"),
-                               new KeyValuePair<string, string>("scope", scope),
-                             })
-                   )
+            if (response.IsSuccessStatusCode)
             {
-                query = content.ReadAsStringAsync().Result;
-            }
-
-            builder.Query = query;
-
-            var stringUri = builder.ToString();
-
-            using (var client = new HttpClient())
-            {
-                string content;
                 try
-                {                  
-                    var response = await client.PostAsync(stringUri, null);
-                    content = await response.Content.ReadAsStringAsync();
+                {
+                    var responseBody = await response.Content.ReadAsStringAsync();
+                    tokenReply = JsonConvert.DeserializeObject<TokenReply>(responseBody);
                 }
                 catch (Exception ex)
                 {
-
-                    throw new Exception("Error retrieving token: " + ex.Message, ex);
+                    throw new Exception("Error parsing token: " + ex.Message, ex);
                 }
-
-                // received tokens from authorization server
-                if (content != null)
-                {
-                    try
-                    {
-                        tokenReply = JsonConvert.DeserializeObject<TokenReply>(content);
-                    }
-                    catch (Exception ex)
-                    {
-                        throw new Exception("Error parsing token: " + ex.Message, ex);
-                    }
-                }
+            }
+            else
+            {
+                throw new Exception("Error retrieving token, response status code: " + response.StatusCode);
             }
 
             return tokenReply;
         }
     }
-
 }
