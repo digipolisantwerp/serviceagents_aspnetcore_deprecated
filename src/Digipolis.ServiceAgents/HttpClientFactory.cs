@@ -4,6 +4,8 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using Digipolis.ServiceAgents.Settings;
 using Digipolis.ServiceAgents.OAuth;
+using System.Text;
+using Digipolis.Errors.Exceptions;
 
 namespace Digipolis.ServiceAgents
 {
@@ -39,6 +41,9 @@ namespace Digipolis.ServiceAgents
                 case AuthScheme.ApiKey:
                     SetApiKeyAuthHeader(client, serviceAgentSettings, settings);
                     break;
+                case AuthScheme.Basic:
+                    SetBasicAuthHeader(client, settings);
+                    break;
                 default:
                     break;
             }
@@ -47,6 +52,15 @@ namespace Digipolis.ServiceAgents
                 AfterClientCreated(_serviceProvider, client);
 
             return client;
+        }
+
+        private void SetBasicAuthHeader(HttpClient client, ServiceSettings settings)
+        {
+            if (settings.Scheme != HttpSchema.Https)
+                throw new BaseException($"Failed to set Basic Authentication header on service agent for host: '{settings.Host}', the actual scheme is '{settings.Scheme}' and should be 'https'!");
+
+            var headerValue = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{settings.BasicAuthUserName}:{settings.BasicAuthPassword}"));
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(AuthScheme.Basic, headerValue);
         }
 
         private void SetApiKeyAuthHeader(HttpClient client, ServiceAgentSettings serviceAgentSettings, ServiceSettings settings)

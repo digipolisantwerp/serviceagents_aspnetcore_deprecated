@@ -11,6 +11,6 @@ namespace Digipolis.ServiceAgents.Settings
         public const string Bearer = "Bearer";
         public const string ApiKey = "ApiKey";
         public const string OAuthClientCredentials = "OAuthClientCredentials";
-
+        public const string Basic = "Basic";
     }
 }

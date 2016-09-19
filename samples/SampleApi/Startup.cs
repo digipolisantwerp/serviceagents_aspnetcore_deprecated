@@ -63,19 +63,28 @@ namespace SampleApi
 
             //services.AddServiceAgents(settings =>
             //{
-            //    settings.FileName = "serviceagentconfig.json";
+            //    settings.FileName = "_config/serviceagents.json";
             //});
 
             //To use a json configuration file use the AddServiceAgents extension
             services.AddServiceAgents(settings =>
             {
-                settings.FileName = Path.Combine(Directory.GetCurrentDirectory(), "Configs/serviceagents.json");
+                settings.FileName = Path.Combine(Directory.GetCurrentDirectory(), "_config/serviceagents.json");
             });
+
+            //services.AddServiceAgents(json =>
+            //{
+            //    json.FileName = Path.Combine(Directory.GetCurrentDirectory(), "_config/serviceagents.json");
+            //}, serviceAgentSettings =>
+            //{
+            //    serviceAgentSettings.Services.Single(s => s.Key == nameof(DemoAgent)).Value.BasicAuthPassword = "userNamefromcode";
+            //    serviceAgentSettings.Services.Single(s => s.Key == nameof(DemoAgent)).Value.BasicAuthUserName = "passwordfromcode";
+            //}, null);
 
             //When combined with CorrelationId use an overload to add client behaviour (Dependency on Digipolis.WebApi required)
             //services.AddServiceAgents(settings =>
             //{
-            //    settings.FileName = "serviceagents.json";
+            //    settings.FileName = "_config/serviceagents.json";
             //}, (serviceProvider, client) => client.SetCorrelationValues(serviceProvider));
 
             services.AddMvc();

@@ -17,6 +17,7 @@ Toolbox for ServiceAgents in ASP.NET Core.
   - [Bearer](#bearer)
   - [ApiKey](#apikey)
   - [OAuthClientCredentials](#oauthclientcredentials)
+  - [Basic](#basic)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -55,7 +56,7 @@ If you want to configure the agent using a configuration file or if you want to 
 ``` csharp
     services.AddServiceAgents(settings =>
     {
-        settings.FileName = "serviceagents.json";
+        settings.FileName = Path.Combine(ConfigPath, "serviceagents.json");
     });
 ```
 
@@ -64,7 +65,7 @@ If your agents are located in a different assembly then the executing assembly, 
 ``` csharp
     services.AddServiceAgents(settings =>
     {
-        settings.FileName = "serviceagents.json";
+        settings.FileName = Path.Combine(ConfigPath, "serviceagents.json");
     },
 	assembly: AssemblyWithAgents);
 ```
@@ -110,6 +111,8 @@ Scheme | The scheme of the url for the service agent. | "https"
 UseGlobalApiKey | A Boolean to indicate to use the globally defined api key for authentication. | false
 ApiKey | The locally defined api key for authentication. | ""
 ApiKeyHeaderName | The string used as header name for the api key. | "ApiKey"
+BasicAuthUserName | The user name used for basic authentication scheme. | ""
+BasicAuthPassword | The password used for basic authentication scheme. | ""
 
 The settings without default are mandatory!
 All the url parts form the basic url for the service agent: {scheme}://{host}:{port}/{path}/
@@ -120,7 +123,7 @@ Important notice: the action gets invoked for every service agent when multiple 
 ``` csharp
     services.AddServiceAgents(s =>
     {
-        s.FileName = "serviceagents.json";
+        s.FileName = Path.Combine(ConfigPath, "serviceagents.json");
         s.Section = "TestAgent";
     },
     (serviceProvider, client) =>
@@ -142,6 +145,8 @@ In order to create a service agent you need to create a type that derives from *
         }
     }
 ```
+
+Since the service agent is registred as singleton, no state should be preserved inside the service agent class!
 
 The **AgentBase** class contains several protected methods to perform the basic http actions (get, post, put and delete). All the methods are async.
 
@@ -246,6 +251,7 @@ Possible schemes:
 * Bearer
 * ApiKey
 * OAuthClientCredentials
+* Basic
 
 Check the [Creating a service agent](#creating-a-service-agent) section to see how to define the scheme for your service agents.
 
@@ -304,6 +310,7 @@ In the example below two agents that use the same key are configured.
 If you have different keys for your service agents, set the **UseGlobalApiKey** to 'false' and set the key in the **ApiKey** field of the service agent section.
 
 In the example below two agents that use different keys are configured.
+
 ``` javascript
 {
   "FirstAgent": {
@@ -330,17 +337,15 @@ In the example below two agents that use different keys are configured.
 
 If you don't want to enter your api keys in the json configuration file you can use an overload of the **AddServiceAgents** method that accepts a parameter of type **Action&lt;ServiceAgentSettings&gt;**
 to alter the values of the service settings after they have been loaded from the json file.
-
 ``` csharp
     services.AddServiceAgents(json =>
     {
-        json.FileName = "_TestData/serviceagentconfig_1.json";
+        json.FileName = Path.Combine(ConfigPath, "serviceagents.json");
     }, serviceAgentSettings =>
     {
         serviceAgentSettings.GlobalApiKey = "globalkeyfromcode";
     }, null);
  ```
-
 ### OAuthClientCredentials
 
 This will use the OAuth2 client credentials flow to obtain a (bearer)token from a token endpoint.
@@ -348,8 +353,7 @@ This will use the OAuth2 client credentials flow to obtain a (bearer)token from 
 To use the OAuth Clientcredentials scheme set the **AuthScheme** property of the **ServiceSettings** object to the value "OAuthClientCredentials".
 
 You must also supply following settings in the ServiceSettings:
-
-```csharp
+``` csharp
   OAuthClientId = "f44d3641-8249-440d-a6e5-61b7b4893184";
   OAuthClientSecret = "2659485f-f0be-4526-bb7a-0541365351f5";
   OAuthScope = "testoauthDigipolis.v2.all";
@@ -357,3 +361,46 @@ You must also supply following settings in the ServiceSettings:
 ```
 
 See the SampleApi for more info.
+
+### Basic
+
+With the Basic scheme the authentication is done through use of a Basic Authentication header.
+
+    Authorization Basic yyy
+where yyy is the base 64 encoded username and password.  
+
+Basic authentication can only be used with an "https" scheme!
+
+To use the Basic scheme set the **AuthScheme** property of the **ServiceSettings** object to the value "Basic".
+The **user name** and **password** can be entered in the settings.
+``` javascript
+{
+    "Global": {
+    "GlobalApiKey": "globalapikey"
+    },
+    "TestAgent": {
+      "AuthScheme": "Basic",
+      "Host": "test.be",
+      "Path": "api",
+      "Port": "5001",
+      "Scheme": "https",
+      "BasicAuthUserName": "userName",
+      "BasicAuthPassword": "password"
+    }
+}
+```
+
+If you don't want to enter your user name and password in the json configuration file you can use an overload of the **AddServiceAgents** method that accepts a parameter of type **Action&lt;ServiceAgentSettings&gt;**
+to alter the values of the service settings after they have been loaded from the json file.
+``` csharp
+    services.AddServiceAgents(json =>
+    {
+        json.FileName = Path.Combine(ConfigPath, "serviceagents.json");
+    }, serviceAgentSettings =>
+    {
+        var settings = serviceAgentSettings.Services.Single(s => s.Key == nameof(TestAgent)).Value; 
+        settings.BasicAuthPassword = "userNamefromcode";
+        settings.BasicAuthUserName = "passwordfromcode";
+    }, null);
+```
+ 

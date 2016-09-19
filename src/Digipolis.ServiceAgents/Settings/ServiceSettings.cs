@@ -33,6 +33,16 @@ namespace Digipolis.ServiceAgents.Settings
         /// </summary>
         public string ApiKeyHeaderName { get; set; } = Digipolis.ServiceAgents.Settings.AuthScheme.ApiKey;
 
+        /// <summary>
+        /// The user name used for basic authentication scheme.
+        /// </summary>
+        public string BasicAuthUserName { get; set; }
+
+        /// <summary>
+        /// The password used for basic authentication scheme.
+        /// </summary>
+        public string BasicAuthPassword { get; set; }
+
         public string Url
         {
             get

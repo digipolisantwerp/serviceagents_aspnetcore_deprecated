@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Digipolis.ServiceAgents.Settings;
 using Digipolis.ServiceAgents.UnitTests.Utilities;
 using Xunit;
+using Digipolis.Errors.Exceptions;
 
 namespace Digipolis.ServiceAgents.UnitTests.HttpClientFactoryTests
 {
@@ -94,6 +95,30 @@ namespace Digipolis.ServiceAgents.UnitTests.HttpClientFactoryTests
 
             Assert.NotNull(client);
             Assert.Equal("globalapikey", client.DefaultRequestHeaders.First(h => h.Key == "api-key").Value.First());
+        }
+
+        [Fact]
+        public void CreateClientWithBasicAuthentication()
+        {
+            var serviceAgentSettings = new ServiceAgentSettings {  };
+            var settings = new ServiceSettings { AuthScheme = AuthScheme.Basic, BasicAuthUserName = "Aladdin", BasicAuthPassword = "OpenSesame", Host = "test.be", Path = "api" };
+            var clientFactory = new HttpClientFactory(CreateServiceProvider(settings));
+
+            var client = clientFactory.CreateClient(serviceAgentSettings, settings);
+
+            Assert.NotNull(client);
+            Assert.Equal(AuthScheme.Basic, client.DefaultRequestHeaders.Authorization.Scheme);
+            Assert.Equal("QWxhZGRpbjpPcGVuU2VzYW1l", client.DefaultRequestHeaders.Authorization.Parameter);
+        }
+
+        [Fact]
+        public void ThrowExceptionWhenNonHttpsSchemeUsedWithBasicAuthentication()
+        {
+            var serviceAgentSettings = new ServiceAgentSettings { };
+            var settings = new ServiceSettings { AuthScheme = AuthScheme.Basic, BasicAuthUserName = "Aladdin", BasicAuthPassword = "OpenSesame", Scheme = HttpSchema.Http, Host = "test.be", Path = "api" };
+            var clientFactory = new HttpClientFactory(CreateServiceProvider(settings));
+
+            Assert.Throws<BaseException>(() => clientFactory.CreateClient(serviceAgentSettings, settings));
         }
 
         [Fact]

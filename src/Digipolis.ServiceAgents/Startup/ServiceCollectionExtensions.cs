@@ -102,7 +102,7 @@ namespace Digipolis.ServiceAgents
 
         private static ServiceAgentSettings ConfigureServiceAgentSettings(IServiceCollection services, ServiceSettingsJsonFile serviceSettingsJsonFile)
         {
-            var builder = new ConfigurationBuilder().AddJsonFile(serviceSettingsJsonFile.FileName);
+             var builder = new ConfigurationBuilder().AddJsonFile(serviceSettingsJsonFile.FileName);
             var config = builder.Build();
             
             var configReader = new ServiceSettingsConfigReader();
