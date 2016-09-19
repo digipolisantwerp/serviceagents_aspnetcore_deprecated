@@ -38,7 +38,7 @@ In Visual Studio you can also use the NuGet Package Manager to do this.
 
 To add a single service agent in your project simply use the **AddSingleServiceAgent&lt;T>** extension in the **ConfigureServices** method in the **Startup** class.
 The type represents the implementation of your service agent.
-It will be registered as a scoped instance. If the service agent implements an interface of the same name preceded with the letter ‘I’, the interface will be registered as scoped.
+It will be registered as a singleton instance. If the service agent implements an interface of the same name preceded with the letter ‘I’, the interface will be registered as singleton.
 
 ``` csharp
     services.AddSingleServiceAgent<YourServiceAgent>(settings =>

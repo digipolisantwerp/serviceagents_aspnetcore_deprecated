@@ -10,7 +10,6 @@ namespace Digipolis.ServiceAgents
     public class HttpClientFactory : IHttpClientFactory
     {
         private IServiceProvider _serviceProvider;
-        private HttpClient _client;        
 
         public event Action<IServiceProvider, HttpClient> AfterClientCreated;
 
@@ -21,61 +20,61 @@ namespace Digipolis.ServiceAgents
 
         public HttpClient CreateClient(ServiceAgentSettings serviceAgentSettings, ServiceSettings settings)
         {
-            _client = new HttpClient
+            var client = new HttpClient
             {
                 BaseAddress = new Uri(settings.Url)
             };
 
-            _client.DefaultRequestHeaders.Accept.Clear();
-            _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            client.DefaultRequestHeaders.Accept.Clear();
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
             switch (settings.AuthScheme)
             {
                 case AuthScheme.OAuthClientCredentials:
-                    SetOAuthClientCredentialsAuthHeader(settings);
+                    SetOAuthClientCredentialsAuthHeader(client, settings);
                     break;
                 case AuthScheme.Bearer:
-                    SetBearerAuthHeader();
+                    SetBearerAuthHeader(client);
                     break;
                 case AuthScheme.ApiKey:
-                    SetApiKeyAuthHeader(serviceAgentSettings, settings);
+                    SetApiKeyAuthHeader(client, serviceAgentSettings, settings);
                     break;
                 default:
                     break;
             }
 
             if (AfterClientCreated != null)
-                AfterClientCreated(_serviceProvider, _client);
+                AfterClientCreated(_serviceProvider, client);
 
-            return _client;
+            return client;
         }
 
-        private void SetApiKeyAuthHeader(ServiceAgentSettings serviceAgentSettings, ServiceSettings settings)
+        private void SetApiKeyAuthHeader(HttpClient client, ServiceAgentSettings serviceAgentSettings, ServiceSettings settings)
         {
             if (settings.UseGlobalApiKey)
             {
-                _client.DefaultRequestHeaders.Add(settings.ApiKeyHeaderName, serviceAgentSettings.GlobalApiKey);
+                client.DefaultRequestHeaders.Add(settings.ApiKeyHeaderName, serviceAgentSettings.GlobalApiKey);
             }
             else
             {
-                _client.DefaultRequestHeaders.Add(settings.ApiKeyHeaderName, settings.ApiKey);
+                client.DefaultRequestHeaders.Add(settings.ApiKeyHeaderName, settings.ApiKey);
             }
         }
 
-        private void SetBearerAuthHeader()
+        private void SetBearerAuthHeader(HttpClient client)
         {
             var authContext = _serviceProvider.GetService<IAuthContext>();
             if (authContext == null) throw new NullReferenceException($"{nameof(IAuthContext)} cannot be null.");
-            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(AuthScheme.Bearer, authContext.UserToken);
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(AuthScheme.Bearer, authContext.UserToken);
         }
 
-        private void SetOAuthClientCredentialsAuthHeader(ServiceSettings settings)
+        private void SetOAuthClientCredentialsAuthHeader(HttpClient client, ServiceSettings settings)
         {
             
             var tokenHelper = _serviceProvider.GetService<ITokenHelper>();
             if (tokenHelper == null) throw new NullReferenceException($"{nameof(ITokenHelper)} cannot be null.");
             var token = tokenHelper.ReadOrRetrieveToken(settings).Result.access_token;
-            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(AuthScheme.Bearer, token);
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(AuthScheme.Bearer, token);
         }
 
 

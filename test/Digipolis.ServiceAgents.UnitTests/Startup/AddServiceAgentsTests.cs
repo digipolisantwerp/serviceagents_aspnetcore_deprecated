@@ -28,7 +28,7 @@ namespace Digipolis.ServiceAgents.UnitTests.Startup
         }
 
         [Fact]
-        private void HttpClientFactoryIsRegistratedAsScoped()
+        private void HttpClientFactoryIsRegistratedAsSingleton()
         {
             var services = new ServiceCollection();
             services.AddServiceAgents(settings =>
@@ -42,7 +42,7 @@ namespace Digipolis.ServiceAgents.UnitTests.Startup
                                         .ToArray();
 
             Assert.Equal(1, registrations.Count());
-            Assert.Equal(ServiceLifetime.Scoped, registrations[0].Lifetime);
+            Assert.Equal(ServiceLifetime.Singleton, registrations[0].Lifetime);
         }
 
         [Fact]
@@ -78,8 +78,6 @@ namespace Digipolis.ServiceAgents.UnitTests.Startup
         private void ServiceAgentSettingsActionIsPassed()
         {
             var serviceAgentSettings = new ServiceAgentSettings();
-            HttpClient passedClient = null;
-            IServiceProvider passedServiceProvider = null;
             var services = new ServiceCollection();
             services.AddServiceAgents(json =>
             {
@@ -150,7 +148,7 @@ namespace Digipolis.ServiceAgents.UnitTests.Startup
         }
 
         [Fact]
-        private void ServiceAgentIsRegistratedAsScoped()
+        private void ServiceAgentIsRegistratedAsSingleton()
         {
             var services = new ServiceCollection();
             services.AddSingleServiceAgent<TestAgent>(settings => { },
@@ -161,7 +159,7 @@ namespace Digipolis.ServiceAgents.UnitTests.Startup
                                         .ToArray();
 
             Assert.Equal(1, registrations.Count());
-            Assert.Equal(ServiceLifetime.Scoped, registrations[0].Lifetime);
+            Assert.Equal(ServiceLifetime.Singleton, registrations[0].Lifetime);
         }
 
         [Fact]
@@ -205,7 +203,7 @@ namespace Digipolis.ServiceAgents.UnitTests.Startup
         }
 
         [Fact]
-        private void MultipleServiceAgentsAreRegistratedAsScoped()
+        private void MultipleServiceAgentsAreRegistratedAsSingleton()
         {
             var services = new ServiceCollection();
             services.AddServiceAgents(settings =>
@@ -219,15 +217,15 @@ namespace Digipolis.ServiceAgents.UnitTests.Startup
                                         .ToArray();
 
             Assert.Equal(2, registrations.Count());
-            Assert.Equal(ServiceLifetime.Scoped, registrations[0].Lifetime);
+            Assert.Equal(ServiceLifetime.Singleton, registrations[0].Lifetime);
             Assert.Equal(nameof(OtherTestAgent), registrations[0].ServiceType.Name);
 
-            Assert.Equal(ServiceLifetime.Scoped, registrations[1].Lifetime);
+            Assert.Equal(ServiceLifetime.Singleton, registrations[1].Lifetime);
             Assert.Equal(nameof(TestAgent), registrations[1].ServiceType.Name);
         }
 
         [Fact]
-        private void ServiceAgentInterfaceIsRegistratedAsScoped()
+        private void ServiceAgentInterfaceIsRegistratedAsSingleton()
         {
             var services = new ServiceCollection();
             services.AddServiceAgents(settings =>
@@ -241,11 +239,11 @@ namespace Digipolis.ServiceAgents.UnitTests.Startup
                                         .ToArray();
 
             Assert.Equal(1, registrations.Count());
-            Assert.Equal(ServiceLifetime.Scoped, registrations[0].Lifetime);
+            Assert.Equal(ServiceLifetime.Singleton, registrations[0].Lifetime);
         }
 
         [Fact]
-        private void GenericAgentIsRegistratedAsScoped()
+        private void GenericAgentIsRegistratedAsSingleton()
         {
             var services = new ServiceCollection();
             services.AddServiceAgents(settings =>
@@ -258,7 +256,7 @@ namespace Digipolis.ServiceAgents.UnitTests.Startup
                                         .ToArray();
 
             Assert.Equal(1, registrations.Count());
-            Assert.Equal(ServiceLifetime.Scoped, registrations[0].Lifetime);
+            Assert.Equal(ServiceLifetime.Singleton, registrations[0].Lifetime);
 
             registrations = services.Where(sd => sd.ServiceType == typeof(IConfigureOptions<ServiceAgentSettings>))
                                         .ToArray();

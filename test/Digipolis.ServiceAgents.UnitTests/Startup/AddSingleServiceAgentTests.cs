@@ -27,7 +27,7 @@ namespace Digipolis.ServiceAgents.UnitTests.Startup
         }
 
         [Fact]
-        private void HttpClientFactoryIsRegistratedAsScoped()
+        private void HttpClientFactoryIsRegistratedAsSingleton()
         {
             var services = new ServiceCollection();
             services.AddSingleServiceAgent<TestAgent>(settings => { });
@@ -36,7 +36,7 @@ namespace Digipolis.ServiceAgents.UnitTests.Startup
                                         .ToArray();
 
             Assert.Equal(1, registrations.Count());
-            Assert.Equal(ServiceLifetime.Scoped, registrations[0].Lifetime);
+            Assert.Equal(ServiceLifetime.Singleton, registrations[0].Lifetime);
         }
 
         [Fact]
@@ -99,7 +99,7 @@ namespace Digipolis.ServiceAgents.UnitTests.Startup
         }
 
         [Fact]
-        private void ServiceAgentIsRegistratedAsScoped()
+        private void ServiceAgentIsRegistratedAsSingleton()
         {
             var services = new ServiceCollection();
             services.AddSingleServiceAgent<TestAgent>(settings => { });
@@ -109,11 +109,11 @@ namespace Digipolis.ServiceAgents.UnitTests.Startup
                                         .ToArray();
 
             Assert.Equal(1, registrations.Count());
-            Assert.Equal(ServiceLifetime.Scoped, registrations[0].Lifetime);
+            Assert.Equal(ServiceLifetime.Singleton, registrations[0].Lifetime);
         }
 
         [Fact]
-        private void ServiceAgentInterfaceIsRegistratedAsScoped()
+        private void ServiceAgentInterfaceIsRegistratedAsSingleton()
         {
             var services = new ServiceCollection();
             services.AddSingleServiceAgent<InterfaceImplementingAgent>(settings => { },
@@ -124,7 +124,7 @@ namespace Digipolis.ServiceAgents.UnitTests.Startup
                                         .ToArray();
 
             Assert.Equal(1, registrations.Count());
-            Assert.Equal(ServiceLifetime.Scoped, registrations[0].Lifetime);
+            Assert.Equal(ServiceLifetime.Singleton, registrations[0].Lifetime);
         }
     }
 }

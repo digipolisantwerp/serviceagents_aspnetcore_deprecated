@@ -137,7 +137,7 @@ namespace Digipolis.ServiceAgents
 
         private static void RegisterClientFactory(IServiceCollection services, Action<IServiceProvider, HttpClient> clientAction)
         {
-            services.AddScoped<IHttpClientFactory, HttpClientFactory>(sp =>
+            services.AddSingleton<IHttpClientFactory, HttpClientFactory>(sp =>
             {
                 var factory = new HttpClientFactory(sp);
 
@@ -155,11 +155,11 @@ namespace Digipolis.ServiceAgents
 
             if (interfaceType != null)
             {
-                services.AddScoped(interfaceType, implementationType);
+                services.AddSingleton(interfaceType, implementationType);
             }
             else
             {
-                services.AddScoped(implementationType);
+                services.AddSingleton(implementationType);
             }
         }
 
