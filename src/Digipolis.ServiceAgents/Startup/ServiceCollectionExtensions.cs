@@ -1,14 +1,11 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Digipolis.ServiceAgents.OAuth;
+using Digipolis.ServiceAgents.Settings;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
-using System.Threading.Tasks;
-using Digipolis.ServiceAgents.Settings;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Digipolis.ServiceAgents
 {
@@ -118,7 +115,7 @@ namespace Digipolis.ServiceAgents
 
             RegisterAgentType(services, assembly.GetTypes(), typeof(T));
 
-            DependencyRegistration.AddBusinessServices(services);
+            services.AddScoped<ITokenHelper, TokenHelper>();
         }
 
         private static void RegisterServices(IServiceCollection services, ServiceAgentSettings settings, Assembly assembly, Action<IServiceProvider, HttpClient> clientAction)
@@ -135,7 +132,7 @@ namespace Digipolis.ServiceAgents
                 RegisterAgentType(services, assemblyTypes, type);
             }
 
-            services.TryAddSingleton<HttpMessageHandler, HttpClientHandler>();
+            services.AddScoped<ITokenHelper, TokenHelper>();
         }
 
         private static void RegisterClientFactory(IServiceCollection services, Action<IServiceProvider, HttpClient> clientAction)
@@ -158,11 +155,11 @@ namespace Digipolis.ServiceAgents
 
             if (interfaceType != null)
             {
-                services.AddSingleton(interfaceType, implementationType);
+                services.AddScoped(interfaceType, implementationType);
             }
             else
             {
-                services.AddSingleton(implementationType);
+                services.AddScoped(implementationType);
             }
         }
 

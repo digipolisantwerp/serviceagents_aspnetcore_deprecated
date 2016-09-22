@@ -1,15 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
-using Xunit;
-using Digipolis.ServiceAgents;
-using Microsoft.Extensions.Options;
+﻿using Digipolis.ServiceAgents.OAuth;
 using Digipolis.ServiceAgents.Settings;
 using Digipolis.ServiceAgents.UnitTests.Utilities;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using System;
+using System.Linq;
 using System.Net.Http;
 using System.Reflection;
+using Xunit;
 
 namespace Digipolis.ServiceAgents.UnitTests.Startup
 {
@@ -58,7 +56,7 @@ namespace Digipolis.ServiceAgents.UnitTests.Startup
         }
 
         [Fact]
-        private void ServiceAgentSettingsIsRegistratedAsSingleton()
+        private void ServiceAgentSettingsIsRegistratedAsScoped()
         {
             var services = new ServiceCollection();
             services.AddSingleServiceAgent<TestAgent>(settings =>
@@ -99,7 +97,7 @@ namespace Digipolis.ServiceAgents.UnitTests.Startup
         }
 
         [Fact]
-        private void ServiceAgentIsRegistratedAsSingleton()
+        private void ServiceAgentIsRegistratedAsScoped()
         {
             var services = new ServiceCollection();
             services.AddSingleServiceAgent<TestAgent>(settings => { });
@@ -109,11 +107,11 @@ namespace Digipolis.ServiceAgents.UnitTests.Startup
                                         .ToArray();
 
             Assert.Equal(1, registrations.Count());
-            Assert.Equal(ServiceLifetime.Singleton, registrations[0].Lifetime);
+            Assert.Equal(ServiceLifetime.Scoped, registrations[0].Lifetime);
         }
 
         [Fact]
-        private void ServiceAgentInterfaceIsRegistratedAsSingleton()
+        private void ServiceAgentInterfaceIsRegistratedAsScoped()
         {
             var services = new ServiceCollection();
             services.AddSingleServiceAgent<InterfaceImplementingAgent>(settings => { },
@@ -124,7 +122,22 @@ namespace Digipolis.ServiceAgents.UnitTests.Startup
                                         .ToArray();
 
             Assert.Equal(1, registrations.Count());
-            Assert.Equal(ServiceLifetime.Singleton, registrations[0].Lifetime);
+            Assert.Equal(ServiceLifetime.Scoped, registrations[0].Lifetime);
+        }
+
+        [Fact]
+        private void TokenHelperIsRegistratedAsScoped()
+        {
+            var services = new ServiceCollection();
+            services.AddSingleServiceAgent<InterfaceImplementingAgent>(settings => { },
+                assembly: typeof(InterfaceImplementingAgent).GetTypeInfo().Assembly);
+
+            var registrations = services.Where(sd => sd.ServiceType == typeof(ITokenHelper) &&
+                                                     sd.ImplementationType == typeof(TokenHelper))
+                                        .ToArray();
+
+            Assert.Equal(1, registrations.Count());
+            Assert.Equal(ServiceLifetime.Scoped, registrations[0].Lifetime);
         }
     }
 }

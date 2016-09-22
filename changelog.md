@@ -34,3 +34,7 @@
 - Agents registred as Singleton instead of Scoped
 - Added Basic authentication
 - Refactored OAuthClientCredentials 
+
+## 3.1.1
+
+- Revert Agents registrations to Scoped
