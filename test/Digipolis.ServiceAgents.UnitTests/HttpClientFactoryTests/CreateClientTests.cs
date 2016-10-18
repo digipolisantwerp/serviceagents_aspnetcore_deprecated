@@ -134,7 +134,7 @@ namespace Digipolis.ServiceAgents.UnitTests.HttpClientFactoryTests
             var settings = new ServiceSettings { AuthScheme = AuthScheme.Basic, BasicAuthUserName = "Aladdin", BasicAuthPassword = "OpenSesame", Scheme = HttpSchema.Http, Host = "test.be", Path = "api" };
             var clientFactory = new HttpClientFactory(CreateServiceProvider(settings));
 
-            Assert.Throws<BaseException>(() => clientFactory.CreateClient(serviceAgentSettings, settings));
+            Assert.Throws<ServiceAgentException>(() => clientFactory.CreateClient(serviceAgentSettings, settings));
         }
 
         [Fact]
