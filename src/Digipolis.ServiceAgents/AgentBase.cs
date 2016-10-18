@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Text;
@@ -24,7 +25,7 @@ namespace Digipolis.ServiceAgents
         protected HttpClient _client;
         private IServiceProvider _serviceProvider;
 
-        public AgentBase(IServiceProvider serviceProvider, IOptions<ServiceAgentSettings> options)
+        protected AgentBase(IServiceProvider serviceProvider, IOptions<ServiceAgentSettings> options)
         {
             if (options.Value == null) throw new ArgumentNullException(nameof(ServiceAgentSettings), $"{nameof(ServiceAgentSettings)} cannot be null.");
 
@@ -49,7 +50,7 @@ namespace Digipolis.ServiceAgents
                 return serviceAgentSettings.Services.FirstOrDefault(s => this.GetType().Name.Contains(s.Key)).Value;
             }
 
-            throw new BaseException($"Settings not found for service agent {this.GetType().Name}");
+            throw new Exception($"Settings not found for service agent {this.GetType().Name}");
         }
 
         protected async Task<T> ParseResult<T>(HttpResponseMessage response)
@@ -66,37 +67,37 @@ namespace Digipolis.ServiceAgents
             try
             {
                 // if there is a response
-                if(errorJson.Length > 0)
+                if (errorJson.Length > 0)
                 {
                     // Try to get Error object from JSON
                     errorResponse = JsonConvert.DeserializeObject<Digipolis.Errors.Error>(errorJson, _jsonSerializerSettings);
-                    
-                    if (errorResponse == null || errorResponse?.Messages == null || ! errorResponse.Messages.Any())
+
+                    if (errorResponse?.ExtraParameters?.Any() == false)
                     {
                         // If the json couldn't be parsed -> create new error object with custom json
-                        errorResponse = new Errors.Error("id", new Errors.ErrorMessage("json", errorJson));
+                        errorResponse = new Errors.Error(new Dictionary<string, object> { { "json", errorJson } });
                     }
                 }
+
+                var extraParameters = errorResponse?.ExtraParameters?.ToDictionary(x => x.Key, x => new [] { x.Value?.ToString() }.AsEnumerable());
 
                 // Throw proper exception based on HTTP status
                 switch (response.StatusCode)
                 {
-                    case HttpStatusCode.NotFound: throw new NotFoundException(errorResponse);
+                    case HttpStatusCode.NotFound: throw new NotFoundException(messages: extraParameters);
 
-                    case HttpStatusCode.BadRequest: throw new ValidationException(errorResponse);
+                    case HttpStatusCode.BadRequest: throw new ValidationException(messages: extraParameters);
 
-                    case HttpStatusCode.Unauthorized: throw new UnauthorizedException(errorResponse);
+                    case HttpStatusCode.Unauthorized: throw new UnauthorizedException(messages: extraParameters);
 
-                    default: throw new BaseException(errorResponse);
+                    default: throw new ServiceAgentException(messages: extraParameters);
                 }
             }
             catch (JsonException)
             {
                 // In case the JSON was badly formatted or couldn't be parsed?
-                throw new BaseException(errorJson);
+                throw new Exception(errorJson);
             }
-
-
         }
 
         protected async Task<T> GetAsync<T>(string requestUri)
