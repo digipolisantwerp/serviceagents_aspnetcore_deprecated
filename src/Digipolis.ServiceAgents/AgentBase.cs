@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using Digipolis.ServiceAgents.Settings;
 using Digipolis.Errors.Exceptions;
 using System.Linq;
+using Digipolis.Errors;
 
 namespace Digipolis.ServiceAgents
 {
@@ -27,7 +28,9 @@ namespace Digipolis.ServiceAgents
 
         protected AgentBase(IServiceProvider serviceProvider, IOptions<ServiceAgentSettings> options)
         {
-            if (options.Value == null) throw new ArgumentNullException(nameof(ServiceAgentSettings), $"{nameof(ServiceAgentSettings)} cannot be null.");
+            if (options.Value == null)
+                throw new ArgumentNullException(nameof(ServiceAgentSettings),
+                    $"{nameof(ServiceAgentSettings)} cannot be null.");
 
             _serviceProvider = serviceProvider;
 
@@ -40,17 +43,17 @@ namespace Digipolis.ServiceAgents
 
         private ServiceSettings GetServiceSettings(ServiceAgentSettings serviceAgentSettings)
         {
-            if (serviceAgentSettings.Services.Any(s => s.Key == this.GetType().Name))
+            if (serviceAgentSettings.Services.Any(s => s.Key == GetType().Name))
             {
-                return serviceAgentSettings.Services[this.GetType().Name];
+                return serviceAgentSettings.Services[GetType().Name];
             }
 
-            if (serviceAgentSettings.Services.Any(s => this.GetType().Name.Contains(s.Key)))
+            if (serviceAgentSettings.Services.Any(s => GetType().Name.Contains(s.Key)))
             {
-                return serviceAgentSettings.Services.FirstOrDefault(s => this.GetType().Name.Contains(s.Key)).Value;
+                return serviceAgentSettings.Services.FirstOrDefault(s => GetType().Name.Contains(s.Key)).Value;
             }
 
-            throw new Exception($"Settings not found for service agent {this.GetType().Name}");
+            throw new Exception($"Settings not found for service agent {GetType().Name}");
         }
 
         protected async Task<T> ParseResult<T>(HttpResponseMessage response)
@@ -62,7 +65,7 @@ namespace Digipolis.ServiceAgents
         protected async Task ParseJsonError(HttpResponseMessage response)
         {
             var errorJson = await response.Content.ReadAsStringAsync();
-            var errorResponse = new Errors.Error();
+            Error errorResponse = null;
 
             try
             {
@@ -70,33 +73,35 @@ namespace Digipolis.ServiceAgents
                 if (errorJson.Length > 0)
                 {
                     // Try to get Error object from JSON
-                    errorResponse = JsonConvert.DeserializeObject<Digipolis.Errors.Error>(errorJson, _jsonSerializerSettings);
-
+                    errorResponse = JsonConvert.DeserializeObject<Error>(errorJson, _jsonSerializerSettings);
                     if (errorResponse?.ExtraParameters?.Any() == false)
                     {
                         // If the json couldn't be parsed -> create new error object with custom json
-                        errorResponse = new Errors.Error(new Dictionary<string, object> { { "json", errorJson } });
+                        errorResponse.ExtraParameters?.Add("json", errorJson);
                     }
                 }
-
-                var extraParameters = errorResponse?.ExtraParameters?.ToDictionary(x => x.Key, x => new [] { x.Value?.ToString() }.AsEnumerable());
-
-                // Throw proper exception based on HTTP status
-                switch (response.StatusCode)
-                {
-                    case HttpStatusCode.NotFound: throw new NotFoundException(messages: extraParameters);
-
-                    case HttpStatusCode.BadRequest: throw new ValidationException(messages: extraParameters);
-
-                    case HttpStatusCode.Unauthorized: throw new UnauthorizedException(messages: extraParameters);
-
-                    default: throw new ServiceAgentException(messages: extraParameters);
-                }
             }
-            catch (JsonException)
+            catch (Exception)
             {
-                // In case the JSON was badly formatted or couldn't be parsed?
-                throw new Exception(errorJson);
+                errorResponse = new Error
+                {
+                    Title = "Json parse error exception.",
+                    Status = (int) response.StatusCode
+                };
+                errorResponse.ExtraParameters?.Add("json", errorJson);
+            }
+
+            // Throw proper exception based on HTTP status
+            var extraParameters = errorResponse?.ExtraParameters?.ToDictionary(x => x.Key, x => new[] { x.Value?.ToString() }.AsEnumerable());
+            switch (response.StatusCode)
+            {
+                case HttpStatusCode.NotFound: throw new NotFoundException(messages: extraParameters);
+
+                case HttpStatusCode.BadRequest: throw new ValidationException(messages: extraParameters);
+
+                case HttpStatusCode.Unauthorized: throw new UnauthorizedException(messages: extraParameters);
+
+                default: throw new ServiceAgentException(messages: extraParameters);
             }
         }
 
