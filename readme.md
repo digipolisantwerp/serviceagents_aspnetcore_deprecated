@@ -29,7 +29,7 @@ To add the toolbox to a project, you add the package to the project.json :
 
 ``` json
     "dependencies": {
-        "Digipolis.ServiceAgents":  "3.2.0"
+        "Digipolis.ServiceAgents":  "3.2.1"
     }
 ```
 
