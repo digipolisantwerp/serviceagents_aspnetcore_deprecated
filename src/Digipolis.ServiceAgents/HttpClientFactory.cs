@@ -1,11 +1,10 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Digipolis.ServiceAgents.OAuth;
+using Digipolis.ServiceAgents.Settings;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using Digipolis.ServiceAgents.Settings;
-using Digipolis.ServiceAgents.OAuth;
 using System.Text;
-using Digipolis.Errors.Exceptions;
 
 namespace Digipolis.ServiceAgents
 {
@@ -38,14 +37,19 @@ namespace Digipolis.ServiceAgents
                 case AuthScheme.Bearer:
                     SetBearerAuthHeader(client);
                     break;
-                case AuthScheme.ApiKey:
-                    SetApiKeyAuthHeader(client, serviceAgentSettings, settings);
-                    break;
                 case AuthScheme.Basic:
                     SetBasicAuthHeader(client, settings);
                     break;
                 default:
                     break;
+            }
+
+            if (settings.Headers != null)
+            {
+                foreach (var header in settings?.Headers)
+                {
+                    client.DefaultRequestHeaders.Add(header.Key, header.Value);
+                }
             }
 
             if (AfterClientCreated != null)
@@ -61,18 +65,6 @@ namespace Digipolis.ServiceAgents
 
             var headerValue = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{settings.BasicAuthUserName}:{settings.BasicAuthPassword}"));
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(AuthScheme.Basic, headerValue);
-        }
-
-        private void SetApiKeyAuthHeader(HttpClient client, ServiceAgentSettings serviceAgentSettings, ServiceSettings settings)
-        {
-            if (settings.UseGlobalApiKey)
-            {
-                client.DefaultRequestHeaders.Add(settings.ApiKeyHeaderName, serviceAgentSettings.GlobalApiKey);
-            }
-            else
-            {
-                client.DefaultRequestHeaders.Add(settings.ApiKeyHeaderName, settings.ApiKey);
-            }
         }
 
         private void SetBearerAuthHeader(HttpClient client)

@@ -1,14 +1,11 @@
 ﻿{
   "Global": {
-    "GlobalApiKey": "globalapikey"
   },
   "TestAgent": {
     "AuthScheme": "None",
     "Host": "test.be",
     "Path": "api",
     "Port": "5001",
-    "Scheme": "http",
-    "UseGlobalApiKey": false,
-    "ApiKey": "localapikey"
+    "Scheme": "http"
   }
 }

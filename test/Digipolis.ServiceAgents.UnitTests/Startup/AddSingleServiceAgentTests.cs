@@ -56,7 +56,7 @@ namespace Digipolis.ServiceAgents.UnitTests.Startup
         }
 
         [Fact]
-        private void ServiceAgentSettingsIsRegistratedAsScoped()
+        private void ServiceAgentSettingsIsRegistratedAsSingleton()
         {
             var services = new ServiceCollection();
             services.AddSingleServiceAgent<TestAgent>(settings =>
@@ -66,8 +66,6 @@ namespace Digipolis.ServiceAgents.UnitTests.Startup
                 settings.Path = "api";
                 settings.Port = "5000";
                 settings.Scheme = HttpSchema.Http;
-                settings.UseGlobalApiKey = true;
-                settings.ApiKey = "localapikey";
             });
 
             var registrations = services.Where(sd => sd.ServiceType == typeof(IConfigureOptions<ServiceAgentSettings>))
@@ -92,8 +90,6 @@ namespace Digipolis.ServiceAgents.UnitTests.Startup
             Assert.Equal("api", serviceSettings.Path);
             Assert.Equal("5000", serviceSettings.Port);
             Assert.Equal(HttpSchema.Http, serviceSettings.Scheme);
-            Assert.False(serviceSettings.UseGlobalApiKey);
-            Assert.Equal("localapikey", serviceSettings.ApiKey);
         }
 
         [Fact]

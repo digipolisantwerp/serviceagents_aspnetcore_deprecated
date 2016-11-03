@@ -1,21 +1,22 @@
 ﻿{
   "Global": {
-    "GlobalApiKey": "globalapikey"
   },
   "DemoAgent": {
     "Scheme": "http",
-    "UseGlobalApiKey": false,
     "Host": "localhost",
     "Port": "50267",
     "Path": "api/",
-    "ApiKey": "myapikey"
+    "Headers": {
+      "apikey": "myapikey"
+    }
   },
   "GenericAgent": {
     "Scheme": "http",
-    "UseGlobalApiKey": false,
     "Host": "localhost",
     "Port": "50267",
     "Path": "api/",
-    "ApiKey": "myapikey"
+    "Headers": {
+      "apikey": "myapikey"
+    }
   }
 }

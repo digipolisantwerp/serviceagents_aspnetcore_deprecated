@@ -32,7 +32,6 @@ namespace Digipolis.ServiceAgents
 
             var serviceSettings = new ServiceSettings();
             setupAction.Invoke(serviceSettings);
-            serviceSettings.UseGlobalApiKey = false;
 
             var type = typeof(T);
 
@@ -86,7 +85,6 @@ namespace Digipolis.ServiceAgents
 
             services.Configure<ServiceAgentSettings>(s =>
             {
-                s.GlobalApiKey = serviceAgentSettings.GlobalApiKey;
                 foreach (var item in serviceAgentSettings.Services)
                 {
                     s.Services.Add(item.Key, item.Value);

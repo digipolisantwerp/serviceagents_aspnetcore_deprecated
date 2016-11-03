@@ -82,8 +82,7 @@ namespace Digipolis.ServiceAgents.UnitTests.Startup
                 json.FileName = Path.Combine(Directory.GetCurrentDirectory(), "_TestData/serviceagentconfig_1.json");
             }, settings =>
             {
-                settings.GlobalApiKey = "globalkeyfromcode";
-                settings.Services["TestAgent"].ApiKey = "localapikeyfromcode";
+                settings.Services["TestAgent"].Port = "15000";
             }, null,
             assembly: typeof(AddServiceAgentsTests).GetTypeInfo().Assembly);
 
@@ -99,17 +98,14 @@ namespace Digipolis.ServiceAgents.UnitTests.Startup
             serviceAgentSettings = new ServiceAgentSettings();
             configOptions.Configure(serviceAgentSettings);
 
-            Assert.Equal(1, serviceAgentSettings.Services.Count);
-            Assert.Equal("globalkeyfromcode", serviceAgentSettings.GlobalApiKey);
-
             var serviceSettings = serviceAgentSettings.Services["TestAgent"];
             Assert.NotNull(serviceSettings);
 
-            Assert.Equal("localapikeyfromcode", serviceSettings.ApiKey);
+            Assert.Equal("15000", serviceSettings.Port);
         }
 
         [Fact]
-        private void ServiceAgentSettingsIsRegistratedAsScoped()
+        private void ServiceAgentSettingsIsRegistratedAsSingleton()
         {
             var services = new ServiceCollection();
             services.AddServiceAgents(settings =>
@@ -123,26 +119,6 @@ namespace Digipolis.ServiceAgents.UnitTests.Startup
 
             Assert.Equal(1, registrations.Count());
             Assert.Equal(ServiceLifetime.Singleton, registrations[0].Lifetime);
-
-            var configOptions = registrations[0].ImplementationInstance as IConfigureOptions<ServiceAgentSettings>;
-            Assert.NotNull(configOptions);
-
-            var serviceAgentSettings = new ServiceAgentSettings();
-            configOptions.Configure(serviceAgentSettings);
-
-            Assert.Equal(1, serviceAgentSettings.Services.Count);
-            Assert.Equal("globalapikey", serviceAgentSettings.GlobalApiKey);
-
-            var serviceSettings = serviceAgentSettings.Services["TestAgent"];
-            Assert.NotNull(serviceSettings);
-
-            Assert.Equal(AuthScheme.None, serviceSettings.AuthScheme);
-            Assert.Equal("test.be", serviceSettings.Host);
-            Assert.Equal("api", serviceSettings.Path);
-            Assert.Equal("5001", serviceSettings.Port);
-            Assert.Equal(HttpSchema.Http, serviceSettings.Scheme);
-            Assert.False(serviceSettings.UseGlobalApiKey);
-            Assert.Equal("localapikey", serviceSettings.ApiKey);
         }
 
         [Fact]

@@ -38,3 +38,8 @@
 ## 3.1.1
 
 - Revert Agents registrations to Scoped
+
+## 4.0.0
+
+- Removed ApiKey authentication scheme
+- Added Headers support

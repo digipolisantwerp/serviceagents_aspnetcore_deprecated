@@ -20,7 +20,7 @@ namespace Digipolis.ServiceAgents.UnitTests.HttpClientFactoryTests
         public void CreateDefaultClient()
         {
             var serviceAgentSettings = new ServiceAgentSettings();
-            var settings = new ServiceSettings { Scheme = HttpSchema.Http, Host = "test.be", Path = "api"};
+            var settings = new ServiceSettings { Scheme = HttpSchema.Http, Host = "test.be", Path = "api" };
             var clientFactory = new HttpClientFactory(CreateServiceProvider(settings));
 
             var client = clientFactory.CreateClient(serviceAgentSettings, settings);
@@ -35,7 +35,7 @@ namespace Digipolis.ServiceAgents.UnitTests.HttpClientFactoryTests
         public void CreateClientWithBearerAuth()
         {
             var serviceAgentSettings = new ServiceAgentSettings();
-            var settings = new ServiceSettings {  AuthScheme = AuthScheme.Bearer, Scheme = HttpSchema.Http, Host = "test.be", Path = "api" };
+            var settings = new ServiceSettings { AuthScheme = AuthScheme.Bearer, Scheme = HttpSchema.Http, Host = "test.be", Path = "api" };
             var clientFactory = new HttpClientFactory(CreateServiceProvider(settings));
 
             var client = clientFactory.CreateClient(serviceAgentSettings, settings);
@@ -48,61 +48,9 @@ namespace Digipolis.ServiceAgents.UnitTests.HttpClientFactoryTests
         }
 
         [Fact]
-        public void CreateClientWithLocalApiKeyByDefault()
-        {
-            var serviceAgentSettings = new ServiceAgentSettings();
-            var settings = new ServiceSettings { AuthScheme = AuthScheme.ApiKey, ApiKey = "localapikey", Scheme = HttpSchema.Http, Host = "test.be", Path = "api" };
-            var clientFactory = new HttpClientFactory(CreateServiceProvider(settings));
-
-            var client = clientFactory.CreateClient(serviceAgentSettings, settings);
-
-            Assert.NotNull(client);
-            Assert.Equal("localapikey", client.DefaultRequestHeaders.First(h => h.Key == AuthScheme.ApiKey).Value.First());
-        }
-
-        [Fact]
-        public void CreateClientWithCustomApiKeyHeader()
-        {
-            var serviceAgentSettings = new ServiceAgentSettings();
-            var settings = new ServiceSettings { AuthScheme = AuthScheme.ApiKey, ApiKeyHeaderName = "api-key", ApiKey = "localapikey", Scheme = HttpSchema.Http, Host = "test.be", Path = "api" };
-            var clientFactory = new HttpClientFactory(CreateServiceProvider(settings));
-
-            var client = clientFactory.CreateClient(serviceAgentSettings, settings);
-
-            Assert.NotNull(client);
-            Assert.Equal("localapikey", client.DefaultRequestHeaders.First(h => h.Key == "api-key").Value.First());
-        }
-
-        [Fact]
-        public void CreateClientWithGlobalApiKey()
-        {
-            var serviceAgentSettings = new ServiceAgentSettings { GlobalApiKey = "globalapikey" };
-            var settings = new ServiceSettings { AuthScheme = AuthScheme.ApiKey, ApiKey = "localapikey", UseGlobalApiKey = true, Scheme = HttpSchema.Http, Host = "test.be", Path = "api" };
-            var clientFactory = new HttpClientFactory(CreateServiceProvider(settings));
-
-            var client = clientFactory.CreateClient(serviceAgentSettings, settings);
-
-            Assert.NotNull(client);
-            Assert.Equal("globalapikey", client.DefaultRequestHeaders.First(h => h.Key == AuthScheme.ApiKey).Value.First());
-        }
-
-        [Fact]
-        public void CreateClientWithGlobalApiKeyWithCustomHeader()
-        {
-            var serviceAgentSettings = new ServiceAgentSettings { GlobalApiKey = "globalapikey" };
-            var settings = new ServiceSettings { AuthScheme = AuthScheme.ApiKey, ApiKeyHeaderName = "api-key", ApiKey = "localapikey", UseGlobalApiKey = true, Scheme = HttpSchema.Http, Host = "test.be", Path = "api" };
-            var clientFactory = new HttpClientFactory(CreateServiceProvider(settings));
-
-            var client = clientFactory.CreateClient(serviceAgentSettings, settings);
-
-            Assert.NotNull(client);
-            Assert.Equal("globalapikey", client.DefaultRequestHeaders.First(h => h.Key == "api-key").Value.First());
-        }
-
-        [Fact]
         public void CreateClientWithBasicAuthentication()
         {
-            var serviceAgentSettings = new ServiceAgentSettings {  };
+            var serviceAgentSettings = new ServiceAgentSettings { };
             var settings = new ServiceSettings { AuthScheme = AuthScheme.Basic, BasicAuthUserName = "Aladdin", BasicAuthPassword = "OpenSesame", Host = "test.be", Path = "api" };
             var clientFactory = new HttpClientFactory(CreateServiceProvider(settings));
 
@@ -144,11 +92,30 @@ namespace Digipolis.ServiceAgents.UnitTests.HttpClientFactoryTests
             var settings = new ServiceSettings { AuthScheme = AuthScheme.Bearer, Scheme = HttpSchema.Http, Host = "test.be", Path = "api" };
             var clientFactory = new HttpClientFactory(CreateServiceProvider(settings));
             HttpClient passedClient = null;
-            clientFactory.AfterClientCreated += (sp,c) => passedClient = c;
+            clientFactory.AfterClientCreated += (sp, c) => passedClient = c;
 
             clientFactory.CreateClient(serviceAgentSettings, settings);
 
             Assert.NotNull(passedClient);
+        }
+
+        [Fact]
+        public void CreateClientWithHeaders()
+        {
+            var serviceAgentSettings = new ServiceAgentSettings();
+            var headers = new Dictionary<string, string>()
+            {
+                { "api-key", "localapikey" },
+                 { "X-Custom-Header", "customvalue" },
+            };
+            var settings = new ServiceSettings { Headers = headers, Scheme = HttpSchema.Http, Host = "test.be", Path = "api" };
+            var clientFactory = new HttpClientFactory(CreateServiceProvider(settings));
+
+            var client = clientFactory.CreateClient(serviceAgentSettings, settings);
+
+            Assert.NotNull(client);
+            Assert.Equal("localapikey", client.DefaultRequestHeaders.First(h => h.Key == "api-key").Value.First());
+            Assert.Equal("customvalue", client.DefaultRequestHeaders.First(h => h.Key == "X-Custom-Header").Value.First());
         }
 
         private IServiceProvider CreateServiceProvider(ServiceSettings settings)
@@ -165,7 +132,7 @@ namespace Digipolis.ServiceAgents.UnitTests.HttpClientFactoryTests
 
             var mockTokenHelper = new Mock<ITokenHelper>();
             mockTokenHelper.Setup(h => h.ReadOrRetrieveToken(settings))
-                .ReturnsAsync(new TokenReply {  access_token = "AccessToken", expires_in = 7200 });
+                .ReturnsAsync(new TokenReply { access_token = "AccessToken", expires_in = 7200 });
 
             serviceProviderMock.Setup(p => p.GetService(typeof(ITokenHelper))).Returns(mockTokenHelper.Object);
 

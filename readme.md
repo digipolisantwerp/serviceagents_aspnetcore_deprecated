@@ -2,13 +2,13 @@
 
 Toolbox for ServiceAgents in ASP.NET Core.
 
-This readme is applicable for toolbox version 3.2.x
+This readme is applicable for toolbox version 4.0.x
 
 ## Table of Contents
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 - [Installation](#installation)
 - [Usage](#usage)
@@ -17,7 +17,6 @@ This readme is applicable for toolbox version 3.2.x
 - [Authentication schemes](#authentication-schemes)
   - [None](#none)
   - [Bearer](#bearer)
-  - [ApiKey](#apikey)
   - [OAuthClientCredentials](#oauthclientcredentials)
   - [Basic](#basic)
 
@@ -29,7 +28,7 @@ To add the toolbox to a project, you add the package to the project.json :
 
 ``` json
     "dependencies": {
-        "Digipolis.ServiceAgents":  "3.2.1"
+        "Digipolis.ServiceAgents":  "4.0.0"
     }
 ```
 
@@ -49,6 +48,11 @@ It will be registered as a scoped instance. If the service agent implements an i
         settings.Scheme = "http";
         settings.Host = "test.com";
         settings.Path = "api";
+        settings.Headers = new Dictionary<string, string>()
+        {
+            { "apikey", "apikeyvalue" },
+            { "X-Custom-Header", "customheadervalue" },
+        };
     });
 ```
 The parameter of type **Action&lt;ServiceSettings>** allows you to set the settings for the service agent.
@@ -79,7 +83,6 @@ The structure of the json file is:
 ``` javascript
 {
     "Global": {
-    "GlobalApiKey": "globalapikey"
     },
     "TestAgent": {
       "AuthScheme": "None",
@@ -87,14 +90,16 @@ The structure of the json file is:
       "Path": "api",
       "Port": "5001",
       "Scheme": "http",
-      "UseGlobalApiKey": false,
-      "ApiKey": "localapikey"
+      "Headers": {
+          "apikey": "123456789",
+          "X-Custom-Header": "customheadervalue"
+      }
     }
 }
 ```
 
 A first object (section) section named **Global** can optionally be defined.
-In this section a **GlobalApiKey** option can be set. See the [Authentication schemes](#authentication-schemes) section for more details.
+THis section is intended for settings that are common to all the service agents.
 
 Each other object (section) in the json represents a service agent type. **The object name has to match the service agent type name**.
 See the [Creating a service agent](#creating-a-service-agent) section for more info on creating the service agents.
@@ -103,20 +108,21 @@ If you have a generic service agent, the section name must match the class name 
 
 Following options can be set per section (service agent):
 
-Option              | Description                                                | Default
------------------- | ----------------------------------------------------------- | --------------------------------------
-AuthScheme              | The authentication scheme to be used by the service agent. | "None"
-Host | The host part of the url for the service agent. | ""
-Path | The path part of the url for the service agent. | "api"
-Port | The port for the service agent. | ""
-Scheme | The scheme of the url for the service agent. | "https"
-UseGlobalApiKey | A Boolean to indicate to use the globally defined api key for authentication. | false
-ApiKey | The locally defined api key for authentication. | ""
-ApiKeyHeaderName | The string used as header name for the api key. | "ApiKey"
-BasicAuthUserName | The user name used for basic authentication scheme. | ""
-BasicAuthPassword | The password used for basic authentication scheme. | ""
+Option              | Description                                                | Default | Mandatory
+------------------ | ----------------------------------------------------------- | -------------------------------------- | ------
+AuthScheme              | The authentication scheme to be used by the service agent. | "None" |
+Host | The host part of the url for the service agent. | "" | X
+Path | The path part of the url for the service agent. | "api" |
+Port | The port for the service agent. | 443 fo https, 80 for http |
+Scheme | The scheme of the url for the service agent. | "https" |
+Headers | A key-value collection representing the headers to be added to the requests. | null |
+BasicAuthUserName | The user name used for basic authentication scheme. | "" | With BasicAuth scheme
+BasicAuthPassword | The password used for basic authentication scheme. | "" | With BasicAuth scheme
+OAuthPathAddition | Oauth path addition for OAuth authentication scheme. | "" | With Oauth scheme
+OAuthClientId | Oauth client id for OAuth authentication scheme. | "" | With Oauth scheme
+OAuthClientSecret | Oauth client secret for OAuth authentication scheme. | "" | With Oauth scheme
+OAuthScope | Oauth scopt for OAuth authentication scheme. | "" | With Oauth scheme
 
-The settings without default are mandatory!
 All the url parts form the basic url for the service agent: {scheme}://{host}:{port}/{path}/
 
 An overload for both **AddSingleServiceAgent&lt;T>** and **AddServiceAgents** is available where you can pass an action of type **Action&lt;IServiceProvider, HttpClient>** that gets invoked when the underlying HttpClient gets created. That way you can customize the created client.
@@ -249,9 +255,11 @@ Possible schemes:
 
 * None
 * Bearer
-* ApiKey
 * OAuthClientCredentials
 * Basic
+
+**Note!** Since version 4.0.0 of the toolbox the "ApiKey" scheme has been removed. If you need to add api key to the request, use the "Headers" property of the **ServiceSettings**.
+This allows you to combine an authentication scheme with an api key header.
 
 Check the [Creating a service agent](#creating-a-service-agent) section to see how to define the scheme for your service agents.
 
@@ -268,84 +276,7 @@ where xxx is the token.
 To use the Bearer scheme set the **AuthScheme** property of the **ServiceSettings** object to the value "Bearer".
 The token is extracted from the **UserToken** property of the **AuthContext** object provided by the dependency injection infrastructure.
 
-### ApiKey
 
-With the ApiKey scheme the authentication is done through use of the apikey header:
-
-    ApiKey yyy
-where yyy is the api key.  
-It is possible to override the default header name by setting an other value in the **ApiKeyHeaderName** property of the service settings.
-
-To use the ApiKey scheme set the **AuthScheme** property of the **ServiceSettings** object to the value "ApiKey".
-
-If multiple or all agents use the same api key to authenticate you can set the key in the **GlobalApiKey** field of the **Global** section in the json config file.
-This in combination with the **UseGlobalApiKey** in the service agent section.
-
-In the example below two agents that use the same key are configured.
-
-``` javascript
-{
-  "Global": {
-    "GlobalApiKey": "apikeyformultipleagents"
-  },
-  "FirstAgent": {
-    "Host": "test.be",
-    "Path": "api",
-    "Port": "5001",
-    "Scheme": "http",
-    "AuthScheme": "ApiKey",
-    "UseGlobalApiKey": true
-  },
-  "SecondAgent": {
-    "Host": "test.be",
-    "Path": "api",
-    "Port": "5001",
-    "Scheme": "http",
-    "AuthScheme": "ApiKey",
-    "UseGlobalApiKey": true
-  }
-}
-```
-
-If you have different keys for your service agents, set the **UseGlobalApiKey** to 'false' and set the key in the **ApiKey** field of the service agent section.
-
-In the example below two agents that use different keys are configured.
-
-``` javascript
-{
-  "FirstAgent": {
-    "Host": "test.be",
-    "Path": "api",
-    "Port": "5001",
-    "Scheme": "http",
-    "AuthScheme": "ApiKey",
-    "UseGlobalApiKey": false,
-    "ApiKey": "apikeyforfirstagent"
-  },
-  "SecondAgent": {
-    "Host": "test.be",
-    "Path": "api",
-    "Port": "5001",
-    "Scheme": "http",
-    "AuthScheme": "ApiKey",
-    "ApiKeyHeaderName": "api-key",
-    "UseGlobalApiKey": false,
-    "ApiKey": "apikeyforsecondagent"
-  }
-}
-```
-
-If you don't want to enter your api keys in the json configuration file you can use an overload of the **AddServiceAgents** method that accepts a parameter of type **Action&lt;ServiceAgentSettings&gt;**
-to alter the values of the service settings after they have been loaded from the json file.
-``` csharp
-    services.AddServiceAgents(json =>
-    {
-        json.FileName = Path.Combine(ConfigPath, "serviceagents.json");
-    }, serviceAgentSettings =>
-    {
-        serviceAgentSettings.GlobalApiKey = "globalkeyfromcode";
-    }, null);
- ```
 ### OAuthClientCredentials
 
 This will use the OAuth2 client credentials flow to obtain a (bearer)token from a token endpoint.
@@ -376,7 +307,6 @@ The **user name** and **password** can be entered in the settings.
 ``` javascript
 {
     "Global": {
-    "GlobalApiKey": "globalapikey"
     },
     "TestAgent": {
       "AuthScheme": "Basic",
