@@ -28,7 +28,7 @@ To add the toolbox to a project, you add the package to the project.json :
 
 ``` json
     "dependencies": {
-        "Digipolis.ServiceAgents":  "4.0.0"
+        "Digipolis.ServiceAgents":  "4.0.1"
     }
 ```
 
@@ -300,7 +300,7 @@ With the Basic scheme the authentication is done through use of a Basic Authenti
     Authorization Basic yyy
 where yyy is the base 64 encoded username and password.  
 
-Basic authentication can only be used with an "https" scheme!
+Basic authentication can only be used with an "https" scheme except for the **Development** environment!
 
 To use the Basic scheme set the **AuthScheme** property of the **ServiceSettings** object to the value "Basic".
 The **user name** and **password** can be entered in the settings.

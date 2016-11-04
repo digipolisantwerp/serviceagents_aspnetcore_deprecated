@@ -11,6 +11,7 @@ using Xunit;
 using Digipolis.Errors.Exceptions;
 using Digipolis.ServiceAgents.OAuth;
 using Digipolis.ServiceAgents.Models;
+using Microsoft.AspNetCore.Hosting;
 
 namespace Digipolis.ServiceAgents.UnitTests.HttpClientFactoryTests
 {
@@ -86,6 +87,16 @@ namespace Digipolis.ServiceAgents.UnitTests.HttpClientFactoryTests
         }
 
         [Fact]
+        public void DoesntThrowExceptionWhenNonHttpsSchemeUsedWithBasicAuthenticationInDevelopmentEnvironment()
+        {
+            var serviceAgentSettings = new ServiceAgentSettings { };
+            var settings = new ServiceSettings { AuthScheme = AuthScheme.Basic, BasicAuthUserName = "Aladdin", BasicAuthPassword = "OpenSesame", Scheme = HttpSchema.Http, Host = "test.be", Path = "api" };
+            var clientFactory = new HttpClientFactory(CreateServiceProvider(settings, isDevelopmentEnvironment: true));
+
+            clientFactory.CreateClient(serviceAgentSettings, settings);
+        }
+
+        [Fact]
         public void AfterClientCreatedGetsRaised()
         {
             var serviceAgentSettings = new ServiceAgentSettings();
@@ -118,7 +129,7 @@ namespace Digipolis.ServiceAgents.UnitTests.HttpClientFactoryTests
             Assert.Equal("customvalue", client.DefaultRequestHeaders.First(h => h.Key == "X-Custom-Header").Value.First());
         }
 
-        private IServiceProvider CreateServiceProvider(ServiceSettings settings)
+        private IServiceProvider CreateServiceProvider(ServiceSettings settings, bool isDevelopmentEnvironment = false)
         {
             var serviceProviderMock = new Mock<IServiceProvider>();
 
@@ -135,6 +146,12 @@ namespace Digipolis.ServiceAgents.UnitTests.HttpClientFactoryTests
                 .ReturnsAsync(new TokenReply { access_token = "AccessToken", expires_in = 7200 });
 
             serviceProviderMock.Setup(p => p.GetService(typeof(ITokenHelper))).Returns(mockTokenHelper.Object);
+
+            var mockHostingEnvironment = new Mock<IHostingEnvironment>();
+            mockHostingEnvironment.Setup(h => h.EnvironmentName)
+                .Returns(isDevelopmentEnvironment ? "Development" : "");
+
+            serviceProviderMock.Setup(p => p.GetService(typeof(IHostingEnvironment))).Returns(mockHostingEnvironment.Object);
 
             return serviceProviderMock.Object;
         }

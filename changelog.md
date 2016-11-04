@@ -43,3 +43,7 @@
 
 - Removed ApiKey authentication scheme
 - Added Headers support
+
+## 4.0.1
+
+- Allow use of basic Authentication with http scheme in development environment 

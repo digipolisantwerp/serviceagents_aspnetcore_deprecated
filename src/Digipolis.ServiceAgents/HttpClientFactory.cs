@@ -1,5 +1,6 @@
 ﻿using Digipolis.ServiceAgents.OAuth;
 using Digipolis.ServiceAgents.Settings;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Net.Http;
@@ -60,7 +61,7 @@ namespace Digipolis.ServiceAgents
 
         private void SetBasicAuthHeader(HttpClient client, ServiceSettings settings)
         {
-            if (settings.Scheme != HttpSchema.Https)
+            if (IsDevelopmentEnvironment() == false && settings.Scheme != HttpSchema.Https)
                 throw new ServiceAgentException($"Failed to set Basic Authentication header on service agent for host: '{settings.Host}', the actual scheme is '{settings.Scheme}' and should be 'https'!");
 
             var headerValue = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{settings.BasicAuthUserName}:{settings.BasicAuthPassword}"));
@@ -81,6 +82,12 @@ namespace Digipolis.ServiceAgents
             if (tokenHelper == null) throw new NullReferenceException($"{nameof(ITokenHelper)} cannot be null.");
             var token = tokenHelper.ReadOrRetrieveToken(settings).Result.access_token;
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(AuthScheme.Bearer, token);
+        }
+
+        private bool IsDevelopmentEnvironment()
+        {
+            var hostingEnvironment = _serviceProvider.GetRequiredService<IHostingEnvironment>();
+            return hostingEnvironment.IsDevelopment();
         }
     }
 }
