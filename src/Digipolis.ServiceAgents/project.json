@@ -1,5 +1,5 @@
 {
-  "version": "4.0.1",
+  "version": "4.0.2",
   "description": "Toolbox for ServiceAgents in ASP.NET Core.",
   "authors": [ "digipolis.be" ],
   "packOptions": {
@@ -27,7 +27,7 @@
     "Microsoft.Extensions.Configuration.EnvironmentVariables": "1.0.0",
     "Microsoft.Extensions.Configuration.Json": "1.0.0",
     "Digipolis.Common": "2.0.0",
-    "Digipolis.Errors": "3.0.0",
+    "Digipolis.Errors": "4.0.0",
     "Microsoft.Extensions.Configuration.Binder": "1.0.0",
     "Microsoft.Extensions.DependencyInjection": "1.0.0"
   },

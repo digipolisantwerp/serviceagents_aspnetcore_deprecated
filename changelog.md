@@ -1,33 +1,21 @@
 # ServiceAgents Toolbox
 
-## 1.0.0
+## 4.0.2
 
-- initial version
+- Updated Error toolbox version
 
-## 1.1.0
+## 4.0.1
 
-- 
+- Allow use of basic Authentication with http scheme in development environment 
 
-## 1.2.0
+## 4.0.0
 
-- Added ApiKey authentication feature
+- Removed ApiKey authentication scheme
+- Added Headers support
 
-## 1.2.1
+## 3.1.1
 
-- Bugfix in Url creation in ServiceSettings
-- Added GetStringAsync to Agentbase for string type responses
-
-## 1.2.2
-
-- Added customization of the api key header name
-
-## 3.0.0
-
-- Changed error handling to the standard Digipolis.Errors format
-
-## 3.0.1
-
-- Bugfix where empty request would throw a NullReferenceException
+- Revert Agents registrations to Scoped
 
 ## 3.1.0
 
@@ -35,15 +23,30 @@
 - Added Basic authentication
 - Refactored OAuthClientCredentials 
 
-## 3.1.1
+## 3.0.1
 
-- Revert Agents registrations to Scoped
+- Bugfix where empty request would throw a NullReferenceException
 
-## 4.0.0
 
-- Removed ApiKey authentication scheme
-- Added Headers support
+## 3.0.0
 
-## 4.0.1
+- Changed error handling to the standard Digipolis.Errors format
 
-- Allow use of basic Authentication with http scheme in development environment 
+## 1.2.2
+
+- Added customization of the api key header name
+
+## 1.2.1
+
+- Bugfix in Url creation in ServiceSettings
+- Added GetStringAsync to Agentbase for string type responses
+
+## 1.2.0
+
+- Added ApiKey authentication feature
+
+## 1.0.0
+
+- initial version
+
+

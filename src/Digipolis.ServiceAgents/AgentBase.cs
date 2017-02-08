@@ -133,8 +133,6 @@ namespace Digipolis.ServiceAgents
             return await ParseResult<TReponse>(response);
         }
 
-
-
         protected async Task<T> PutAsync<T>(string requestUri, T item)
         {
             HttpContent contentPost = new StringContent(JsonConvert.SerializeObject(item, _jsonSerializerSettings), Encoding.UTF8, "application/json");
