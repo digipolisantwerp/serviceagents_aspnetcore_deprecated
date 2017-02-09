@@ -1,19 +1,16 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Serialization;
 using System;
-using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using Digipolis.ServiceAgents.Settings;
 using Digipolis.Errors.Exceptions;
 using System.Linq;
 using Digipolis.Errors;
+using System.Collections.Generic;
 
 namespace Digipolis.ServiceAgents
 {
@@ -77,22 +74,22 @@ namespace Digipolis.ServiceAgents
                     if (errorResponse?.ExtraParameters?.Any() == false)
                     {
                         // If the json couldn't be parsed -> create new error object with custom json
-                        errorResponse.ExtraParameters?.Add("json", errorJson);
+                        errorResponse.ExtraParameters?.Add("json", new List<string> { errorJson });
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 errorResponse = new Error
                 {
                     Title = "Json parse error exception.",
-                    Status = (int) response.StatusCode
+                    Status = (int)response.StatusCode
                 };
-                errorResponse.ExtraParameters?.Add("json", errorJson);
+                errorResponse.ExtraParameters?.Add("json", new List<string> { errorJson });
             }
 
             // Throw proper exception based on HTTP status
-            var extraParameters = errorResponse?.ExtraParameters?.ToDictionary(x => x.Key, x => new[] { x.Value?.ToString() }.AsEnumerable());
+            var extraParameters = errorResponse?.ExtraParameters;
             switch (response.StatusCode)
             {
                 case HttpStatusCode.NotFound: throw new NotFoundException(messages: extraParameters);

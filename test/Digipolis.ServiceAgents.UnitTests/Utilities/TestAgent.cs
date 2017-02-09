@@ -1,9 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
-using System.Threading;
 using System.Threading.Tasks;
 using Digipolis.ServiceAgents.Settings;
 
@@ -61,6 +58,11 @@ namespace Digipolis.ServiceAgents.UnitTests.Utilities
         public Task DeleteAsync()
         {
             return base.DeleteAsync($"test/7");
+        }
+
+        public Task ParseJsonWithError(HttpResponseMessage message)
+        {
+            return base.ParseJsonError(message);
         }
     }
 }

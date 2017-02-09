@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Digipolis.ServiceAgents.Settings;
+﻿using Digipolis.ServiceAgents.Settings;
 using Xunit;
 
 namespace Digipolis.ServiceAgents.UnitTests.Settings

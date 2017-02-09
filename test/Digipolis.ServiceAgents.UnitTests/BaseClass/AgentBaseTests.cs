@@ -1,16 +1,12 @@
-﻿using Microsoft.Extensions.DependencyModel;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using Moq;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
-using System.Threading;
-using System.Threading.Tasks;
 using Digipolis.ServiceAgents.Settings;
 using Digipolis.ServiceAgents.UnitTests.Utilities;
 using Xunit;
+using System.Net.Http;
+using Digipolis.Errors.Exceptions;
 
 namespace Digipolis.ServiceAgents.UnitTests.BaseClass
 {
@@ -107,13 +103,148 @@ namespace Digipolis.ServiceAgents.UnitTests.BaseClass
         }
 
         [Fact]
+        public void JsonParserErrorWith1Param()
+        {
+            var settings = CreateServiceAgentSettings();
+            var serviceProvider = CreateServiceProvider(settings);
+            var agent = new TestAgent(serviceProvider, Options.Create(settings));
+            agent.HttpClient = CreateClient();
+            var message = new HttpResponseMessage();
+            message.Content = new StringContent(@"
+            {""identifier"": ""dbcd3004-3af0-4862-bad1-2c4013dec85f"",
+               ""title"": ""Client validation failed."",
+               ""status"": 400,
+               ""extraParameters"": {
+                                ""naam"": [""Naam moet uniek zijn"",""Test""],
+                                    }
+                        }");
+
+            var result = Assert.ThrowsAsync<ServiceAgentException>(async () => await agent.ParseJsonWithError(message)).Result;
+            Assert.True(result.Messages.Count() == 1);
+            var extraParam = result.Messages.FirstOrDefault();
+
+            Assert.NotNull(extraParam);
+            Assert.Equal("naam", extraParam.Key);
+            Assert.True(extraParam.Value.Count() == 2);
+            var errorMessage = extraParam.Value.FirstOrDefault();
+            Assert.NotNull(errorMessage);
+            Assert.Equal("Naam moet uniek zijn", errorMessage);
+            errorMessage = extraParam.Value.LastOrDefault();
+            Assert.NotNull(errorMessage);
+            Assert.Equal("Test", errorMessage);
+
+
+        }
+
+        [Fact]
+        public void JsonParserErrorWith2Param()
+        {
+            var settings = CreateServiceAgentSettings();
+            var serviceProvider = CreateServiceProvider(settings);
+            var agent = new TestAgent(serviceProvider, Options.Create(settings));
+            agent.HttpClient = CreateClient();
+            var message = new HttpResponseMessage();
+
+            message.Content = new StringContent(@"
+            {""identifier"": ""dbcd3004-3af0-4862-bad1-2c4013dec85f"",
+               ""title"": ""Client validation failed."",
+               ""status"": 400,
+               ""extraParameters"": {
+                                ""naam"": [""Naam moet uniek zijn"",""Test""],
+                                ""test"": [""Naam moet uniek zijn 2"",""Test2""]
+                                    }
+                        }");
+
+            var result = Assert.ThrowsAsync<ServiceAgentException>(async () => await agent.ParseJsonWithError(message)).Result;
+            Assert.True(result.Messages.Count() == 2);
+            var extraParam = result.Messages.FirstOrDefault();
+            Assert.NotNull(extraParam);
+            Assert.Equal("naam", extraParam.Key);
+            Assert.True(extraParam.Value.Count() == 2);
+            var errorMessage = extraParam.Value.FirstOrDefault();
+            Assert.NotNull(errorMessage);
+            Assert.Equal("Naam moet uniek zijn", errorMessage);
+            extraParam = result.Messages.LastOrDefault();
+            Assert.NotNull(extraParam);
+            Assert.Equal("test", extraParam.Key);
+            Assert.True(extraParam.Value.Count() == 2);
+            errorMessage = extraParam.Value.LastOrDefault();
+            Assert.NotNull(errorMessage);
+            Assert.Equal("Test2", errorMessage);
+        }
+
+        [Fact]
+        public void JsonParserError400()
+        {
+            var settings = CreateServiceAgentSettings();
+            var serviceProvider = CreateServiceProvider(settings);
+            var agent = new TestAgent(serviceProvider, Options.Create(settings));
+            agent.HttpClient = CreateClient();
+            var message = new HttpResponseMessage();
+            message.StatusCode = System.Net.HttpStatusCode.BadRequest;
+            message.Content = new StringContent(@"
+            {""identifier"": ""dbcd3004-3af0-4862-bad1-2c4013dec85f"",
+               ""title"": ""Client validation failed."",
+               ""status"": 401,
+               ""extraParameters"": {
+                                ""naam"": [""Naam moet uniek zijn"",""Test""],
+                                    }
+                        }");
+
+            var result = Assert.ThrowsAsync<ValidationException>(async () => await agent.ParseJsonWithError(message)).Result;
+            Assert.True(result.Messages.Count() == 1);
+            var extraParam = result.Messages.FirstOrDefault();
+
+            Assert.NotNull(extraParam);
+            Assert.Equal("naam", extraParam.Key);
+            Assert.True(extraParam.Value.Count() == 2);
+            var errorMessage = extraParam.Value.FirstOrDefault();
+            Assert.NotNull(errorMessage);
+            Assert.Equal("Naam moet uniek zijn", errorMessage);
+            errorMessage = extraParam.Value.LastOrDefault();
+            Assert.NotNull(errorMessage);
+            Assert.Equal("Test", errorMessage);
+        }
+
+        [Fact]
+        public void JsonParserError404()
+        {
+            var settings = CreateServiceAgentSettings();
+            var serviceProvider = CreateServiceProvider(settings);
+            var agent = new TestAgent(serviceProvider, Options.Create(settings));
+            agent.HttpClient = CreateClient();
+            var message = new HttpResponseMessage();
+            message.Content = new StringContent("");
+            message.StatusCode = System.Net.HttpStatusCode.NotFound;
+
+            var result = Assert.ThrowsAsync<NotFoundException>(async () => await agent.ParseJsonWithError(message)).Result;
+            Assert.NotNull(result);
+
+        }
+
+        [Fact]
+        public void JsonParserError401()
+        {
+            var settings = CreateServiceAgentSettings();
+            var serviceProvider = CreateServiceProvider(settings);
+            var agent = new TestAgent(serviceProvider, Options.Create(settings));
+            agent.HttpClient = CreateClient();
+            var message = new HttpResponseMessage();
+            message.Content = new StringContent("");
+            message.StatusCode = System.Net.HttpStatusCode.Unauthorized;
+
+            var result = Assert.ThrowsAsync<UnauthorizedException>(async () => await agent.ParseJsonWithError(message)).Result;
+            Assert.NotNull(result);
+
+        }
+
+        [Fact]
         public async void Delete()
         {
             var settings = CreateServiceAgentSettings();
             var serviceProvider = CreateServiceProvider(settings);
             var agent = new TestAgent(serviceProvider, Options.Create(settings));
             agent.HttpClient = CreateClient();
-
             await agent.DeleteAsync();
 
             var sentData = await agent.GetPreviousDataAsync();
