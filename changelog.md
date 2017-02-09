@@ -1,5 +1,9 @@
 # ServiceAgents Toolbox
 
+## 4.0.3
+
+- Fixed Error object changes
+ 
 ## 4.0.2
 
 - Updated Error toolbox version
