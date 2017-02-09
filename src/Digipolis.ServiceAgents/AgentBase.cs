@@ -78,7 +78,7 @@ namespace Digipolis.ServiceAgents
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 errorResponse = new Error
                 {
