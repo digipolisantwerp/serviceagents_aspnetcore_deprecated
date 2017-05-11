@@ -60,6 +60,20 @@ namespace Digipolis.ServiceAgents.UnitTests.HttpClientFactoryTests
         }
 
         [Fact]
+        public void CreateClientWithBasicAuthenticationAndDomain()
+        {
+            var serviceAgentSettings = new ServiceAgentSettings { };
+            var settings = new ServiceSettings { AuthScheme = AuthScheme.Basic, BasicAuthDomain = "ICA", BasicAuthUserName = "Aladdin", BasicAuthPassword = "OpenSesame", Host = "test.be", Path = "api" };
+            var clientFactory = new HttpClientFactory(CreateServiceProvider(settings));
+
+            var client = clientFactory.CreateClient(serviceAgentSettings, settings);
+
+            Assert.NotNull(client);
+            Assert.Equal(AuthScheme.Basic, client.DefaultRequestHeaders.Authorization.Scheme);
+            Assert.Equal("SUNBXEFsYWRkaW46T3BlblNlc2FtZQ==", client.DefaultRequestHeaders.Authorization.Parameter);
+        }
+
+        [Fact]
         public void CreateClientWithOAuthClientCredentials()
         {
             var serviceAgentSettings = new ServiceAgentSettings { };

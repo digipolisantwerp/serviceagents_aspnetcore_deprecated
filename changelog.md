@@ -1,5 +1,9 @@
 # ServiceAgents Toolbox
 
+## 4.1.0
+
+- Added optional domain setting for Basic authentication
+
 ## 4.0.3
 
 - Fixed Error object changes
