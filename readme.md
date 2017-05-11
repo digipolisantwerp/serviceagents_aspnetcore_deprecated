@@ -298,7 +298,7 @@ See the SampleApi for more info.
 With the Basic scheme the authentication is done through use of a Basic Authentication header.
 
     Authorization Basic yyy
-where yyy is the base 64 encoded username and password.  
+where yyy is the base 64 encoded username and password, with username containing an optional domain
 
 Basic authentication can only be used with an "https" scheme except for the **Development** environment!
 
@@ -314,6 +314,7 @@ The **user name** and **password** can be entered in the settings.
       "Path": "api",
       "Port": "5001",
       "Scheme": "https",
+      "BasicAuthDomain": "domain",
       "BasicAuthUserName": "userName",
       "BasicAuthPassword": "password"
     }
@@ -329,6 +330,7 @@ to alter the values of the service settings after they have been loaded from the
     }, serviceAgentSettings =>
     {
         var settings = serviceAgentSettings.Services.Single(s => s.Key == nameof(TestAgent)).Value; 
+		settings.BasicAuthDomain = "domainfromcode"
         settings.BasicAuthPassword = "userNamefromcode";
         settings.BasicAuthUserName = "passwordfromcode";
     }, null);
