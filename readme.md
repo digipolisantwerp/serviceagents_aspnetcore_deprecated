@@ -2,7 +2,7 @@
 
 Toolbox for ServiceAgents in ASP.NET Core.
 
-This readme is applicable for toolbox version 4.0.x
+This readme is applicable for toolbox version 4.1.x
 
 ## Table of Contents
 
@@ -28,7 +28,7 @@ To add the toolbox to a project, you add the package to the project.json :
 
 ``` json
     "dependencies": {
-        "Digipolis.ServiceAgents":  "4.0.2"
+        "Digipolis.ServiceAgents":  "4.1.0"
     }
 ```
 
