@@ -9,6 +9,7 @@ namespace Digipolis.ServiceAgents.UnitTests.Utilities
     {
         public TestStartup()
         {
+
         }
 
         public void ConfigureServices(IServiceCollection services)
@@ -27,13 +28,13 @@ namespace Digipolis.ServiceAgents.UnitTests.Utilities
             app.UseMvc();
         }
 
-        public static void Main(string[] args)
-        {
-            var host = new WebHostBuilder()
-            .UseStartup<TestStartup>()
-            .Build();
-            host.Run();
-        }
+        //public static void Main(string[] args)
+        //{
+        //    var host = new WebHostBuilder()
+        //    .UseStartup<TestStartup>()
+        //    .Build();
+        //    host.Run();
+        //}
 
         //=> WebApplication.Run<TestStartup>(args);
     }

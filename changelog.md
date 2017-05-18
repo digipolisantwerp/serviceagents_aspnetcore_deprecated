@@ -1,5 +1,9 @@
 # ServiceAgents Toolbox
 
+## 5.0.0
+
+- conversion to csproj and MSBuild.
+
 ## 4.1.0
 
 - Added optional domain setting for Basic authentication

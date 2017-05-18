@@ -1,11 +1,10 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26430.6
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{58491237-F5EC-386A-7D34-13DD19686027}"
 	ProjectSection(SolutionItems) = preProject
 		changelog.md = changelog.md
-		global.json = global.json
 		LICENSE.txt = LICENSE.txt
 		readme.md = readme.md
 	EndProjectSection
@@ -17,13 +16,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{01BF1486-760
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{234E9852-E8F2-6DE3-89A0-00FB33B742E7}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Digipolis.ServiceAgents", "src\Digipolis.ServiceAgents\Digipolis.ServiceAgents.xproj", "{F77C51AF-3748-8769-F453-D2EADFC3B1D0}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Digipolis.ServiceAgents.UnitTests", "test\Digipolis.ServiceAgents.UnitTests\Digipolis.ServiceAgents.UnitTests.xproj", "{84EFA99D-F408-3A19-0FE1-68AA796A4457}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{1E14B150-8CF1-4A37-A5E7-C10847FEC8E9}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "SampleApi", "samples\SampleApi\SampleApi.xproj", "{2308EE57-26AF-441A-89FA-671387202491}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Digipolis.ServiceAgents", "src\Digipolis.ServiceAgents\Digipolis.ServiceAgents.csproj", "{F77C51AF-3748-8769-F453-D2EADFC3B1D0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Digipolis.ServiceAgents.UnitTests", "test\Digipolis.ServiceAgents.UnitTests\Digipolis.ServiceAgents.UnitTests.csproj", "{84EFA99D-F408-3A19-0FE1-68AA796A4457}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SampleApi", "samples\SampleApi\SampleApi.csproj", "{2308EE57-26AF-441A-89FA-671387202491}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
