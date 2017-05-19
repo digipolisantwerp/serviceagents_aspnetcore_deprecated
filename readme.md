@@ -40,7 +40,7 @@ or if your project still works with project.json :
     }
 ```
 
-ALWAYS check the latest version [here](https://github.com/digipolisantwerp/serviceagents_aspnetcore/blob/master/src/Digipolis.ServiceAgents/project.json) before adding the above line !
+ALWAYS check the latest version [here](https://github.com/digipolisantwerp/serviceagents_aspnetcore/blob/master/src/Digipolis.ServiceAgents/Digipolis.ServiceAgents.csproj) before adding the above line !
 
 In Visual Studio you can also use the NuGet Package Manager to do this.
 
