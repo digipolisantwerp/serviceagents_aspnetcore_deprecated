@@ -3,6 +3,7 @@
 ## 5.0.0
 
 - conversion to csproj and MSBuild.
+- update package System.Runtime.Serialization.Formatters to 4.3.0
 
 ## 4.1.0
 
