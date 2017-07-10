@@ -159,6 +159,29 @@ namespace Digipolis.ServiceAgents
                 await ParseJsonError(response);
         }
 
+        protected async Task<T> PatchAsync<T>(string requestUri, T item)
+        {
+            HttpContent contentPatch = new StringContent(JsonConvert.SerializeObject(item, _jsonSerializerSettings), Encoding.UTF8, "application/json");
+            var method = new HttpMethod("PATCH");
+            var request = new HttpRequestMessage(method, requestUri)
+            {
+                Content = contentPatch
+            };
+            var response = await _client.SendAsync(request);
+            return await ParseResult<T>(response);
+        }
+
+        protected async Task<TReponse> PatchAsync<TRequest, TReponse>(string requestUri, TRequest item)
+        {
+            HttpContent contentPatch = new StringContent(JsonConvert.SerializeObject(item, _jsonSerializerSettings), Encoding.UTF8, "application/json");
+            var method = new HttpMethod("PATCH");
+            var request = new HttpRequestMessage(method, requestUri)
+            {
+                Content = contentPatch
+            };
+            var response = await _client.SendAsync(request);
+            return await ParseResult<TReponse>(response);
+        }
         public void Dispose()
         {
             if (_client != null)
