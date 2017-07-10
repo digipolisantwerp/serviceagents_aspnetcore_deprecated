@@ -50,6 +50,18 @@ namespace Digipolis.ServiceAgents.UnitTests.Utilities
             _previousData = data;
         }
 
+        [HttpPatch("8")]
+        public TestModel Patch([FromBody]TestModel data)
+        {
+            return data;
+        }
+
+        [HttpPatch("9")]
+        public TestResponseModel PatchWithOtherReturnType([FromBody]TestModel data)
+        {
+            return new TestResponseModel { Something = data.Name, Id = data.Number };
+        }
+
         [HttpDelete("7")]
         public void Delete()
         {

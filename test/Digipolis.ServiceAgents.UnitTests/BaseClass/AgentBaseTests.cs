@@ -73,6 +73,21 @@ namespace Digipolis.ServiceAgents.UnitTests.BaseClass
         }
 
         [Fact]
+        public async Task Patch()
+        {
+            var settings = CreateServiceAgentSettings();
+            var serviceProvider = CreateServiceProvider(settings);
+            var agent = new TestAgent(serviceProvider, Options.Create(settings));
+            agent.HttpClient = CreateClient();
+
+            var response = await agent.PatchTestDataAsync(new TestModel { Name = "Name2", Number = 250 });
+
+            Assert.NotNull(response);
+            Assert.Equal("Name2", response.Name);
+            Assert.Equal(250, response.Number);
+        }
+
+        [Fact]
         public async Task Put()
         {
             var settings = CreateServiceAgentSettings();
