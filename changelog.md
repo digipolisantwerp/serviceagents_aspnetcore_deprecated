@@ -1,5 +1,9 @@
 # ServiceAgents Toolbox
 
+## 5.1.0
+
+- Added http patch to AgentBase
+
 ## 5.0.0
 
 - conversion to csproj and MSBuild.
