@@ -162,7 +162,7 @@ In order to create a service agent you need to create a type that derives from *
     }
 ```
 
-The **AgentBase** class contains several protected methods to perform the basic http actions (get, post, put and delete). All the methods are async.
+The **AgentBase** class contains several protected methods to perform the basic http actions (get, post, put, patch and delete). All the methods are async.
 
 Some examples:
 
