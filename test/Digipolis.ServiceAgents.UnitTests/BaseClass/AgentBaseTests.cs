@@ -8,6 +8,7 @@ using Xunit;
 using System.Net.Http;
 using Digipolis.Errors.Exceptions;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace Digipolis.ServiceAgents.UnitTests.BaseClass
 {
@@ -116,6 +117,36 @@ namespace Digipolis.ServiceAgents.UnitTests.BaseClass
             Assert.NotNull(sentData);
             Assert.Equal("Name3", sentData.Name);
             Assert.Equal(350, sentData.Number);
+        }
+
+        [Fact]
+        public async Task JsonParserErrorWithoutParams()
+        {
+            var settings = CreateServiceAgentSettings();
+            var serviceProvider = CreateServiceProvider(settings);
+            var agent = new TestAgent(serviceProvider, Options.Create(settings));
+            agent.HttpClient = CreateClient();
+            var message = new HttpResponseMessage();
+            var body = JsonConvert.SerializeObject(new
+            {
+                identifier = "dbcd3004-3af0-4862-bad1-2c4013dec85f",
+                title = "Client validation failed.",
+                status = 400,
+                extraParameters = (string)null
+            });
+            message.Content = new StringContent(body);
+
+            var result = await Assert.ThrowsAsync<ServiceAgentException>(async () => await agent.ParseJsonWithError(message));
+
+            Assert.True(result.Messages.Count() == 1);
+            var extraParam = result.Messages.FirstOrDefault();
+
+            Assert.NotNull(extraParam);
+            Assert.Equal("json", extraParam.Key);
+            Assert.True(extraParam.Value.Count() == 1);
+            var errorMessage = extraParam.Value.FirstOrDefault();
+            Assert.NotNull(errorMessage);
+            Assert.Equal(body, errorMessage);
         }
 
         [Fact]
