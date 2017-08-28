@@ -71,10 +71,16 @@ namespace Digipolis.ServiceAgents
                 {
                     // Try to get Error object from JSON
                     errorResponse = JsonConvert.DeserializeObject<Error>(errorJson, _jsonSerializerSettings);
-                    if (errorResponse?.ExtraParameters?.Any() == false)
+
+                    if (errorResponse?.ExtraParameters == null)
+                    {
+                        errorResponse.ExtraParameters = new Dictionary<string, IEnumerable<string>>();
+                    }
+
+                    if (errorResponse?.ExtraParameters.Any() == false)
                     {
                         // If the json couldn't be parsed -> create new error object with custom json
-                        errorResponse.ExtraParameters?.Add("json", new List<string> { errorJson });
+                        errorResponse.ExtraParameters.Add("json", new List<string> { errorJson });
                     }
                 }
             }
