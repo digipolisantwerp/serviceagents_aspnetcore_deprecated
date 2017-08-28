@@ -1,5 +1,9 @@
 # ServiceAgents Toolbox
 
+## 5.1.1
+
+- Bugfix: Add JSON body to Messages when extraParameters is null
+
 ## 5.1.0
 
 - Added http patch to AgentBase
