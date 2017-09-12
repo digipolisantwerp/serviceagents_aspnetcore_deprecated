@@ -47,6 +47,9 @@
     <None Update="_TestData\serviceagentconfig_3.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="_TestData\serviceagentconfig_5.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="_TestData\serviceagentconfig_4.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

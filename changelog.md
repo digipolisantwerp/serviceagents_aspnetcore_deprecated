@@ -1,5 +1,9 @@
 # ServiceAgents Toolbox
 
+## 5.1.2
+
+- Bugfix: Registering agents with inherited base agent
+
 ## 5.1.1
 
 - Bugfix: Add JSON body to Messages when extraParameters is null
