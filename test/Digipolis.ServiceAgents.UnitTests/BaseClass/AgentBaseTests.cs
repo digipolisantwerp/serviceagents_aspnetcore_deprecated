@@ -287,6 +287,22 @@ namespace Digipolis.ServiceAgents.UnitTests.BaseClass
         }
 
         [Fact]
+        public async Task JsonParserError403()
+        {
+            var settings = CreateServiceAgentSettings();
+            var serviceProvider = CreateServiceProvider(settings);
+            var agent = new TestAgent(serviceProvider, Options.Create(settings));
+            agent.HttpClient = CreateClient();
+            var message = new HttpResponseMessage();
+            message.Content = new StringContent("");
+            message.StatusCode = System.Net.HttpStatusCode.Forbidden;
+
+            var result = await Assert.ThrowsAsync<ForbiddenException>(async () => await agent.ParseJsonWithError(message));
+
+            Assert.NotNull(result);
+        }
+
+        [Fact]
         public async Task Delete()
         {
             var settings = CreateServiceAgentSettings();

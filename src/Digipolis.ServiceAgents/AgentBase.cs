@@ -104,6 +104,8 @@ namespace Digipolis.ServiceAgents
 
                 case HttpStatusCode.Unauthorized: throw new UnauthorizedException(messages: extraParameters);
 
+                case HttpStatusCode.Forbidden: throw new ForbiddenException(messages: extraParameters);
+
                 default: throw new ServiceAgentException(messages: extraParameters);
             }
         }

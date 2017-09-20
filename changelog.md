@@ -1,5 +1,9 @@
 # ServiceAgents Toolbox
 
+## 5.1.3
+
+- AgentBase throws ForbiddenException when HTTP status code is 403
+
 ## 5.1.2
 
 - Bugfix: Registering agents with inherited base agent
