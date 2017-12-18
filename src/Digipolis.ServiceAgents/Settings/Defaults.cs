@@ -16,7 +16,7 @@ namespace Digipolis.ServiceAgents.Settings
         {
             public const string AuthScheme = Settings.AuthScheme.None;
             public const string Scheme = HttpSchema.Https;
-            public const string Path = "api";
+            public const string Path = "";
         }
     }
 }

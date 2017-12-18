@@ -1,4 +1,5 @@
 ﻿using Digipolis.ServiceAgents.Settings;
+using System;
 using Xunit;
 
 namespace Digipolis.ServiceAgents.UnitTests.Settings
@@ -12,7 +13,7 @@ namespace Digipolis.ServiceAgents.UnitTests.Settings
 
             Assert.Equal(AuthScheme.None, settings.AuthScheme);
             Assert.Equal(HttpSchema.Https, settings.Scheme);
-            Assert.Equal("api", settings.Path);
+            Assert.Equal(String.Empty, settings.Path);
         }
 
         [Fact]
