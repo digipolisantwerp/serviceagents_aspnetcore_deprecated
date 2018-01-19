@@ -120,7 +120,7 @@ namespace Digipolis.ServiceAgents.UnitTests.BaseClass
         }
 
         [Fact]
-        public async Task JsonParserErrorWithoutParams()
+        public async Task JsonParserErrorWithMissingTitleAndStatusCode()
         {
             var settings = CreateServiceAgentSettings();
             var serviceProvider = CreateServiceProvider(settings);
@@ -130,8 +130,6 @@ namespace Digipolis.ServiceAgents.UnitTests.BaseClass
             var body = JsonConvert.SerializeObject(new
             {
                 identifier = "dbcd3004-3af0-4862-bad1-2c4013dec85f",
-                title = "Client validation failed.",
-                status = 400,
                 extraParameters = (string)null
             });
             message.Content = new StringContent(body);
