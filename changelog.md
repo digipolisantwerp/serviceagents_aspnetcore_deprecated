@@ -1,5 +1,10 @@
 # ServiceAgents Toolbox
 
+## 6.0.0
+
+- Changed default value of path parameter from "api" to empty string
+- Fixed exception handling for Digipolis error model with empty extraParameters value
+
 ## 5.1.3
 
 - AgentBase throws ForbiddenException when HTTP status code is 403
