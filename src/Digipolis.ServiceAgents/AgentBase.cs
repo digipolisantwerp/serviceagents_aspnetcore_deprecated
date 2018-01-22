@@ -66,7 +66,7 @@ namespace Digipolis.ServiceAgents
 
             try
             {
-                // if there is a response
+                // If there is a response
                 if (errorJson.Length > 0)
                 {
                     // Try to get Error object from JSON
@@ -77,10 +77,10 @@ namespace Digipolis.ServiceAgents
                         errorResponse.ExtraParameters = new Dictionary<string, IEnumerable<string>>();
                     }
 
-                    if (errorResponse?.ExtraParameters.Any() == false)
+                    if (errorResponse == null || (String.IsNullOrWhiteSpace(errorResponse.Title) && errorResponse.Status == 0))
                     {
-                        // If the json couldn't be parsed -> create new error object with custom json
-                        errorResponse.ExtraParameters.Add("json", new List<string> { errorJson });
+                        // Json couldn't be parsed -> create new error object with custom json
+                        throw new Exception();
                     }
                 }
             }

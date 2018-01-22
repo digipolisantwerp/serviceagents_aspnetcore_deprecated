@@ -120,7 +120,7 @@ Option              | Description                                               
 ------------------ | ----------------------------------------------------------- | -------------------------------------- | ------
 AuthScheme              | The authentication scheme to be used by the service agent. | "None" |
 Host | The host part of the url for the service agent. | "" | X
-Path | The path part of the url for the service agent. | "api" |
+Path | The path part of the url for the service agent. | "" |
 Port | The port for the service agent. | 443 fo https, 80 for http |
 Scheme | The scheme of the url for the service agent. | "https" |
 Headers | A key-value collection representing the headers to be added to the requests. | null |

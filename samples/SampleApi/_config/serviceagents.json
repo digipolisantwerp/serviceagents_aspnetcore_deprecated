@@ -5,7 +5,7 @@
     "Scheme": "http",
     "Host": "localhost",
     "Port": "50267",
-    "Path": "api/",
+    "Path": "api",
     "Headers": {
       "apikey": "myapikey"
     }
@@ -14,7 +14,7 @@
     "Scheme": "http",
     "Host": "localhost",
     "Port": "50267",
-    "Path": "api/",
+    "Path": "api",
     "Headers": {
       "apikey": "myapikey"
     }
