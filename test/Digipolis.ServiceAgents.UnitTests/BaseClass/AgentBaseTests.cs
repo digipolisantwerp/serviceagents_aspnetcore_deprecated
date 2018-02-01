@@ -229,6 +229,7 @@ namespace Digipolis.ServiceAgents.UnitTests.BaseClass
             message.StatusCode = System.Net.HttpStatusCode.BadRequest;
             message.Content = new StringContent(@"
             {""identifier"": ""dbcd3004-3af0-4862-bad1-2c4013dec85f"",
+                ""code"": ""test123"",
                ""title"": ""Client validation failed."",
                ""status"": 401,
                ""extraParameters"": {
@@ -237,6 +238,9 @@ namespace Digipolis.ServiceAgents.UnitTests.BaseClass
                         }");
 
             var result = await Assert.ThrowsAsync<ValidationException>(async () => await agent.ParseJsonWithError(message));
+
+            Assert.Equal("Client validation failed.", result.Message);
+            Assert.Equal("test123", result.Code);
 
             Assert.True(result.Messages.Count() == 1);
             var extraParam = result.Messages.FirstOrDefault();
@@ -250,6 +254,7 @@ namespace Digipolis.ServiceAgents.UnitTests.BaseClass
             errorMessage = extraParam.Value.LastOrDefault();
             Assert.NotNull(errorMessage);
             Assert.Equal("Test", errorMessage);
+
         }
 
         [Fact]
