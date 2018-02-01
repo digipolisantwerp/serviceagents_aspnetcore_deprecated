@@ -1,4 +1,6 @@
 # ServiceAgents Toolbox
+## 6.0.1
+ - Bugfix : Added missing mapping of Code and title of validationexception
 
 ## 6.0.0
 
