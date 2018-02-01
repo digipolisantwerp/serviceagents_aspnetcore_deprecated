@@ -1,19 +1,16 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Serialization;
 using System;
-using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using Digipolis.ServiceAgents.Settings;
 using Digipolis.Errors.Exceptions;
 using System.Linq;
 using Digipolis.Errors;
+using System.Collections.Generic;
 
 namespace Digipolis.ServiceAgents
 {
@@ -69,15 +66,21 @@ namespace Digipolis.ServiceAgents
 
             try
             {
-                // if there is a response
+                // If there is a response
                 if (errorJson.Length > 0)
                 {
                     // Try to get Error object from JSON
                     errorResponse = JsonConvert.DeserializeObject<Error>(errorJson, _jsonSerializerSettings);
-                    if (errorResponse?.ExtraParameters?.Any() == false)
+
+                    if (errorResponse?.ExtraParameters == null)
                     {
-                        // If the json couldn't be parsed -> create new error object with custom json
-                        errorResponse.ExtraParameters?.Add("json", errorJson);
+                        errorResponse.ExtraParameters = new Dictionary<string, IEnumerable<string>>();
+                    }
+
+                    if (errorResponse == null || (String.IsNullOrWhiteSpace(errorResponse.Title) && errorResponse.Status == 0))
+                    {
+                        // Json couldn't be parsed -> create new error object with custom json
+                        throw new Exception();
                     }
                 }
             }
@@ -86,13 +89,13 @@ namespace Digipolis.ServiceAgents
                 errorResponse = new Error
                 {
                     Title = "Json parse error exception.",
-                    Status = (int) response.StatusCode
+                    Status = (int)response.StatusCode
                 };
-                errorResponse.ExtraParameters?.Add("json", errorJson);
+                errorResponse.ExtraParameters?.Add("json", new List<string> { errorJson });
             }
 
             // Throw proper exception based on HTTP status
-            var extraParameters = errorResponse?.ExtraParameters?.ToDictionary(x => x.Key, x => new[] { x.Value?.ToString() }.AsEnumerable());
+            var extraParameters = errorResponse?.ExtraParameters;
             switch (response.StatusCode)
             {
                 case HttpStatusCode.NotFound: throw new NotFoundException(messages: extraParameters);
@@ -100,6 +103,8 @@ namespace Digipolis.ServiceAgents
                 case HttpStatusCode.BadRequest: throw new ValidationException(messages: extraParameters);
 
                 case HttpStatusCode.Unauthorized: throw new UnauthorizedException(messages: extraParameters);
+
+                case HttpStatusCode.Forbidden: throw new ForbiddenException(messages: extraParameters);
 
                 default: throw new ServiceAgentException(messages: extraParameters);
             }
@@ -133,8 +138,6 @@ namespace Digipolis.ServiceAgents
             return await ParseResult<TReponse>(response);
         }
 
-
-
         protected async Task<T> PutAsync<T>(string requestUri, T item)
         {
             HttpContent contentPost = new StringContent(JsonConvert.SerializeObject(item, _jsonSerializerSettings), Encoding.UTF8, "application/json");
@@ -164,6 +167,29 @@ namespace Digipolis.ServiceAgents
                 await ParseJsonError(response);
         }
 
+        protected async Task<T> PatchAsync<T>(string requestUri, T item)
+        {
+            HttpContent contentPatch = new StringContent(JsonConvert.SerializeObject(item, _jsonSerializerSettings), Encoding.UTF8, "application/json");
+            var method = new HttpMethod("PATCH");
+            var request = new HttpRequestMessage(method, requestUri)
+            {
+                Content = contentPatch
+            };
+            var response = await _client.SendAsync(request);
+            return await ParseResult<T>(response);
+        }
+
+        protected async Task<TReponse> PatchAsync<TRequest, TReponse>(string requestUri, TRequest item)
+        {
+            HttpContent contentPatch = new StringContent(JsonConvert.SerializeObject(item, _jsonSerializerSettings), Encoding.UTF8, "application/json");
+            var method = new HttpMethod("PATCH");
+            var request = new HttpRequestMessage(method, requestUri)
+            {
+                Content = contentPatch
+            };
+            var response = await _client.SendAsync(request);
+            return await ParseResult<TReponse>(response);
+        }
         public void Dispose()
         {
             if (_client != null)

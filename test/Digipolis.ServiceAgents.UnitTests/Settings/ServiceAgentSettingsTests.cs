@@ -1,5 +1,4 @@
-﻿using System;
-using Digipolis.ServiceAgents.Settings;
+﻿using Digipolis.ServiceAgents.Settings;
 using Xunit;
 
 namespace Digipolis.ServiceAgents.UnitTests.Settings

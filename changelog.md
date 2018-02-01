@@ -1,33 +1,55 @@
 # ServiceAgents Toolbox
 
-## 1.0.0
+## 6.0.0
 
-- initial version
+- Changed default value of path parameter from "api" to empty string
+- Fixed exception handling for Digipolis error model with empty extraParameters value
 
-## 1.1.0
+## 5.1.3
 
-- 
+- AgentBase throws ForbiddenException when HTTP status code is 403
 
-## 1.2.0
+## 5.1.2
 
-- Added ApiKey authentication feature
+- Bugfix: Registering agents with inherited base agent
 
-## 1.2.1
+## 5.1.1
 
-- Bugfix in Url creation in ServiceSettings
-- Added GetStringAsync to Agentbase for string type responses
+- Bugfix: Add JSON body to Messages when extraParameters is null
 
-## 1.2.2
+## 5.1.0
 
-- Added customization of the api key header name
+- Added http patch to AgentBase
 
-## 3.0.0
+## 5.0.0
 
-- Changed error handling to the standard Digipolis.Errors format
+- conversion to csproj and MSBuild.
+- update package System.Runtime.Serialization.Formatters to 4.3.0
 
-## 3.0.1
+## 4.1.0
 
-- Bugfix where empty request would throw a NullReferenceException
+- Added optional domain setting for Basic authentication
+
+## 4.0.3
+
+- Fixed Error object changes
+ 
+## 4.0.2
+
+- Updated Error toolbox version
+
+## 4.0.1
+
+- Allow use of basic Authentication with http scheme in development environment 
+
+## 4.0.0
+
+- Removed ApiKey authentication scheme
+- Added Headers support
+
+## 3.1.1
+
+- Revert Agents registrations to Scoped
 
 ## 3.1.0
 
@@ -35,15 +57,30 @@
 - Added Basic authentication
 - Refactored OAuthClientCredentials 
 
-## 3.1.1
+## 3.0.1
 
-- Revert Agents registrations to Scoped
+- Bugfix where empty request would throw a NullReferenceException
 
-## 4.0.0
 
-- Removed ApiKey authentication scheme
-- Added Headers support
+## 3.0.0
 
-## 4.0.1
+- Changed error handling to the standard Digipolis.Errors format
 
-- Allow use of basic Authentication with http scheme in development environment 
+## 1.2.2
+
+- Added customization of the api key header name
+
+## 1.2.1
+
+- Bugfix in Url creation in ServiceSettings
+- Added GetStringAsync to Agentbase for string type responses
+
+## 1.2.0
+
+- Added ApiKey authentication feature
+
+## 1.0.0
+
+- initial version
+
+

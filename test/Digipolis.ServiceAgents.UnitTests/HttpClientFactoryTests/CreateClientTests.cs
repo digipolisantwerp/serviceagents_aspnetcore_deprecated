@@ -4,11 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Threading.Tasks;
 using Digipolis.ServiceAgents.Settings;
-using Digipolis.ServiceAgents.UnitTests.Utilities;
 using Xunit;
-using Digipolis.Errors.Exceptions;
 using Digipolis.ServiceAgents.OAuth;
 using Digipolis.ServiceAgents.Models;
 using Microsoft.AspNetCore.Hosting;
@@ -60,6 +57,20 @@ namespace Digipolis.ServiceAgents.UnitTests.HttpClientFactoryTests
             Assert.NotNull(client);
             Assert.Equal(AuthScheme.Basic, client.DefaultRequestHeaders.Authorization.Scheme);
             Assert.Equal("QWxhZGRpbjpPcGVuU2VzYW1l", client.DefaultRequestHeaders.Authorization.Parameter);
+        }
+
+        [Fact]
+        public void CreateClientWithBasicAuthenticationAndDomain()
+        {
+            var serviceAgentSettings = new ServiceAgentSettings { };
+            var settings = new ServiceSettings { AuthScheme = AuthScheme.Basic, BasicAuthDomain = "ICA", BasicAuthUserName = "Aladdin", BasicAuthPassword = "OpenSesame", Host = "test.be", Path = "api" };
+            var clientFactory = new HttpClientFactory(CreateServiceProvider(settings));
+
+            var client = clientFactory.CreateClient(serviceAgentSettings, settings);
+
+            Assert.NotNull(client);
+            Assert.Equal(AuthScheme.Basic, client.DefaultRequestHeaders.Authorization.Scheme);
+            Assert.Equal("SUNBXEFsYWRkaW46T3BlblNlc2FtZQ==", client.DefaultRequestHeaders.Authorization.Parameter);
         }
 
         [Fact]

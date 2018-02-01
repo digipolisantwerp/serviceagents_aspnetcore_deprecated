@@ -64,7 +64,9 @@ namespace Digipolis.ServiceAgents
             if (IsDevelopmentEnvironment() == false && settings.Scheme != HttpSchema.Https)
                 throw new ServiceAgentException($"Failed to set Basic Authentication header on service agent for host: '{settings.Host}', the actual scheme is '{settings.Scheme}' and should be 'https'!");
 
-            var headerValue = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{settings.BasicAuthUserName}:{settings.BasicAuthPassword}"));
+            string username = settings.BasicAuthUserName;
+            if (!string.IsNullOrEmpty(settings.BasicAuthDomain)) username = $"{settings.BasicAuthDomain}\\{settings.BasicAuthUserName}";
+            var headerValue = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{username}:{settings.BasicAuthPassword}"));
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(AuthScheme.Basic, headerValue);
         }
 

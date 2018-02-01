@@ -1,9 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
-using System.Threading;
 using System.Threading.Tasks;
 using Digipolis.ServiceAgents.Settings;
 
@@ -58,9 +55,24 @@ namespace Digipolis.ServiceAgents.UnitTests.Utilities
             return base.PutWithEmptyResultAsync($"test/6", data);
         }
 
+        public Task<TestModel> PatchTestDataAsync(TestModel data)
+        {
+            return base.PatchAsync<TestModel>($"test/8", data);
+        }
+
+        public Task<TestResponseModel> PatchTestDataWithOtherReturnTypeAsync(TestModel data)
+        {
+            return base.PatchAsync<TestModel, TestResponseModel>($"test/9", data);
+        }
+
         public Task DeleteAsync()
         {
             return base.DeleteAsync($"test/7");
+        }
+
+        public Task ParseJsonWithError(HttpResponseMessage message)
+        {
+            return base.ParseJsonError(message);
         }
     }
 }

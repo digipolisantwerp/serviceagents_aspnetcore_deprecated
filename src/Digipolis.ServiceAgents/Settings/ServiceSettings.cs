@@ -19,6 +19,11 @@ namespace Digipolis.ServiceAgents.Settings
         public string OAuthScope { get; set; }
 
         /// <summary>
+        /// The optional domain used for basic authentication scheme.
+        /// </summary>
+        public string BasicAuthDomain { get; set; }
+
+        /// <summary>
         /// The user name used for basic authentication scheme.
         /// </summary>
         public string BasicAuthUserName { get; set; }

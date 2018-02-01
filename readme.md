@@ -2,7 +2,7 @@
 
 Toolbox for ServiceAgents in ASP.NET Core.
 
-This readme is applicable for toolbox version 4.0.x
+This readme is applicable for toolbox version 5.0.x
 
 ## Table of Contents
 
@@ -24,15 +24,23 @@ This readme is applicable for toolbox version 4.0.x
 
 ## Installation
 
-To add the toolbox to a project, you add the package to the project.json :
+To add the toolbox to a project, you add the package to the csproj project file:
+
+```xml
+  <ItemGroup>
+    <PackageReference Include="Digipolis.ServiceAgents" Version="5.0.0" />
+  </ItemGroup>
+``` 
+
+or if your project still works with project.json :
 
 ``` json
     "dependencies": {
-        "Digipolis.ServiceAgents":  "4.0.1"
+        "Digipolis.ServiceAgents":  "5.0.0"
     }
 ```
 
-ALWAYS check the latest version [here](https://github.com/digipolisantwerp/serviceagents_aspnetcore/blob/master/src/Digipolis.ServiceAgents/project.json) before adding the above line !
+ALWAYS check the latest version [here](https://github.com/digipolisantwerp/serviceagents_aspnetcore/blob/master/src/Digipolis.ServiceAgents/Digipolis.ServiceAgents.csproj) before adding the above line !
 
 In Visual Studio you can also use the NuGet Package Manager to do this.
 
@@ -112,7 +120,7 @@ Option              | Description                                               
 ------------------ | ----------------------------------------------------------- | -------------------------------------- | ------
 AuthScheme              | The authentication scheme to be used by the service agent. | "None" |
 Host | The host part of the url for the service agent. | "" | X
-Path | The path part of the url for the service agent. | "api" |
+Path | The path part of the url for the service agent. | "" |
 Port | The port for the service agent. | 443 fo https, 80 for http |
 Scheme | The scheme of the url for the service agent. | "https" |
 Headers | A key-value collection representing the headers to be added to the requests. | null |
@@ -154,7 +162,7 @@ In order to create a service agent you need to create a type that derives from *
     }
 ```
 
-The **AgentBase** class contains several protected methods to perform the basic http actions (get, post, put and delete). All the methods are async.
+The **AgentBase** class contains several protected methods to perform the basic http actions (get, post, put, patch and delete). All the methods are async.
 
 Some examples:
 
@@ -298,7 +306,7 @@ See the SampleApi for more info.
 With the Basic scheme the authentication is done through use of a Basic Authentication header.
 
     Authorization Basic yyy
-where yyy is the base 64 encoded username and password.  
+where yyy is the base 64 encoded username and password, with username containing an optional domain
 
 Basic authentication can only be used with an "https" scheme except for the **Development** environment!
 
@@ -314,6 +322,7 @@ The **user name** and **password** can be entered in the settings.
       "Path": "api",
       "Port": "5001",
       "Scheme": "https",
+      "BasicAuthDomain": "domain",
       "BasicAuthUserName": "userName",
       "BasicAuthPassword": "password"
     }
@@ -329,6 +338,7 @@ to alter the values of the service settings after they have been loaded from the
     }, serviceAgentSettings =>
     {
         var settings = serviceAgentSettings.Services.Single(s => s.Key == nameof(TestAgent)).Value; 
+		settings.BasicAuthDomain = "domainfromcode"
         settings.BasicAuthPassword = "userNamefromcode";
         settings.BasicAuthUserName = "passwordfromcode";
     }, null);

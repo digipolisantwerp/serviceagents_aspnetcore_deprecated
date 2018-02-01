@@ -217,6 +217,24 @@ namespace Digipolis.ServiceAgents.UnitTests.Startup
         }
 
         [Fact]
+        private void AgentWithInheritedBaseIsRegistredAsScoped()
+        {
+            var services = new ServiceCollection();
+            services.AddServiceAgents(settings =>
+            {
+                settings.FileName = Path.Combine(Directory.GetCurrentDirectory(), "_TestData/serviceagentconfig_5.json");
+            },
+            assembly: typeof(AddServiceAgentsTests).GetTypeInfo().Assembly);
+
+            var registrations = services.Where(sd => sd.ServiceType == typeof(InheritingFromOtherClassAgent) &&
+                                                     sd.ImplementationType == typeof(InheritingFromOtherClassAgent))
+                                        .ToArray();
+
+            Assert.Equal(1, registrations.Count());
+            Assert.Equal(ServiceLifetime.Scoped, registrations[0].Lifetime);
+        }
+
+        [Fact]
         private void GenericAgentIsRegistratedAsScoped()
         {
             var services = new ServiceCollection();

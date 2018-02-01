@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace Digipolis.ServiceAgents.UnitTests.Utilities
+﻿namespace Digipolis.ServiceAgents.UnitTests.Utilities
 {
     public class TestModel
     {
