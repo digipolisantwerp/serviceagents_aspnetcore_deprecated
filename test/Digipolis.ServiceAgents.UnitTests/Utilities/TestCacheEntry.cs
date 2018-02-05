@@ -23,6 +23,8 @@ namespace Digipolis.ServiceAgents.UnitTests.Utilities
 
         public object Value { get; set; }
 
+        public long? Size { get; set ; }
+
         public void Dispose()
         {
         }
