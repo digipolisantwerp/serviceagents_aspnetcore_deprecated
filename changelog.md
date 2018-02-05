@@ -1,4 +1,8 @@
 # ServiceAgents Toolbox
+
+## 7.0.0
+ - Modified Dependencies for .Net Core 2.0
+
 ## 6.0.1
  - Bugfix : Added missing mapping of Code and title of validationexception
 
