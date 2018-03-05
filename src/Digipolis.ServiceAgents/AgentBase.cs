@@ -103,13 +103,12 @@ namespace Digipolis.ServiceAgents
                 case HttpStatusCode.NotFound: throw new NotFoundException(
                     message: errorTitle ?? "Not found",
                     code: errorCode ?? "NFOUND001",
-                    messages: extraParameters
-                    );
+                    messages: extraParameters);
 
-                case HttpStatusCode.BadRequest:
-                    var title = errorTitle ?? "Bad request";
-                    var code = errorCode ?? "UNVALI001";
-                    throw new ValidationException(code: code, message: title, messages: extraParameters);
+                case HttpStatusCode.BadRequest: throw new ValidationException(
+                        message: errorTitle ?? "Bad request", 
+                        code: errorCode ?? "UNVALI001", 
+                        messages: extraParameters);
 
                 case HttpStatusCode.Unauthorized: throw new UnauthorizedException(
                     message: errorTitle ?? "Access denied",
