@@ -1,4 +1,8 @@
 # ServiceAgents Toolbox
+## 6.0.2
+ - Bugfix : Improved error mapping
+ - Bugfix : Added Content-Type: application/x-www-form-urlencoded header to oauth content to fix issues after Kong upgrade 
+
 ## 6.0.1
  - Bugfix : Added missing mapping of Code and title of validationexception
 

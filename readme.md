@@ -2,7 +2,7 @@
 
 Toolbox for ServiceAgents in ASP.NET Core.
 
-This readme is applicable for toolbox version 5.0.x
+This readme is applicable for toolbox version 6.0.x
 
 ## Table of Contents
 
