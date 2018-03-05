@@ -4,6 +4,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
 using System;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Digipolis.ServiceAgents.OAuth
@@ -51,7 +52,7 @@ namespace Digipolis.ServiceAgents.OAuth
 
             var content = $"client_id={clientID}&client_secret={clientSecret}&grant_type=client_credentials{(String.IsNullOrWhiteSpace(scope) ? "" : $"&scope={scope}")}";
 
-            var response = await _client.PostAsync(tokenEndpoint, new StringContent(content));
+            var response = await _client.PostAsync(tokenEndpoint, new StringContent(content, Encoding.UTF8, "application/x-www-form-urlencoded"));
 
             if (response.IsSuccessStatusCode)
             {
