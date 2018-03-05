@@ -95,21 +95,35 @@ namespace Digipolis.ServiceAgents
             }
 
             // Throw proper exception based on HTTP status
+            var errorTitle = errorResponse?.Title;
+            var errorCode = errorResponse?.Code;
             var extraParameters = errorResponse?.ExtraParameters;
             switch (response.StatusCode)
             {
-                case HttpStatusCode.NotFound: throw new NotFoundException(messages: extraParameters);
+                case HttpStatusCode.NotFound: throw new NotFoundException(
+                    message: errorTitle ?? "Not found",
+                    code: errorCode ?? "NFOUND001",
+                    messages: extraParameters);
 
-                case HttpStatusCode.BadRequest:
-                    var title = errorResponse?.Title ?? "Bad Request";
-                    var code = errorResponse?.Code ?? "UNVALI001";
-                    throw new ValidationException(code: code, message: title, messages: extraParameters);
+                case HttpStatusCode.BadRequest: throw new ValidationException(
+                        message: errorTitle ?? "Bad request", 
+                        code: errorCode ?? "UNVALI001", 
+                        messages: extraParameters);
 
-                case HttpStatusCode.Unauthorized: throw new UnauthorizedException(messages: extraParameters);
+                case HttpStatusCode.Unauthorized: throw new UnauthorizedException(
+                    message: errorTitle ?? "Access denied",
+                    code: errorCode ?? "UNAUTH001",
+                    messages: extraParameters);
 
-                case HttpStatusCode.Forbidden: throw new ForbiddenException(messages: extraParameters);
+                case HttpStatusCode.Forbidden: throw new ForbiddenException(
+                    message: errorTitle ?? "Forbidden",
+                    code: errorCode ?? "FORBID001", 
+                    messages: extraParameters);
 
-                default: throw new ServiceAgentException(messages: extraParameters);
+                default: throw new ServiceAgentException(
+                    message: errorTitle,
+                    code: errorCode, 
+                    messages: extraParameters);
             }
         }
 
