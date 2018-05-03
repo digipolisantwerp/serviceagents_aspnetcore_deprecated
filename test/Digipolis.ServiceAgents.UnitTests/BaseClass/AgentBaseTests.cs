@@ -315,11 +315,13 @@ namespace Digipolis.ServiceAgents.UnitTests.BaseClass
             agent.HttpClient = CreateClient();
             var message = new HttpResponseMessage();
             message.Content = new StringContent(@"<HTML><h1>STATUS 500</h1></HTML>");
-            message.StatusCode = System.Net.HttpStatusCode.InternalServerError;
+            message.StatusCode = HttpStatusCode.InternalServerError;
 
             var result = await Assert.ThrowsAsync<ServiceAgentException>(async () => await agent.ParseJsonWithError(message));
 
             Assert.NotNull(result);
+            Assert.Equal(await message.Content.ReadAsStringAsync(), result.Messages.FirstOrDefault().Value.FirstOrDefault());
+            Assert.Equal(result.Code, $"Status: {HttpStatusCode.InternalServerError.ToString()}");
         }
 
         [Fact]
