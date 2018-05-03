@@ -84,14 +84,15 @@ namespace Digipolis.ServiceAgents
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                OnParseJsonErrorException(ex, response);
                 errorResponse = new Error
                 {
                     Title = "Json parse error exception.",
-                    Status = (int)response.StatusCode
+                    Status = (int)response.StatusCode,
+                    ExtraParameters = new Dictionary<string, IEnumerable<string>> { { "response", new List<string> { errorJson } } }
                 };
-                errorResponse.ExtraParameters?.Add("json", new List<string> { errorJson });
             }
 
             // Throw proper exception based on HTTP status
@@ -126,6 +127,8 @@ namespace Digipolis.ServiceAgents
                     messages: extraParameters);
             }
         }
+
+        protected virtual void OnParseJsonErrorException(Exception ex, HttpResponseMessage response) { }
 
         protected async Task<T> GetAsync<T>(string requestUri)
         {
