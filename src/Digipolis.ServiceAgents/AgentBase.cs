@@ -91,7 +91,7 @@ namespace Digipolis.ServiceAgents
                 {
                     Title = "Json parse error exception.",
                     Status = (int)response.StatusCode,
-                    ExtraParameters = new Dictionary<string, IEnumerable<string>> { { "json", new List<string> { errorJson } } }
+                    ExtraParameters = new Dictionary<string, IEnumerable<string>> { { "response", new List<string> { errorJson } } }
                 };
             }
 
