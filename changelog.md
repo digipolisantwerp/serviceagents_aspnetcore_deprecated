@@ -1,4 +1,9 @@
 # ServiceAgents Toolbox
+## 6.0.3
+- ParseJsonError: fixed Exception handling - ExtraParameters always null
+- OnParseJsonErrorException: Added hook for custom exception handling
+- Ensure Statuscode is included
+
 ## 6.0.2
  - Bugfix : Improved error mapping
  - Bugfix : Added Content-Type: application/x-www-form-urlencoded header to oauth content to fix issues after Kong upgrade 
