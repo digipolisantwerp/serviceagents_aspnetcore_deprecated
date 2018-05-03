@@ -123,7 +123,7 @@ namespace Digipolis.ServiceAgents
 
                 default: throw new ServiceAgentException(
                     message: errorTitle,
-                    code: errorCode, 
+                    code: errorCode ?? $"Status: {response.StatusCode}", 
                     messages: extraParameters);
             }
         }
