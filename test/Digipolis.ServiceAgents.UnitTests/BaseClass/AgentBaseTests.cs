@@ -2,6 +2,7 @@
 using Moq;
 using System;
 using System.Linq;
+using System.Net;
 using Digipolis.ServiceAgents.Settings;
 using Digipolis.ServiceAgents.UnitTests.Utilities;
 using Xunit;
@@ -303,6 +304,24 @@ namespace Digipolis.ServiceAgents.UnitTests.BaseClass
             var result = await Assert.ThrowsAsync<ForbiddenException>(async () => await agent.ParseJsonWithError(message));
 
             Assert.NotNull(result);
+        }
+
+        [Fact]
+        public async Task JsonParserErrorOtherStatus()
+        {
+            var settings = CreateServiceAgentSettings();
+            var serviceProvider = CreateServiceProvider(settings);
+            var agent = new TestAgent(serviceProvider, Options.Create(settings));
+            agent.HttpClient = CreateClient();
+            var message = new HttpResponseMessage();
+            message.Content = new StringContent(@"<HTML><h1>STATUS 500</h1></HTML>");
+            message.StatusCode = HttpStatusCode.InternalServerError;
+
+            var result = await Assert.ThrowsAsync<ServiceAgentException>(async () => await agent.ParseJsonWithError(message));
+
+            Assert.NotNull(result);
+            Assert.Equal(await message.Content.ReadAsStringAsync(), result.Messages.FirstOrDefault().Value.FirstOrDefault());
+            Assert.Equal(result.Code, $"Status: {HttpStatusCode.InternalServerError.ToString()}");
         }
 
         [Fact]
