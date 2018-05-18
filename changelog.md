@@ -1,4 +1,8 @@
 # ServiceAgents Toolbox
+
+## 6.0.4
+- AgentBase: initialization of _client (HttpClient) happens on first use instead of during constructor execution to avoid unnecessary calls to retrieve an access token for OAuth-authentication scheme
+
 ## 6.0.3
 - ParseJsonError: fixed Exception handling - ExtraParameters always null
 - OnParseJsonErrorException: Added hook for custom exception handling

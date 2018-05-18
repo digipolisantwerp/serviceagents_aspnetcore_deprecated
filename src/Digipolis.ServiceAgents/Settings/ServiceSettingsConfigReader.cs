@@ -1,9 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using System;
-using System.IO;
 using System.Linq;
 using System.Reflection;
-using Digipolis.Common.Validation;
 
 namespace Digipolis.ServiceAgents.Settings
 {

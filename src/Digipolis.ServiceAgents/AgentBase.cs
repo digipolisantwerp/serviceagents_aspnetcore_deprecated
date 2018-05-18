@@ -1,16 +1,16 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Digipolis.Errors;
+using Digipolis.Errors.Exceptions;
+using Digipolis.ServiceAgents.Settings;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using Digipolis.ServiceAgents.Settings;
-using Digipolis.Errors.Exceptions;
-using System.Linq;
-using Digipolis.Errors;
-using System.Collections.Generic;
 
 namespace Digipolis.ServiceAgents
 {
@@ -20,7 +20,24 @@ namespace Digipolis.ServiceAgents
 
         protected readonly JsonSerializerSettings _jsonSerializerSettings = new JsonSerializerSettings();
 
-        protected HttpClient _client;
+        protected readonly IHttpClientFactory _clientFactory;
+
+        private HttpClient _clientConnection;
+        protected HttpClient _client
+        {
+            get
+            {
+                if (_clientConnection == null)
+                {
+                    _clientConnection = _clientFactory.CreateClient(_settings);
+                }
+                return _clientConnection;
+            }
+            set {
+                _clientConnection = value;
+            }
+        }
+
         private IServiceProvider _serviceProvider;
 
         protected AgentBase(IServiceProvider serviceProvider, IOptions<ServiceAgentSettings> options)
@@ -31,11 +48,9 @@ namespace Digipolis.ServiceAgents
 
             _serviceProvider = serviceProvider;
 
-            var serviceAgentSettings = options.Value;
-            _settings = GetServiceSettings(serviceAgentSettings);
+            _settings = GetServiceSettings(options.Value);
 
-            var clientFactory = serviceProvider.GetService<IHttpClientFactory>();
-            _client = clientFactory.CreateClient(serviceAgentSettings, _settings);
+            _clientFactory = serviceProvider.GetService<IHttpClientFactory>();
         }
 
         private ServiceSettings GetServiceSettings(ServiceAgentSettings serviceAgentSettings)
@@ -210,10 +225,11 @@ namespace Digipolis.ServiceAgents
             var response = await _client.SendAsync(request);
             return await ParseResult<TReponse>(response);
         }
+
         public void Dispose()
         {
-            if (_client != null)
-                _client.Dispose();
+            if (_clientConnection != null)
+                _clientConnection.Dispose();
         }
     }
 }

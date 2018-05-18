@@ -1,8 +1,8 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Digipolis.ServiceAgents.Settings;
+using Microsoft.Extensions.Options;
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Digipolis.ServiceAgents.Settings;
 
 namespace Digipolis.ServiceAgents.UnitTests.Utilities
 {
