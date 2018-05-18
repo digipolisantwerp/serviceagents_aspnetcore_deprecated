@@ -1,15 +1,15 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Digipolis.Errors.Exceptions;
+using Digipolis.ServiceAgents.Settings;
+using Digipolis.ServiceAgents.UnitTests.Utilities;
+using Microsoft.Extensions.Options;
 using Moq;
+using Newtonsoft.Json;
 using System;
 using System.Linq;
 using System.Net;
-using Digipolis.ServiceAgents.Settings;
-using Digipolis.ServiceAgents.UnitTests.Utilities;
-using Xunit;
 using System.Net.Http;
-using Digipolis.Errors.Exceptions;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
+using Xunit;
 
 namespace Digipolis.ServiceAgents.UnitTests.BaseClass
 {

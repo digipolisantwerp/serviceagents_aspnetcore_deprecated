@@ -20,7 +20,7 @@ namespace Digipolis.ServiceAgents
             _serviceProvider = serviceProvider;           
         }
 
-        public HttpClient CreateClient(ServiceAgentSettings serviceAgentSettings, ServiceSettings settings)
+        public HttpClient CreateClient(ServiceSettings settings)
         {
             var client = new HttpClient
             {

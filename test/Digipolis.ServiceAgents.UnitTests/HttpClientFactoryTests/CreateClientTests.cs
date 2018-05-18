@@ -21,7 +21,7 @@ namespace Digipolis.ServiceAgents.UnitTests.HttpClientFactoryTests
             var settings = new ServiceSettings { Scheme = HttpSchema.Http, Host = "test.be", Path = "api" };
             var clientFactory = new HttpClientFactory(CreateServiceProvider(settings));
 
-            var client = clientFactory.CreateClient(serviceAgentSettings, settings);
+            var client = clientFactory.CreateClient(settings);
 
             Assert.NotNull(client);
             Assert.Equal("http://test.be/api/", client.BaseAddress.AbsoluteUri);
@@ -36,7 +36,7 @@ namespace Digipolis.ServiceAgents.UnitTests.HttpClientFactoryTests
             var settings = new ServiceSettings { AuthScheme = AuthScheme.Bearer, Scheme = HttpSchema.Http, Host = "test.be", Path = "api" };
             var clientFactory = new HttpClientFactory(CreateServiceProvider(settings));
 
-            var client = clientFactory.CreateClient(serviceAgentSettings, settings);
+            var client = clientFactory.CreateClient(settings);
 
             Assert.NotNull(client);
             Assert.Equal("http://test.be/api/", client.BaseAddress.AbsoluteUri);
@@ -52,7 +52,7 @@ namespace Digipolis.ServiceAgents.UnitTests.HttpClientFactoryTests
             var settings = new ServiceSettings { AuthScheme = AuthScheme.Basic, BasicAuthUserName = "Aladdin", BasicAuthPassword = "OpenSesame", Host = "test.be", Path = "api" };
             var clientFactory = new HttpClientFactory(CreateServiceProvider(settings));
 
-            var client = clientFactory.CreateClient(serviceAgentSettings, settings);
+            var client = clientFactory.CreateClient(settings);
 
             Assert.NotNull(client);
             Assert.Equal(AuthScheme.Basic, client.DefaultRequestHeaders.Authorization.Scheme);
@@ -66,7 +66,7 @@ namespace Digipolis.ServiceAgents.UnitTests.HttpClientFactoryTests
             var settings = new ServiceSettings { AuthScheme = AuthScheme.Basic, BasicAuthDomain = "ICA", BasicAuthUserName = "Aladdin", BasicAuthPassword = "OpenSesame", Host = "test.be", Path = "api" };
             var clientFactory = new HttpClientFactory(CreateServiceProvider(settings));
 
-            var client = clientFactory.CreateClient(serviceAgentSettings, settings);
+            var client = clientFactory.CreateClient(settings);
 
             Assert.NotNull(client);
             Assert.Equal(AuthScheme.Basic, client.DefaultRequestHeaders.Authorization.Scheme);
@@ -80,7 +80,7 @@ namespace Digipolis.ServiceAgents.UnitTests.HttpClientFactoryTests
             var settings = new ServiceSettings { AuthScheme = AuthScheme.OAuthClientCredentials, OAuthClientId = "clientId", OAuthClientSecret = "clientSecret", Host = "test.be", Path = "api" };
             var clientFactory = new HttpClientFactory(CreateServiceProvider(settings));
 
-            var client = clientFactory.CreateClient(serviceAgentSettings, settings);
+            var client = clientFactory.CreateClient(settings);
 
             Assert.NotNull(client);
             Assert.Equal(AuthScheme.Bearer, client.DefaultRequestHeaders.Authorization.Scheme);
@@ -94,7 +94,7 @@ namespace Digipolis.ServiceAgents.UnitTests.HttpClientFactoryTests
             var settings = new ServiceSettings { AuthScheme = AuthScheme.Basic, BasicAuthUserName = "Aladdin", BasicAuthPassword = "OpenSesame", Scheme = HttpSchema.Http, Host = "test.be", Path = "api" };
             var clientFactory = new HttpClientFactory(CreateServiceProvider(settings));
 
-            Assert.Throws<ServiceAgentException>(() => clientFactory.CreateClient(serviceAgentSettings, settings));
+            Assert.Throws<ServiceAgentException>(() => clientFactory.CreateClient(settings));
         }
 
         [Fact]
@@ -104,7 +104,7 @@ namespace Digipolis.ServiceAgents.UnitTests.HttpClientFactoryTests
             var settings = new ServiceSettings { AuthScheme = AuthScheme.Basic, BasicAuthUserName = "Aladdin", BasicAuthPassword = "OpenSesame", Scheme = HttpSchema.Http, Host = "test.be", Path = "api" };
             var clientFactory = new HttpClientFactory(CreateServiceProvider(settings, isDevelopmentEnvironment: true));
 
-            clientFactory.CreateClient(serviceAgentSettings, settings);
+            clientFactory.CreateClient(settings);
         }
 
         [Fact]
@@ -116,7 +116,7 @@ namespace Digipolis.ServiceAgents.UnitTests.HttpClientFactoryTests
             HttpClient passedClient = null;
             clientFactory.AfterClientCreated += (sp, c) => passedClient = c;
 
-            clientFactory.CreateClient(serviceAgentSettings, settings);
+            clientFactory.CreateClient(settings);
 
             Assert.NotNull(passedClient);
         }
@@ -133,7 +133,7 @@ namespace Digipolis.ServiceAgents.UnitTests.HttpClientFactoryTests
             var settings = new ServiceSettings { Headers = headers, Scheme = HttpSchema.Http, Host = "test.be", Path = "api" };
             var clientFactory = new HttpClientFactory(CreateServiceProvider(settings));
 
-            var client = clientFactory.CreateClient(serviceAgentSettings, settings);
+            var client = clientFactory.CreateClient(settings);
 
             Assert.NotNull(client);
             Assert.Equal("localapikey", client.DefaultRequestHeaders.First(h => h.Key == "api-key").Value.First());
