@@ -7,6 +7,6 @@ namespace Digipolis.ServiceAgents
     {
         void InitializeHeaders(HttpClient client, ServiceSettings settings);
 
-        void validateAuthHeaders(HttpClient client, ServiceSettings settings);
+        void ValidateAuthHeaders(HttpClient client, ServiceSettings settings);
     }
 }

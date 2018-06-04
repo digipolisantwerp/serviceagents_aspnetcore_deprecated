@@ -48,7 +48,7 @@ namespace Digipolis.ServiceAgents
             }
         }
 
-        public void validateAuthHeaders(HttpClient client, ServiceSettings settings)
+        public void ValidateAuthHeaders(HttpClient client, ServiceSettings settings)
         {
             switch (settings.AuthScheme)
             {
