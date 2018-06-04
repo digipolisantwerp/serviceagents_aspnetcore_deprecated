@@ -1,5 +1,8 @@
 # ServiceAgents Toolbox
 
+## 6.0.5
+- RequestHeaders are evaluated before each service agent request. If an OAuth access token has expired, a new one will be requested.
+
 ## 6.0.4
 - AgentBase: initialization of _client (HttpClient) happens on first use instead of during constructor execution to avoid unnecessary calls to retrieve an access token for OAuth-authentication scheme
 

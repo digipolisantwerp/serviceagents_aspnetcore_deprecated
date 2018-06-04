@@ -66,10 +66,11 @@ namespace Digipolis.ServiceAgents.UnitTests.Startup
             var registration = services.Single(sd => sd.ServiceType == typeof(IHttpClientFactory));
 
             //Manually call the CreateClient on the factory (this normally happens when the service agent gets resolved
-            var factory = registration.ImplementationFactory.Invoke(null) as HttpClientFactory;
+            var factory = registration.ImplementationFactory.Invoke(services.BuildServiceProvider()) as HttpClientFactory;
             factory.CreateClient(new ServiceSettings { Host = "test.be" });
 
             Assert.NotNull(passedClient);
+            Assert.NotNull(passedServiceProvider);
         }
 
         [Fact]

@@ -27,8 +27,8 @@ namespace Digipolis.ServiceAgents
 
             _requestHeaderHelper.InitializeHeaders(client, settings);
 
-            if (AfterClientCreated != null)
-                AfterClientCreated(_serviceProvider, client);
+            // invoke event
+            AfterClientCreated?.Invoke(_serviceProvider, client);
 
             return client;
         }
