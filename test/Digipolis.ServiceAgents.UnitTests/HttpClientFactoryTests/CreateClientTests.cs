@@ -157,6 +157,7 @@ namespace Digipolis.ServiceAgents.UnitTests.HttpClientFactoryTests
                 .ReturnsAsync(new TokenReply { access_token = "AccessToken", expires_in = 7200 });
 
             serviceProviderMock.Setup(p => p.GetService(typeof(ITokenHelper))).Returns(mockTokenHelper.Object);
+            serviceProviderMock.Setup(p => p.GetService(typeof(IRequestHeaderHelper))).Returns(new RequestHeaderHelper(serviceProviderMock.Object));
 
             var mockHostingEnvironment = new Mock<IHostingEnvironment>();
             mockHostingEnvironment.Setup(h => h.EnvironmentName)

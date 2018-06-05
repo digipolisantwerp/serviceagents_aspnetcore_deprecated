@@ -358,8 +358,8 @@ namespace Digipolis.ServiceAgents.UnitTests.BaseClass
 
             serviceProviderMock.Setup(p => p.GetService(typeof(IAuthContext))).Returns(authContextMock.Object);
             serviceProviderMock.Setup(p => p.GetService(typeof(IHttpClientFactory))).Returns(new HttpClientFactory(serviceProviderMock.Object));
-
-
+            serviceProviderMock.Setup(p => p.GetService(typeof(IRequestHeaderHelper))).Returns(new RequestHeaderHelper(serviceProviderMock.Object));
+            
             return serviceProviderMock.Object;
         }
     }

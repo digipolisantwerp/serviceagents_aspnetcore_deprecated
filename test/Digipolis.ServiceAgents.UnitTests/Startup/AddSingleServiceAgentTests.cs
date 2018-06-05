@@ -3,6 +3,7 @@ using Digipolis.ServiceAgents.Settings;
 using Digipolis.ServiceAgents.UnitTests.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Moq;
 using System;
 using System.Linq;
 using System.Net.Http;
@@ -40,7 +41,6 @@ namespace Digipolis.ServiceAgents.UnitTests.Startup
         [Fact]
         private void HttpClientFactoryClientActionIsPassed()
         {
-            var serviceAgentSettings = new ServiceAgentSettings();
             HttpClient passedClient = null;
             var services = new ServiceCollection();
             services.AddSingleServiceAgent<TestAgent>(settings => { }, (sp, client) => passedClient = client);
@@ -49,7 +49,7 @@ namespace Digipolis.ServiceAgents.UnitTests.Startup
             var registration = services.Single(sd => sd.ServiceType == typeof(IHttpClientFactory));
 
             //Manually call the CreateClient on the factory (this normally happens when the service agent gets resolved
-            var factory = registration.ImplementationFactory.Invoke(null) as HttpClientFactory;
+            var factory = registration.ImplementationFactory.Invoke(services.BuildServiceProvider()) as HttpClientFactory;
             factory.CreateClient(new ServiceSettings { Host = "test.be" });
 
             Assert.NotNull(passedClient);
@@ -110,7 +110,7 @@ namespace Digipolis.ServiceAgents.UnitTests.Startup
         private void ServiceAgentInterfaceIsRegistratedAsScoped()
         {
             var services = new ServiceCollection();
-            services.AddSingleServiceAgent<InterfaceImplementingAgent>(settings => { },
+            services.AddSingleServiceAgent<InterfaceImplementingAgent>(servicSettings => { },
                 assembly: typeof(InterfaceImplementingAgent).GetTypeInfo().Assembly);
 
             var registrations = services.Where(sd => sd.ServiceType == typeof(IInterfaceImplementingAgent) &&
@@ -134,6 +134,30 @@ namespace Digipolis.ServiceAgents.UnitTests.Startup
 
             Assert.Equal(1, registrations.Count());
             Assert.Equal(ServiceLifetime.Scoped, registrations[0].Lifetime);
+        }
+
+        private ServiceAgentSettings CreateServiceAgentSettings()
+        {
+            var settings = new ServiceAgentSettings();
+            settings.Services.Add("TestAgent", new ServiceSettings { Scheme = HttpSchema.Http, Host = "localhost" });
+            return settings;
+        }
+
+        private IServiceProvider CreateServiceProvider(ServiceAgentSettings settings)
+        {
+            var serviceProviderMock = new Mock<IServiceProvider>();
+
+            if (settings != null)
+                serviceProviderMock.Setup(p => p.GetService(typeof(IOptions<ServiceAgentSettings>))).Returns(Options.Create(settings));
+
+            var authContextMock = new Mock<IAuthContext>();
+            authContextMock.Setup(c => c.UserToken).Returns("TokenValue");
+
+            serviceProviderMock.Setup(p => p.GetService(typeof(IAuthContext))).Returns(authContextMock.Object);
+            serviceProviderMock.Setup(p => p.GetService(typeof(IHttpClientFactory))).Returns(new HttpClientFactory(serviceProviderMock.Object));
+            serviceProviderMock.Setup(p => p.GetService(typeof(IRequestHeaderHelper))).Returns(new RequestHeaderHelper(serviceProviderMock.Object));
+
+            return serviceProviderMock.Object;
         }
     }
 }

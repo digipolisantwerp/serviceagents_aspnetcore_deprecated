@@ -36,6 +36,8 @@ namespace Digipolis.ServiceAgents.OAuth
                 var cacheExpiration = tokenReplyResult.expires_in - 60;
                 cacheExpiration = cacheExpiration > 0 ? cacheExpiration : 0;
 
+                Console.WriteLine($"Retrieved new OAuth access token for {options.Path} on end-point {options.OAuthTokenEndpoint}");
+
                 if (cacheExpiration > 0)
                 {
                     _cache.Set(cacheKey, tokenReplyResult, new MemoryCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(cacheExpiration) });

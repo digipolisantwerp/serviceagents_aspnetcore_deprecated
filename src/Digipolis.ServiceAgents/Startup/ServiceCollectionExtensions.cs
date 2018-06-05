@@ -114,6 +114,7 @@ namespace Digipolis.ServiceAgents
             RegisterAgentType(services, assembly.GetTypes(), typeof(T));
 
             services.AddScoped<ITokenHelper, TokenHelper>();
+            services.AddScoped<IRequestHeaderHelper, RequestHeaderHelper>();
         }
 
         private static void RegisterServices(IServiceCollection services, ServiceAgentSettings settings, Assembly assembly, Action<IServiceProvider, HttpClient> clientAction)
@@ -131,6 +132,7 @@ namespace Digipolis.ServiceAgents
             }
 
             services.AddScoped<ITokenHelper, TokenHelper>();
+            services.AddScoped<IRequestHeaderHelper, RequestHeaderHelper>();
         }
 
         private static void RegisterClientFactory(IServiceCollection services, Action<IServiceProvider, HttpClient> clientAction)
