@@ -8,14 +8,12 @@ namespace Digipolis.ServiceAgents
     public class HttpClientFactory : IHttpClientFactory
     {
         private IServiceProvider _serviceProvider;
-        private IRequestHeaderHelper _requestHeaderHelper;
-
+        
         public event Action<IServiceProvider, HttpClient> AfterClientCreated;
 
         public HttpClientFactory(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
-            _requestHeaderHelper = serviceProvider.GetService<IRequestHeaderHelper>();
         }
 
         public HttpClient CreateClient(ServiceSettings settings)
@@ -25,7 +23,8 @@ namespace Digipolis.ServiceAgents
                 BaseAddress = new Uri(settings.Url)
             };
 
-            _requestHeaderHelper.InitializeHeaders(client, settings);
+            IRequestHeaderHelper requestHeaderHelper = _serviceProvider.GetService<IRequestHeaderHelper>();
+            requestHeaderHelper.InitializeHeaders(client, settings);
 
             // invoke event
             AfterClientCreated?.Invoke(_serviceProvider, client);
