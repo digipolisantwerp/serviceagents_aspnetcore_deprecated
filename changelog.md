@@ -1,5 +1,8 @@
 # ServiceAgents Toolbox
 
+## 6.0.6
+- Expose response from an HttpClient call to classes that inherit AgentBase (useful when for ex. returned data model has not a fixed format )
+
 ## 6.0.5
 - RequestHeaders are evaluated before each service agent request. If an OAuth access token has expired, a new one will be requested.
 
