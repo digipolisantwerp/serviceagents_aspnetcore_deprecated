@@ -153,6 +153,8 @@ namespace Digipolis.ServiceAgents
             var interfaceTypeName = $"I{implementationType.Name}";
             var interfaceType = assemblyTypes.SingleOrDefault(t => t.Name == interfaceTypeName && t.GetTypeInfo().IsInterface);
 
+            //services.AddTypedClient<interfaceType, implementationType>();
+
             if (interfaceType != null)
             {
                 services.AddScoped(interfaceType, implementationType);
