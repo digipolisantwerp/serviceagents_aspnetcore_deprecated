@@ -39,7 +39,7 @@ namespace Digipolis.ServiceAgents.UnitTests.Startup
             var registrations = services.Where(sd => sd.ServiceType == typeof(IHttpClientFactory))
                                         .ToArray();
 
-            Assert.Equal(1, registrations.Count());
+            Assert.Single(registrations);
             Assert.Equal(ServiceLifetime.Singleton, registrations[0].Lifetime);
         }
 
@@ -90,7 +90,7 @@ namespace Digipolis.ServiceAgents.UnitTests.Startup
             var registrations = services.Where(sd => sd.ServiceType == typeof(IConfigureOptions<ServiceAgentSettings>))
                                         .ToArray();
 
-            Assert.Equal(1, registrations.Count());
+            Assert.Single(registrations);
             Assert.Equal(ServiceLifetime.Singleton, registrations[0].Lifetime);
 
             var configOptions = registrations[0].ImplementationInstance as IConfigureOptions<ServiceAgentSettings>;
@@ -118,7 +118,7 @@ namespace Digipolis.ServiceAgents.UnitTests.Startup
             var registrations = services.Where(sd => sd.ServiceType == typeof(IConfigureOptions<ServiceAgentSettings>))
                                         .ToArray();
 
-            Assert.Equal(1, registrations.Count());
+            Assert.Single(registrations);
             Assert.Equal(ServiceLifetime.Singleton, registrations[0].Lifetime);
         }
 
@@ -133,7 +133,7 @@ namespace Digipolis.ServiceAgents.UnitTests.Startup
                                                      sd.ImplementationType == typeof(TestAgent))
                                         .ToArray();
 
-            Assert.Equal(1, registrations.Count());
+            Assert.Single(registrations);
             Assert.Equal(ServiceLifetime.Scoped, registrations[0].Lifetime);
         }
 
@@ -213,7 +213,7 @@ namespace Digipolis.ServiceAgents.UnitTests.Startup
                                                      sd.ImplementationType == typeof(InterfaceImplementingAgent))
                                         .ToArray();
 
-            Assert.Equal(1, registrations.Count());
+            Assert.Single(registrations);
             Assert.Equal(ServiceLifetime.Scoped, registrations[0].Lifetime);
         }
 
@@ -231,7 +231,7 @@ namespace Digipolis.ServiceAgents.UnitTests.Startup
                                                      sd.ImplementationType == typeof(InheritingFromOtherClassAgent))
                                         .ToArray();
 
-            Assert.Equal(1, registrations.Count());
+            Assert.Single(registrations);
             Assert.Equal(ServiceLifetime.Scoped, registrations[0].Lifetime);
         }
 
@@ -248,7 +248,7 @@ namespace Digipolis.ServiceAgents.UnitTests.Startup
             var registrations = services.Where(sd => sd.ServiceType == typeof(GenericAgent<>))
                                         .ToArray();
 
-            Assert.Equal(1, registrations.Count());
+            Assert.Single(registrations);
             Assert.Equal(ServiceLifetime.Scoped, registrations[0].Lifetime);
 
             registrations = services.Where(sd => sd.ServiceType == typeof(IConfigureOptions<ServiceAgentSettings>))
@@ -280,7 +280,7 @@ namespace Digipolis.ServiceAgents.UnitTests.Startup
                                                      sd.ImplementationType == typeof(TokenHelper))
                                         .ToArray();
 
-            Assert.Equal(1, registrations.Count());
+            Assert.Single(registrations);
             Assert.Equal(ServiceLifetime.Scoped, registrations[0].Lifetime);
         }
     }

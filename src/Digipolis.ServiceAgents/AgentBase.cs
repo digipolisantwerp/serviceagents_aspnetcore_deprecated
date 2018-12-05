@@ -19,41 +19,25 @@ namespace Digipolis.ServiceAgents
         protected readonly ServiceSettings _settings;
         protected readonly JsonSerializerSettings _jsonSerializerSettings = new JsonSerializerSettings();
 
-        protected readonly IHttpClientFactory _clientFactory;
         protected readonly IRequestHeaderHelper _requestHeaderHelper;
 
         private IServiceProvider _serviceProvider;
         protected HttpResponseMessage _response;
 
-        private HttpClient _clientConnection;
-        protected HttpClient _client
-        {
-            get
-            {
-                if (_clientConnection == null)
-                {
-                    _clientConnection = _clientFactory.CreateClient(_settings);
-                }
-                return _clientConnection;
-            }
-            set
-            {
-                _clientConnection = value;
-            }
-        }
+        protected HttpClient _client { get; set; }
 
-        protected AgentBase(IServiceProvider serviceProvider, IOptions<ServiceAgentSettings> options)
+        protected AgentBase(HttpClient client, IServiceProvider serviceProvider, IOptions<ServiceAgentSettings> options)
         {
-            if (options.Value == null)
-                throw new ArgumentNullException(nameof(ServiceAgentSettings),
-                    $"{nameof(ServiceAgentSettings)} cannot be null.");
+            if (options.Value == null) throw new ArgumentNullException(nameof(ServiceAgentSettings), $"{nameof(ServiceAgentSettings)} cannot be null.");
 
-            _serviceProvider = serviceProvider;
+            _client = client ?? throw new ArgumentNullException(nameof(client), $"Http client cannot be null.");
+            _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider), $"Service provider cannot be null.");
 
             _settings = GetServiceSettings(options.Value);
 
-            _clientFactory = serviceProvider.GetService<IHttpClientFactory>();
-            _requestHeaderHelper = serviceProvider.GetService<IRequestHeaderHelper>();
+            var options2 = _serviceProvider.GetService<IOptions<ServiceAgentSettings>>();
+            var settings2 = GetServiceSettings(options2.Value);
+            _requestHeaderHelper = _serviceProvider.GetService<IRequestHeaderHelper>();
         }
 
         private ServiceSettings GetServiceSettings(ServiceAgentSettings serviceAgentSettings)
@@ -121,33 +105,33 @@ namespace Digipolis.ServiceAgents
             {
                 case HttpStatusCode.NotFound:
                     throw new NotFoundException(
-message: errorTitle ?? "Not found",
-code: errorCode ?? "NFOUND001",
-messages: extraParameters);
+                                message: errorTitle ?? "Not found",
+                                code: errorCode ?? "NFOUND001",
+                                messages: extraParameters);
 
                 case HttpStatusCode.BadRequest:
                     throw new ValidationException(
-message: errorTitle ?? "Bad request",
-code: errorCode ?? "UNVALI001",
-messages: extraParameters);
+                                message: errorTitle ?? "Bad request",
+                                code: errorCode ?? "UNVALI001",
+                                messages: extraParameters);
 
                 case HttpStatusCode.Unauthorized:
                     throw new UnauthorizedException(
-message: errorTitle ?? "Access denied",
-code: errorCode ?? "UNAUTH001",
-messages: extraParameters);
+                                message: errorTitle ?? "Access denied",
+                                code: errorCode ?? "UNAUTH001",
+                                messages: extraParameters);
 
                 case HttpStatusCode.Forbidden:
                     throw new ForbiddenException(
-message: errorTitle ?? "Forbidden",
-code: errorCode ?? "FORBID001",
-messages: extraParameters);
+                                message: errorTitle ?? "Forbidden",
+                                code: errorCode ?? "FORBID001",
+                                messages: extraParameters);
 
                 default:
                     throw new ServiceAgentException(
-               message: errorTitle,
-               code: errorCode ?? $"Status: {response.StatusCode}",
-               messages: extraParameters);
+                               message: errorTitle,
+                               code: errorCode ?? $"Status: {response.StatusCode}",
+                               messages: extraParameters);
             }
         }
 
@@ -158,8 +142,16 @@ messages: extraParameters);
             _requestHeaderHelper.ValidateAuthHeaders(_client, _settings);
 
             _response = await _client.GetAsync(requestUri);
-            if (!_response.IsSuccessStatusCode) await ParseJsonError(_response);
-            return JsonConvert.DeserializeObject<T>(await _response.Content.ReadAsStringAsync(), _jsonSerializerSettings);
+            return await ParseResult<T>(_response);
+        }
+
+        protected async Task<HttpResponseMessage> GetResponseAsync<T>(string requestUri)
+        {
+            _requestHeaderHelper.ValidateAuthHeaders(_client, _settings);
+
+            _response = await _client.GetAsync(requestUri);
+            if (!_response.IsSuccessStatusCode) await ParseJsonError(_response);    // only return responses with status code success
+            return _response;
         }
 
         protected async Task<string> GetStringAsync(string requestUri)
@@ -256,8 +248,8 @@ messages: extraParameters);
 
         public void Dispose()
         {
-            if (_clientConnection != null)
-                _clientConnection.Dispose();
+            if (_client != null)
+                _client.Dispose();
         }
     }
 }

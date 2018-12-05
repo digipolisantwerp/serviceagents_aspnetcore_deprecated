@@ -1,17 +1,17 @@
-﻿
-using Digipolis.ServiceAgents;
+﻿using Digipolis.ServiceAgents;
 using Digipolis.ServiceAgents.Settings;
 using Microsoft.Extensions.Options;
 using SampleApi.Models;
 using System;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace SampleApi.ServiceAgents
 {
     public class GenericAgent<T> : AgentBase
     {
-        public GenericAgent(IServiceProvider serviceProvider, IOptions<ServiceAgentSettings> options) 
-            : base(serviceProvider, options)
+        public GenericAgent(HttpClient client, IServiceProvider serviceProvider, IOptions<ServiceAgentSettings> options) 
+            : base(client, serviceProvider, options)
         {
         }
 

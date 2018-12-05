@@ -3,6 +3,7 @@ using Digipolis.ServiceAgents.Settings;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
@@ -30,17 +31,20 @@ namespace Digipolis.ServiceAgents
         {
             if (setupAction == null) throw new ArgumentNullException(nameof(setupAction), $"{nameof(setupAction)} cannot be null.");
 
+            // read service agent settings in local variable
             var serviceSettings = new ServiceSettings();
             setupAction.Invoke(serviceSettings);
 
-            var type = typeof(T);
-
+            // configure service agent settings for DI container
             services.Configure<ServiceAgentSettings>(s =>
             {
-                s.Services.Add(type.Name, serviceSettings);
+                s.Services.Add(typeof(T).Name, serviceSettings);
             });
 
-            RegisterServices<T>(services, callingAssembly, clientAction);
+            ServiceAgentSettings serviceAgentSettings = new ServiceAgentSettings();
+            serviceAgentSettings.Services.Add(typeof(T).Name, serviceSettings);
+
+            RegisterServices<T>(services, serviceAgentSettings, callingAssembly, clientAction);
 
             return services;
         }
@@ -107,11 +111,11 @@ namespace Digipolis.ServiceAgents
             return serviceAgentSettings;
         }
 
-        private static void RegisterServices<T>(IServiceCollection services, Assembly assembly, Action<IServiceProvider, HttpClient> clientAction) where T : AgentBase
+        private static void RegisterServices<T>(IServiceCollection services, ServiceAgentSettings settings, Assembly assembly, Action<IServiceProvider, HttpClient> clientAction) where T : AgentBase
         {
-            RegisterClientFactory(services, clientAction);
+            //RegisterClientFactory(services, clientAction);
 
-            RegisterAgentType(services, assembly.GetTypes(), typeof(T));
+            RegisterAgentType(services, typeof(T), settings);
 
             services.AddScoped<ITokenHelper, TokenHelper>();
             services.AddScoped<IRequestHeaderHelper, RequestHeaderHelper>();
@@ -119,7 +123,7 @@ namespace Digipolis.ServiceAgents
 
         private static void RegisterServices(IServiceCollection services, ServiceAgentSettings settings, Assembly assembly, Action<IServiceProvider, HttpClient> clientAction)
         {
-            RegisterClientFactory(services, clientAction);
+            //RegisterClientFactory(services, clientAction);
 
             var assemblyTypes = assembly.GetTypes();
 
@@ -128,48 +132,72 @@ namespace Digipolis.ServiceAgents
                 var type = assemblyTypes.Single(t => typeof(AgentBase).IsAssignableFrom(t.GetTypeInfo().BaseType) &&
                                                      t.Name.StartsWith(item.Key));
 
-                RegisterAgentType(services, assemblyTypes, type);
+                RegisterAgentType(services, type, settings);
             }
 
             services.AddScoped<ITokenHelper, TokenHelper>();
             services.AddScoped<IRequestHeaderHelper, RequestHeaderHelper>();
         }
 
-        private static void RegisterClientFactory(IServiceCollection services, Action<IServiceProvider, HttpClient> clientAction)
+        //private static void RegisterClientFactory(IServiceCollection services, Action<IServiceProvider, HttpClient> clientAction)
+        //{
+        //    services.AddSingleton<IHttpClientFactory, HttpClientFactory>(sp =>
+        //    {
+        //        var factory = new HttpClientFactory(sp);
+
+        //        if (clientAction != null)
+        //            factory.AfterClientCreated += clientAction;
+
+        //        return factory;
+        //    });
+        //}
+
+        private static void RegisterAgentType(IServiceCollection services, Type implementationType, ServiceAgentSettings settings)
         {
-            services.AddSingleton<IHttpClientFactory, HttpClientFactory>(sp =>
-            {
-                var factory = new HttpClientFactory(sp);
-
-                if (clientAction != null)
-                    factory.AfterClientCreated += clientAction;
-
-                return factory;
-            });
-        }
-
-        private static void RegisterAgentType(IServiceCollection services, Type[] assemblyTypes, Type implementationType)
-        {
-            var interfaceTypeName = $"I{implementationType.Name}";
-            var interfaceType = assemblyTypes.SingleOrDefault(t => t.Name == interfaceTypeName && t.GetTypeInfo().IsInterface);
-
-            //services.AddTypedClient<interfaceType, implementationType>();
-
+            var interfaceType = implementationType.FindInterfaces(new TypeFilter(MyInterfaceFilter), implementationType.Name).SingleOrDefault();
+            
             if (interfaceType != null)
             {
-                services.AddScoped(interfaceType, implementationType);
+                //services.AddScoped(interfaceType, implementationType);
+
+                // they type specified will be registered in the service collection as a transient service
+                IHttpClientBuilder builder = services.AddHttpClient(implementationType.Name, (serviceProvider, client) =>
+                {
+                    var serviceSettings = settings.GetServiceSettings(implementationType.Name);
+
+                    client.BaseAddress = new Uri(serviceSettings.Url);
+
+                    IRequestHeaderHelper requestHeaderHelper = serviceProvider.GetService<IRequestHeaderHelper>();
+                    requestHeaderHelper.InitializeHeaders(client, serviceSettings);
+
+                    // invoke event
+                    //AfterClientCreated?.Invoke(_serviceProvider, client);
+                });
+
+                // find the desired generic method for creating a typed HttpClient
+                var genericMethods = typeof(HttpClientBuilderExtensions).GetMethods()
+                    .Where(m => m.Name == "AddTypedClient"
+                                && m.IsGenericMethod == true
+                                && m.GetParameters().Count() == 1
+                                && m.GetGenericArguments().Count() == 2).ToList();
+
+                if (genericMethods == null || genericMethods.Count != 1) throw new Exception("Unable to find suitable method for constructing a typed HttpClient");
+                
+                var genericMethod = genericMethods.First().MakeGenericMethod(interfaceType, implementationType);
+                genericMethod.Invoke(builder, new object[] { builder });
             }
             else
-            {
+            { 
                 services.AddScoped(implementationType);
             }
         }
 
-        private static Type TryGetInterface(Type[] assemblyTypes, Type type)
+        public static bool MyInterfaceFilter(Type typeObj, Object criteriaObj)
         {
-            var interfaceTypeName = $"I{type.Name}";
-            var interfaceType = assemblyTypes.SingleOrDefault(t => t.Name == interfaceTypeName && t.GetTypeInfo().IsInterface);
-            return interfaceType;
+            if (typeObj.ToString().EndsWith(criteriaObj.ToString()))
+                return true;
+            else
+                return false;
         }
     }
 }
