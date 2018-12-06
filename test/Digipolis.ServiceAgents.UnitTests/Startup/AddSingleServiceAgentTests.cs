@@ -26,31 +26,23 @@ namespace Digipolis.ServiceAgents.UnitTests.Startup
         }
 
         [Fact]
-        private void HttpClientFactoryIsRegistratedAsSingleton()
-        {
-            var services = new ServiceCollection();
-            services.AddSingleServiceAgent<TestAgent>(settings => { });
-
-            var registrations = services.Where(sd => sd.ServiceType == typeof(IHttpClientFactory))
-                                        .ToArray();
-
-            Assert.Equal(1, registrations.Count());
-            Assert.Equal(ServiceLifetime.Singleton, registrations[0].Lifetime);
-        }
-
-        [Fact]
-        private void HttpClientFactoryClientActionIsPassed()
+        private void HttpClientCreatedActionIsExecuted()
         {
             HttpClient passedClient = null;
             var services = new ServiceCollection();
-            services.AddSingleServiceAgent<TestAgent>(settings => { }, (sp, client) => passedClient = client);
+            services.AddSingleServiceAgent<TestAgent>(settings => {
+                settings.Scheme = "http";
+                settings.Host = "localhost";
+                settings.Path = "api";
+            }, 
+            (sp, client) => {
+                // execution of the HttpClientCreated action
+                passedClient = client;
+            });
 
-            ///get the registrated HttpFactory
-            var registration = services.Single(sd => sd.ServiceType == typeof(IHttpClientFactory));
-
-            //Manually call the CreateClient on the factory (this normally happens when the service agent gets resolved
-            var factory = registration.ImplementationFactory.Invoke(services.BuildServiceProvider()) as HttpClientFactory;
-            factory.CreateClient(new ServiceSettings { Host = "test.be" });
+            /// get the registrated TestAgent > this also creates an HttpClient and executes the clientCreatedAction
+            var registration = services.Single(sd => sd.ServiceType == typeof(TestAgent));
+            var agent = registration.ImplementationFactory.Invoke(services.BuildServiceProvider()) as TestAgent;
 
             Assert.NotNull(passedClient);
         }
@@ -71,7 +63,7 @@ namespace Digipolis.ServiceAgents.UnitTests.Startup
             var registrations = services.Where(sd => sd.ServiceType == typeof(IConfigureOptions<ServiceAgentSettings>))
                                         .ToArray();
 
-            Assert.Equal(1, registrations.Count());
+            Assert.Single(registrations);
             Assert.Equal(ServiceLifetime.Singleton, registrations[0].Lifetime);
 
             var configOptions = registrations[0].ImplementationInstance as IConfigureOptions<ServiceAgentSettings>;
@@ -102,7 +94,7 @@ namespace Digipolis.ServiceAgents.UnitTests.Startup
                                                      sd.ImplementationType == typeof(TestAgent))
                                         .ToArray();
 
-            Assert.Equal(1, registrations.Count());
+            Assert.Single(registrations);
             Assert.Equal(ServiceLifetime.Scoped, registrations[0].Lifetime);
         }
 
@@ -113,12 +105,11 @@ namespace Digipolis.ServiceAgents.UnitTests.Startup
             services.AddSingleServiceAgent<InterfaceImplementingAgent>(servicSettings => { },
                 assembly: typeof(InterfaceImplementingAgent).GetTypeInfo().Assembly);
 
-            var registrations = services.Where(sd => sd.ServiceType == typeof(IInterfaceImplementingAgent) &&
-                                                     sd.ImplementationType == typeof(InterfaceImplementingAgent))
+            var registrations = services.Where(sd => sd.ServiceType == typeof(IInterfaceImplementingAgent))
                                         .ToArray();
 
-            Assert.Equal(1, registrations.Count());
-            Assert.Equal(ServiceLifetime.Scoped, registrations[0].Lifetime);
+            Assert.Single(registrations);
+            Assert.Equal(ServiceLifetime.Transient, registrations[0].Lifetime);
         }
 
         [Fact]
@@ -132,7 +123,7 @@ namespace Digipolis.ServiceAgents.UnitTests.Startup
                                                      sd.ImplementationType == typeof(TokenHelper))
                                         .ToArray();
 
-            Assert.Equal(1, registrations.Count());
+            Assert.Single(registrations);
             Assert.Equal(ServiceLifetime.Scoped, registrations[0].Lifetime);
         }
 

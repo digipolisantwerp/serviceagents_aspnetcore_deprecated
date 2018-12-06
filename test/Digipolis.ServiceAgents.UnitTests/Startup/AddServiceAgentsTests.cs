@@ -24,50 +24,31 @@ namespace Digipolis.ServiceAgents.UnitTests.Startup
 
             Assert.Equal("jsonSetupAction", ex.ParamName);
         }
-
+        
         [Fact]
-        private void HttpClientFactoryIsRegistratedAsSingleton()
-        {
-            var services = new ServiceCollection();
-            services.AddServiceAgents(settings =>
-                {
-                    settings.FileName = Path.Combine(Directory.GetCurrentDirectory(), "_TestData/serviceagentconfig_1.json");
-                    settings.Section = "TestAgent";
-                },
-                assembly: typeof(AddServiceAgentsTests).GetTypeInfo().Assembly);
-
-            var registrations = services.Where(sd => sd.ServiceType == typeof(IHttpClientFactory))
-                                        .ToArray();
-
-            Assert.Single(registrations);
-            Assert.Equal(ServiceLifetime.Singleton, registrations[0].Lifetime);
-        }
-
-        [Fact]
-        private void HttpClientFactoryClientActionIsPassed()
+        private void HttpClientCreatedActionIsExecuted()
         {
             var serviceAgentSettings = new ServiceAgentSettings();
             HttpClient passedClient = null;
             IServiceProvider passedServiceProvider = null;
+
             var services = new ServiceCollection();
             services.AddServiceAgents(s =>
             {
-                s.FileName = Path.Combine(Directory.GetCurrentDirectory(), "_TestData/serviceagentconfig_1.json");
-                s.Section = "TestAgent";
+                s.FileName = Path.Combine(Directory.GetCurrentDirectory(), "_TestData/serviceagentconfig_3.json");
+                s.Section = "InterfaceImplementingAgent";
             }, (serviceProvider, client) =>
             {
+                // actions for the client created function
                 passedClient = client;
                 passedServiceProvider = serviceProvider;
             },
             assembly: typeof(AddServiceAgentsTests).GetTypeInfo().Assembly
             );
 
-            ///get the registrated HttpFactory
-            var registration = services.Single(sd => sd.ServiceType == typeof(IHttpClientFactory));
-
-            //Manually call the CreateClient on the factory (this normally happens when the service agent gets resolved
-            var factory = registration.ImplementationFactory.Invoke(services.BuildServiceProvider()) as HttpClientFactory;
-            factory.CreateClient(new ServiceSettings { Host = "test.be" });
+            /// get the registrated TestAgent > this also creates an HttpClient and executes the clientCreatedAction
+            var registration = services.Single(sd => sd.ServiceType == typeof(IInterfaceImplementingAgent));
+            var agent = registration.ImplementationFactory.Invoke(services.BuildServiceProvider()) as InterfaceImplementingAgent;
 
             Assert.NotNull(passedClient);
             Assert.NotNull(passedServiceProvider);
@@ -209,12 +190,11 @@ namespace Digipolis.ServiceAgents.UnitTests.Startup
             },
             assembly: typeof(AddServiceAgentsTests).GetTypeInfo().Assembly);
 
-            var registrations = services.Where(sd => sd.ServiceType == typeof(IInterfaceImplementingAgent) &&
-                                                     sd.ImplementationType == typeof(InterfaceImplementingAgent))
+            var registrations = services.Where(sd => sd.ServiceType == typeof(IInterfaceImplementingAgent))
                                         .ToArray();
 
             Assert.Single(registrations);
-            Assert.Equal(ServiceLifetime.Scoped, registrations[0].Lifetime);
+            Assert.Equal(ServiceLifetime.Transient, registrations[0].Lifetime);
         }
 
         [Fact]
