@@ -16,22 +16,32 @@ namespace Digipolis.ServiceAgents
                                                                   Assembly assembly = null) where T : AgentBase
         {
             assembly = assembly == null ? Assembly.GetEntryAssembly() : assembly;
-            return AddSingleServiceAgent<T>(services, assembly, serviceSettingsSetupAction, null);
+            return AddSingleServiceAgent<T>(services: services,
+                                            serviceSettingsSetupAction: serviceSettingsSetupAction,
+                                            clientCreatedAction: null, 
+                                            clientBuildAction : null, 
+                                            callingAssembly: assembly);
         }
 
         public static IServiceCollection AddSingleServiceAgent<T>(this IServiceCollection services, 
                                                                   Action<ServiceSettings> serviceSettingsSetupAction, 
-                                                                  Action<IServiceProvider, HttpClient> clientCreatedAction, 
+                                                                  Action<IServiceProvider, HttpClient> clientCreatedAction,
+                                                                  Action<string, IHttpClientBuilder> clientBuildAction = null,
                                                                   Assembly assembly = null) where T : AgentBase
         {
             assembly = assembly == null ? Assembly.GetEntryAssembly() : assembly;
-            return AddSingleServiceAgent<T>(services, assembly, serviceSettingsSetupAction, clientCreatedAction);
+            return AddSingleServiceAgent<T>(services: services,
+                                            serviceSettingsSetupAction: serviceSettingsSetupAction,
+                                            clientCreatedAction: clientCreatedAction,
+                                            clientBuildAction: clientBuildAction,
+                                            callingAssembly: assembly);
         }
 
         private static IServiceCollection AddSingleServiceAgent<T>(this IServiceCollection services,
-                                                                   Assembly callingAssembly, 
+                                                                   Assembly callingAssembly,
                                                                    Action<ServiceSettings> serviceSettingsSetupAction, 
-                                                                   Action<IServiceProvider, HttpClient> clientCreatedAction) where T : AgentBase
+                                                                   Action<IServiceProvider, HttpClient> clientCreatedAction,
+                                                                   Action<string, IHttpClientBuilder> clientBuildAction = null) where T : AgentBase
         {
             if (serviceSettingsSetupAction == null) throw new ArgumentNullException(nameof(serviceSettingsSetupAction), $"{nameof(serviceSettingsSetupAction)} cannot be null.");
 
@@ -48,7 +58,7 @@ namespace Digipolis.ServiceAgents
             ServiceAgentSettings serviceAgentSettings = new ServiceAgentSettings();
             serviceAgentSettings.Services.Add(typeof(T).Name, serviceSettings);
 
-            RegisterServices<T>(services, serviceAgentSettings, callingAssembly, clientCreatedAction);
+            RegisterServices<T>(services, serviceAgentSettings, callingAssembly, clientCreatedAction, clientBuildAction);
 
             return services;
         }
@@ -58,38 +68,56 @@ namespace Digipolis.ServiceAgents
                                                           Assembly assembly = null)
         {
             assembly = assembly == null ? Assembly.GetEntryAssembly() : assembly;
-            return AddServiceAgents(services, assembly, jsonConfigurationFileSetupAction, null, null);
+            return AddServiceAgents(services: services,
+                                    jsonConfigurationFileSetupAction: jsonConfigurationFileSetupAction,
+                                    settingsSetupAction: null,
+                                    clientCreatedAction: null,
+                                    clientBuildAction: null,
+                                    callingAssembly: assembly);
         }
-
-        public static IServiceCollection AddServiceAgents(this IServiceCollection services, 
-                                                          Action<ServiceSettingsJsonFile> jsonConfigurationFileSetupAction, 
-                                                          Action<IServiceProvider, HttpClient> clientCreatedAction, 
+                
+        public static IServiceCollection AddServiceAgents(this IServiceCollection services,
+                                                          Action<ServiceSettingsJsonFile> jsonConfigurationFileSetupAction,
+                                                          Action<IServiceProvider, HttpClient> clientCreatedAction,
+                                                          Action<string, IHttpClientBuilder> clientBuildAction = null,
                                                           Assembly assembly = null)
         {
             assembly = assembly == null ? Assembly.GetEntryAssembly() : assembly;
-            return AddServiceAgents(services, assembly, jsonConfigurationFileSetupAction, null, clientCreatedAction);
+            return AddServiceAgents(services: services,
+                                    jsonConfigurationFileSetupAction: jsonConfigurationFileSetupAction,
+                                    settingsSetupAction: null,
+                                    clientCreatedAction: clientCreatedAction,
+                                    clientBuildAction: clientBuildAction,
+                                    callingAssembly: assembly);
         }
 
         public static IServiceCollection AddServiceAgents(this IServiceCollection services, 
                                                           Action<ServiceSettingsJsonFile> jsonConfigurationFileSetupAction,
                                                           Action<ServiceAgentSettings> serviceSettingsSetupAction,
                                                           Action<IServiceProvider, HttpClient> clientCreatedAction,
+                                                          Action<string, IHttpClientBuilder> clientBuildAction = null,
                                                           Assembly assembly = null)
         {
             assembly = assembly == null ? Assembly.GetEntryAssembly() : assembly;
-            return AddServiceAgents(services, assembly, jsonConfigurationFileSetupAction, serviceSettingsSetupAction, clientCreatedAction);
+            return AddServiceAgents(services: services,
+                                    jsonConfigurationFileSetupAction: jsonConfigurationFileSetupAction,
+                                    settingsSetupAction: serviceSettingsSetupAction,
+                                    clientCreatedAction: clientCreatedAction,
+                                    clientBuildAction: clientBuildAction,
+                                    callingAssembly: assembly);
         }
 
         private static IServiceCollection AddServiceAgents(this IServiceCollection services,
             Assembly callingAssembly,
-            Action<ServiceSettingsJsonFile> jsonSetupAction,
+            Action<ServiceSettingsJsonFile> jsonConfigurationFileSetupAction,
             Action<ServiceAgentSettings> settingsSetupAction,
-            Action<IServiceProvider, HttpClient> clientCreatedAction)
+            Action<IServiceProvider, HttpClient> clientCreatedAction,
+            Action<string, IHttpClientBuilder> clientBuildAction)
         {
-            if (jsonSetupAction == null) throw new ArgumentNullException(nameof(jsonSetupAction), $"{nameof(jsonSetupAction)} cannot be null.");
+            if (jsonConfigurationFileSetupAction == null) throw new ArgumentNullException(nameof(jsonConfigurationFileSetupAction), $"{nameof(jsonConfigurationFileSetupAction)} cannot be null.");
 
             var serviceSettingsJsonFile = new ServiceSettingsJsonFile();
-            jsonSetupAction.Invoke(serviceSettingsJsonFile);
+            jsonConfigurationFileSetupAction.Invoke(serviceSettingsJsonFile);
 
             var serviceAgentSettings = ConfigureServiceAgentSettings(services, serviceSettingsJsonFile);
 
@@ -104,7 +132,7 @@ namespace Digipolis.ServiceAgents
                 }
             });
 
-            RegisterServices(services, serviceAgentSettings, callingAssembly, clientCreatedAction);
+            RegisterServices(services, serviceAgentSettings, callingAssembly, clientCreatedAction, clientBuildAction);
 
             return services;
         }
@@ -120,15 +148,23 @@ namespace Digipolis.ServiceAgents
             return serviceAgentSettings;
         }
 
-        private static void RegisterServices<T>(IServiceCollection services, ServiceAgentSettings settings, Assembly assembly, Action<IServiceProvider, HttpClient> clientCreatedAction) where T : AgentBase
+        private static void RegisterServices<T>(IServiceCollection services, 
+                                    ServiceAgentSettings settings, 
+                                    Assembly assembly, 
+                                    Action<IServiceProvider, HttpClient> clientCreatedAction,
+                                    Action<string, IHttpClientBuilder> clientBuildAction) where T : AgentBase
         {
-            RegisterAgentType(services, typeof(T), settings, clientCreatedAction);
+            RegisterAgentType(services, typeof(T), settings, clientCreatedAction, clientBuildAction);
 
             services.AddScoped<ITokenHelper, TokenHelper>();
             services.AddScoped<IRequestHeaderHelper, RequestHeaderHelper>();
         }
 
-        private static void RegisterServices(IServiceCollection services, ServiceAgentSettings settings, Assembly assembly, Action<IServiceProvider, HttpClient> clientCreatedAction)
+        private static void RegisterServices(IServiceCollection services, 
+                                ServiceAgentSettings settings, 
+                                Assembly assembly, 
+                                Action<IServiceProvider, HttpClient> clientCreatedAction,
+                                Action<string, IHttpClientBuilder> clientBuildAction)
         {
             var assemblyTypes = assembly.GetTypes();
 
@@ -137,7 +173,7 @@ namespace Digipolis.ServiceAgents
                 var type = assemblyTypes.Single(t => typeof(AgentBase).IsAssignableFrom(t.GetTypeInfo().BaseType) &&
                                                      t.Name.StartsWith(item.Key));
 
-                RegisterAgentType(services, type, settings, clientCreatedAction);
+                RegisterAgentType(services, type, settings, clientCreatedAction, clientBuildAction);
             }
 
             services.AddScoped<ITokenHelper, TokenHelper>();
@@ -147,7 +183,8 @@ namespace Digipolis.ServiceAgents
         private static void RegisterAgentType(IServiceCollection services, 
                                               Type implementationType, 
                                               ServiceAgentSettings settings, 
-                                              Action<IServiceProvider, HttpClient> clientCreatedAction)
+                                              Action<IServiceProvider, HttpClient> clientCreatedAction,
+                                              Action<string, IHttpClientBuilder> clientBuildAction)
         {
             // they type specified will be registered in the service collection as a transient service
             IHttpClientBuilder builder = services.AddHttpClient(implementationType.Name, (serviceProvider, client) =>
@@ -194,6 +231,9 @@ namespace Digipolis.ServiceAgents
                 var genericMethod = genericMethods.First().MakeGenericMethod(implementationType);
                 genericMethod.Invoke(builder, new object[] { builder });
             }
+
+            // invoke additional actions for HttpClientBuilder ex. attaching DelegatingHandlers
+            clientBuildAction?.Invoke(implementationType.Name, builder);
         }
 
         public static bool MyInterfaceFilter(Type typeObj, Object criteriaObj)

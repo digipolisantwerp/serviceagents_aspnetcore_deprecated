@@ -2,7 +2,7 @@
 
 Toolbox for ServiceAgents in ASP.NET Core.
 
-This readme is applicable for toolbox version 6.0.x
+This readme is applicable for toolbox version 7.0.x
 
 ## Table of Contents
 
@@ -36,7 +36,7 @@ or if your project still works with project.json :
 
 ``` json
     "dependencies": {
-        "Digipolis.ServiceAgents":  "6.0.6"
+        "Digipolis.ServiceAgents":  "7.0.1"
     }
 ```
 
@@ -155,8 +155,8 @@ In order to create a service agent you need to create a type that derives from *
 ``` csharp
     public class DemoAgent : AgentBase
     {
-        public DemoAgent(IServiceProvider serviceProvider, IOptions<ServiceAgentSettings> options)
-            : base(serviceProvider, options)
+        public DemoAgent(HttpClient client, IServiceProvider serviceProvider, IOptions<ServiceAgentSettings> options)
+            : base(client, serviceProvider, options)
         {
         }
     }
@@ -196,6 +196,15 @@ If you want to return the response as string you can use the **GetStringAsync** 
     public Task<string> GetAddressAsStringAsync(int id)
     {
         return base.GetStringAsync($"adress?id={id}");
+    }
+```
+
+If you want to get the response itself you can use the **GetResponseAsync** method on the **Agentbase**. Only responses with status success will be returned.
+
+``` csharp
+    public Task<HttpResponseMessage> GetServiceMethodResponseAsync(int id)
+    {
+        return base.GetResponseAsync($"adress?id={id}");
     }
 ```
 
