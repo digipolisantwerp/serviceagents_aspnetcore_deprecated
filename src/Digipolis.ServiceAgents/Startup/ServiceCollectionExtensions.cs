@@ -62,7 +62,7 @@ namespace Digipolis.ServiceAgents
 
             return services;
         }
-
+        
         public static IServiceCollection AddServiceAgents(this IServiceCollection services, 
                                                           Action<ServiceSettingsJsonFile> jsonConfigurationFileSetupAction, 
                                                           Assembly assembly = null)
@@ -154,10 +154,9 @@ namespace Digipolis.ServiceAgents
                                     Action<IServiceProvider, HttpClient> clientCreatedAction,
                                     Action<string, IHttpClientBuilder> clientBuildAction) where T : AgentBase
         {
-            RegisterAgentType(services, typeof(T), settings, clientCreatedAction, clientBuildAction);
+            RegisterAgentType<T>(services, settings, clientCreatedAction, clientBuildAction);
 
-            services.AddScoped<ITokenHelper, TokenHelper>();
-            services.AddScoped<IRequestHeaderHelper, RequestHeaderHelper>();
+            RegisterCommonServices(services);
         }
 
         private static void RegisterServices(IServiceCollection services, 
@@ -176,31 +175,32 @@ namespace Digipolis.ServiceAgents
                 RegisterAgentType(services, type, settings, clientCreatedAction, clientBuildAction);
             }
 
+            RegisterCommonServices(services);
+        }
+
+        private static void RegisterCommonServices(IServiceCollection services)
+        {
             services.AddScoped<ITokenHelper, TokenHelper>();
             services.AddScoped<IRequestHeaderHelper, RequestHeaderHelper>();
         }
-        
+
         private static void RegisterAgentType(IServiceCollection services, 
                                               Type implementationType, 
                                               ServiceAgentSettings settings, 
                                               Action<IServiceProvider, HttpClient> clientCreatedAction,
                                               Action<string, IHttpClientBuilder> clientBuildAction)
         {
+            // registering service agents with generic parameters causes an error: "Late bound operations cannot be performed on types or methods for which ContainsGenericParameters is true."
+            if (implementationType.ContainsGenericParameters) throw new Exception($"Error registering service {implementationType.Name}. A service agent with generic parameters can't be registered at runtime and must be registered with the service collection via de AddSingleServiceAgent<T> method");
+
             // they type specified will be registered in the service collection as a transient service
             IHttpClientBuilder builder = services.AddHttpClient(implementationType.Name, (serviceProvider, client) =>
             {
                 var serviceSettings = settings.GetServiceSettings(implementationType.Name);
 
-                client.BaseAddress = new Uri(serviceSettings.Url);
-
-                IRequestHeaderHelper requestHeaderHelper = serviceProvider.GetService<IRequestHeaderHelper>();
-                requestHeaderHelper.InitializeHeaders(client, serviceSettings);
-
-                // invoke event
-                clientCreatedAction?.Invoke(serviceProvider, client);
+                ConfigureHttpClient(serviceProvider, client, serviceSettings, clientCreatedAction);
             });
-
-
+            
             var interfaceType = implementationType.FindInterfaces(new TypeFilter(MyInterfaceFilter), implementationType.Name).SingleOrDefault();
             
             if (interfaceType != null)
@@ -236,12 +236,41 @@ namespace Digipolis.ServiceAgents
             clientBuildAction?.Invoke(implementationType.Name, builder);
         }
 
-        public static bool MyInterfaceFilter(Type typeObj, Object criteriaObj)
+        private static void RegisterAgentType<T>(IServiceCollection services,
+                                              ServiceAgentSettings settings,
+                                              Action<IServiceProvider, HttpClient> clientCreatedAction,
+                                              Action<string, IHttpClientBuilder> clientBuildAction) where T: class
+        {
+            // they type specified will be registered in the service collection as a transient service
+            IHttpClientBuilder builder = services.AddHttpClient<T>(typeof(T).Name, (serviceProvider, client) =>
+            {
+                var serviceSettings = settings.GetServiceSettings(typeof(T).Name);
+
+                ConfigureHttpClient(serviceProvider, client, serviceSettings, clientCreatedAction);
+            });
+
+            // invoke additional actions for HttpClientBuilder ex. attaching DelegatingHandlers
+            clientBuildAction?.Invoke(typeof(T).Name, builder);
+        }
+
+        private static void ConfigureHttpClient(IServiceProvider serviceProvider, HttpClient client, ServiceSettings serviceSettings, Action<IServiceProvider, HttpClient> clientCreatedAction)
+        {
+            client.BaseAddress = new Uri(serviceSettings.Url);
+
+            IRequestHeaderHelper requestHeaderHelper = serviceProvider.GetService<IRequestHeaderHelper>();
+            requestHeaderHelper.InitializeHeaders(client, serviceSettings).Wait();
+
+            // invoke event
+            clientCreatedAction?.Invoke(serviceProvider, client);
+        }
+
+        private static bool MyInterfaceFilter(Type typeObj, Object criteriaObj)
         {
             if (typeObj.ToString().EndsWith(criteriaObj.ToString()))
                 return true;
             else
                 return false;
         }
+
     }
 }

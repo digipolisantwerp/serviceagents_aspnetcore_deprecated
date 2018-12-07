@@ -35,8 +35,8 @@ namespace Digipolis.ServiceAgents
 
             _settings = GetServiceSettings(options.Value);
 
-            var options2 = _serviceProvider.GetService<IOptions<ServiceAgentSettings>>();
-            var settings2 = GetServiceSettings(options2.Value);
+            //var options2 = _serviceProvider.GetService<IOptions<ServiceAgentSettings>>();
+            //var settings2 = GetServiceSettings(options2.Value);
             _requestHeaderHelper = _serviceProvider.GetService<IRequestHeaderHelper>();
         }
 
@@ -139,7 +139,7 @@ namespace Digipolis.ServiceAgents
 
         protected async Task<T> GetAsync<T>(string requestUri)
         {
-            _requestHeaderHelper.ValidateAuthHeaders(_client, _settings);
+            await _requestHeaderHelper.ValidateAuthHeaders(_client, _settings);
 
             _response = await _client.GetAsync(requestUri);
             return await ParseResult<T>(_response);
@@ -147,7 +147,7 @@ namespace Digipolis.ServiceAgents
 
         protected async Task<HttpResponseMessage> GetResponseAsync<T>(string requestUri)
         {
-            _requestHeaderHelper.ValidateAuthHeaders(_client, _settings);
+            await _requestHeaderHelper.ValidateAuthHeaders(_client, _settings);
 
             _response = await _client.GetAsync(requestUri);
             if (!_response.IsSuccessStatusCode) await ParseJsonError(_response);    // only return responses with status code success
@@ -156,7 +156,7 @@ namespace Digipolis.ServiceAgents
 
         protected async Task<string> GetStringAsync(string requestUri)
         {
-            _requestHeaderHelper.ValidateAuthHeaders(_client, _settings);
+            await _requestHeaderHelper.ValidateAuthHeaders(_client, _settings);
 
             _response = await _client.GetAsync(requestUri);
             if (!_response.IsSuccessStatusCode) await ParseJsonError(_response);
@@ -165,7 +165,7 @@ namespace Digipolis.ServiceAgents
 
         protected async Task<T> PostAsync<T>(string requestUri, T item)
         {
-            _requestHeaderHelper.ValidateAuthHeaders(_client, _settings);
+            await _requestHeaderHelper.ValidateAuthHeaders(_client, _settings);
 
             HttpContent contentPost = new StringContent(JsonConvert.SerializeObject(item, _jsonSerializerSettings), Encoding.UTF8, "application/json");
             _response = await _client.PostAsync(requestUri, contentPost);
@@ -174,7 +174,7 @@ namespace Digipolis.ServiceAgents
 
         protected async Task<TReponse> PostAsync<TRequest, TReponse>(string requestUri, TRequest item)
         {
-            _requestHeaderHelper.ValidateAuthHeaders(_client, _settings);
+            await _requestHeaderHelper.ValidateAuthHeaders(_client, _settings);
 
             HttpContent contentPost = new StringContent(JsonConvert.SerializeObject(item, _jsonSerializerSettings), Encoding.UTF8, "application/json");
             _response = await _client.PostAsync(requestUri, contentPost);
@@ -183,7 +183,7 @@ namespace Digipolis.ServiceAgents
 
         protected async Task<T> PutAsync<T>(string requestUri, T item)
         {
-            _requestHeaderHelper.ValidateAuthHeaders(_client, _settings);
+            await _requestHeaderHelper.ValidateAuthHeaders(_client, _settings);
 
             HttpContent contentPost = new StringContent(JsonConvert.SerializeObject(item, _jsonSerializerSettings), Encoding.UTF8, "application/json");
             _response = await _client.PutAsync(requestUri, contentPost);
@@ -192,7 +192,7 @@ namespace Digipolis.ServiceAgents
 
         protected async Task<TReponse> PutAsync<TRequest, TReponse>(string requestUri, TRequest item)
         {
-            _requestHeaderHelper.ValidateAuthHeaders(_client, _settings);
+            await _requestHeaderHelper.ValidateAuthHeaders(_client, _settings);
 
             HttpContent contentPost = new StringContent(JsonConvert.SerializeObject(item, _jsonSerializerSettings), Encoding.UTF8, "application/json");
             _response = await _client.PutAsync(requestUri, contentPost);
@@ -201,7 +201,7 @@ namespace Digipolis.ServiceAgents
 
         protected async Task PutWithEmptyResultAsync<T>(string requestUri, T item)
         {
-            _requestHeaderHelper.ValidateAuthHeaders(_client, _settings);
+            await _requestHeaderHelper.ValidateAuthHeaders(_client, _settings);
 
             HttpContent contentPost = new StringContent(JsonConvert.SerializeObject(item, _jsonSerializerSettings), Encoding.UTF8, "application/json");
             _response = await _client.PutAsync(requestUri, contentPost);
@@ -211,7 +211,7 @@ namespace Digipolis.ServiceAgents
 
         protected async Task DeleteAsync(string requestUri)
         {
-            _requestHeaderHelper.ValidateAuthHeaders(_client, _settings);
+            await _requestHeaderHelper.ValidateAuthHeaders(_client, _settings);
 
             _response = await _client.DeleteAsync(requestUri);
             if (!_response.IsSuccessStatusCode)
@@ -220,7 +220,7 @@ namespace Digipolis.ServiceAgents
 
         protected async Task<T> PatchAsync<T>(string requestUri, T item)
         {
-            _requestHeaderHelper.ValidateAuthHeaders(_client, _settings);
+            await _requestHeaderHelper.ValidateAuthHeaders(_client, _settings);
 
             HttpContent contentPatch = new StringContent(JsonConvert.SerializeObject(item, _jsonSerializerSettings), Encoding.UTF8, "application/json");
             var method = new HttpMethod("PATCH");
@@ -234,7 +234,7 @@ namespace Digipolis.ServiceAgents
 
         protected async Task<TReponse> PatchAsync<TRequest, TReponse>(string requestUri, TRequest item)
         {
-            _requestHeaderHelper.ValidateAuthHeaders(_client, _settings);
+            await _requestHeaderHelper.ValidateAuthHeaders(_client, _settings);
 
             HttpContent contentPatch = new StringContent(JsonConvert.SerializeObject(item, _jsonSerializerSettings), Encoding.UTF8, "application/json");
             var method = new HttpMethod("PATCH");

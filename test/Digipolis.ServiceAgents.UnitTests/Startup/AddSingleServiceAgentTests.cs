@@ -22,7 +22,7 @@ namespace Digipolis.ServiceAgents.UnitTests.Startup
 
             var ex = Assert.Throws<ArgumentNullException>(() => services.AddSingleServiceAgent<TestAgent>(nullAction));
 
-            Assert.Equal("setupAction", ex.ParamName);
+            Assert.Equal("serviceSettingsSetupAction", ex.ParamName);
         }
 
         [Fact]
@@ -85,21 +85,20 @@ namespace Digipolis.ServiceAgents.UnitTests.Startup
         }
 
         [Fact]
-        private void ServiceAgentIsRegistratedAsScoped()
+        private void ServiceAgentIsRegistratedAsTransient()
         {
             var services = new ServiceCollection();
             services.AddSingleServiceAgent<TestAgent>(settings => { });
 
-            var registrations = services.Where(sd => sd.ServiceType == typeof(TestAgent) &&
-                                                     sd.ImplementationType == typeof(TestAgent))
+            var registrations = services.Where(sd => sd.ServiceType == typeof(TestAgent))
                                         .ToArray();
 
             Assert.Single(registrations);
-            Assert.Equal(ServiceLifetime.Scoped, registrations[0].Lifetime);
+            Assert.Equal(ServiceLifetime.Transient, registrations[0].Lifetime);
         }
 
         [Fact]
-        private void ServiceAgentInterfaceIsRegistratedAsScoped()
+        private void ServiceAgentInterfaceIsRegistratedAsTransient()
         {
             var services = new ServiceCollection();
             services.AddSingleServiceAgent<InterfaceImplementingAgent>(servicSettings => { },
@@ -145,7 +144,6 @@ namespace Digipolis.ServiceAgents.UnitTests.Startup
             authContextMock.Setup(c => c.UserToken).Returns("TokenValue");
 
             serviceProviderMock.Setup(p => p.GetService(typeof(IAuthContext))).Returns(authContextMock.Object);
-            serviceProviderMock.Setup(p => p.GetService(typeof(IHttpClientFactory))).Returns(new HttpClientFactory(serviceProviderMock.Object));
             serviceProviderMock.Setup(p => p.GetService(typeof(IRequestHeaderHelper))).Returns(new RequestHeaderHelper(serviceProviderMock.Object));
 
             return serviceProviderMock.Object;

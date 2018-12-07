@@ -43,8 +43,6 @@ namespace Digipolis.ServiceAgents.UnitTests.Settings
             if (settings != null)
                 serviceProviderMock.Setup(p => p.GetService(typeof(IOptions<ServiceAgentSettings>))).Returns(Options.Create(settings));
 
-            serviceProviderMock.Setup(p => p.GetService(typeof(IHttpClientFactory))).Returns(new HttpClientFactory(serviceProviderMock.Object));
-
             return serviceProviderMock.Object;
         }
     }

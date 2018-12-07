@@ -148,8 +148,6 @@ namespace Digipolis.ServiceAgents.UnitTests.BaseClass
 
             Assert.True(result.Messages.Count() == 1);
             var extraParam = result.Messages.FirstOrDefault();
-
-            Assert.NotNull(extraParam);
             Assert.Equal("json", extraParam.Key);
             Assert.True(extraParam.Value.Count() == 1);
             var errorMessage = extraParam.Value.FirstOrDefault();
@@ -262,8 +260,6 @@ namespace Digipolis.ServiceAgents.UnitTests.BaseClass
 
             Assert.True(result.Messages.Count() == 1);
             var extraParam = result.Messages.FirstOrDefault();
-
-            Assert.NotNull(extraParam);
             Assert.Equal("naam", extraParam.Key);
             Assert.True(extraParam.Value.Count() == 2);
             var errorMessage = extraParam.Value.FirstOrDefault();
@@ -383,7 +379,6 @@ namespace Digipolis.ServiceAgents.UnitTests.BaseClass
             authContextMock.Setup(c => c.UserToken).Returns("TokenValue");
 
             serviceProviderMock.Setup(p => p.GetService(typeof(IAuthContext))).Returns(authContextMock.Object);
-            serviceProviderMock.Setup(p => p.GetService(typeof(IHttpClientFactory))).Returns(new HttpClientFactory(serviceProviderMock.Object));
             serviceProviderMock.Setup(p => p.GetService(typeof(IRequestHeaderHelper))).Returns(new RequestHeaderHelper(serviceProviderMock.Object));
             
             return serviceProviderMock.Object;
