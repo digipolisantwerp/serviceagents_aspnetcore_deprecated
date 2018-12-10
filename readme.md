@@ -36,7 +36,7 @@ or if your project still works with project.json :
 
 ``` json
     "dependencies": {
-        "Digipolis.ServiceAgents":  "7.0.1"
+        "Digipolis.ServiceAgents":  "7.0.0"
     }
 ```
 
