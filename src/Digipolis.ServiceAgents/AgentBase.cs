@@ -135,7 +135,7 @@ namespace Digipolis.ServiceAgents
         }
 
         protected virtual void OnParseJsonErrorException(Exception ex, HttpResponseMessage response) { }
-
+        
         protected async Task<T> GetAsync<T>(string requestUri)
         {
             await _requestHeaderHelper.ValidateAuthHeaders(_client, _settings);
@@ -145,11 +145,8 @@ namespace Digipolis.ServiceAgents
                 if (response.IsSuccessStatusCode)
                 {
                     using (var stream = await response.Content.ReadAsStreamAsync())
-                    using (var streamReader = new StreamReader(stream))
-                    using (var jsonReader = new JsonTextReader(streamReader))
                     {
-                        var serializer = new JsonSerializer();
-                        return serializer.Deserialize<T>(jsonReader);
+                        return DeserializeJsonFromStream<T>(stream);
                     }
                 }
                 else
@@ -170,9 +167,8 @@ namespace Digipolis.ServiceAgents
                 if (response.IsSuccessStatusCode)
                 {
                     using (var stream = await response.Content.ReadAsStreamAsync())
-                    using (var streamReader = new StreamReader(stream))
                     {
-                        return await streamReader.ReadToEndAsync();
+                        return await StreamToStringAsync(stream);
                     }
                 }
                 else
@@ -274,6 +270,34 @@ namespace Digipolis.ServiceAgents
             };
             var response = await _client.SendAsync(request);
             return await ParseResult<TReponse>(response);
+        }
+
+        protected static T DeserializeJsonFromStream<T>(Stream stream)
+        {
+            if (stream == null || stream.CanRead == false)
+                return default(T);
+
+            using (var streamReader = new StreamReader(stream))
+            using (var jsonReader = new JsonTextReader(streamReader))
+            {
+                var serializer = new JsonSerializer();
+                return serializer.Deserialize<T>(jsonReader);
+            }
+        }
+
+        protected static async Task<string> StreamToStringAsync(Stream stream)
+        {
+            string content = null;
+
+            if (stream != null)
+            {
+                using (var streamReader = new StreamReader(stream))
+                {
+                    content = await streamReader.ReadToEndAsync();
+                }
+            }
+
+            return content;
         }
 
         public void Dispose()
