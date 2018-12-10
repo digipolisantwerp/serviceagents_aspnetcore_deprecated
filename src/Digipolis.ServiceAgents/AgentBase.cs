@@ -6,6 +6,7 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -22,8 +23,7 @@ namespace Digipolis.ServiceAgents
         protected readonly IRequestHeaderHelper _requestHeaderHelper;
 
         private IServiceProvider _serviceProvider;
-        protected HttpResponseMessage _response;
-
+        
         protected HttpClient _client { get; set; }
 
         protected AgentBase(HttpClient client, IServiceProvider serviceProvider, IOptions<ServiceAgentSettings> options)
@@ -34,9 +34,7 @@ namespace Digipolis.ServiceAgents
             _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider), $"Service provider cannot be null.");
 
             _settings = GetServiceSettings(options.Value);
-
-            //var options2 = _serviceProvider.GetService<IOptions<ServiceAgentSettings>>();
-            //var settings2 = GetServiceSettings(options2.Value);
+            
             _requestHeaderHelper = _serviceProvider.GetService<IRequestHeaderHelper>();
         }
 
@@ -101,6 +99,7 @@ namespace Digipolis.ServiceAgents
             var errorTitle = errorResponse?.Title;
             var errorCode = errorResponse?.Code;
             var extraParameters = errorResponse?.ExtraParameters;
+
             switch (response.StatusCode)
             {
                 case HttpStatusCode.NotFound:
@@ -141,26 +140,57 @@ namespace Digipolis.ServiceAgents
         {
             await _requestHeaderHelper.ValidateAuthHeaders(_client, _settings);
 
-            _response = await _client.GetAsync(requestUri);
-            return await ParseResult<T>(_response);
+            using (var response = await _client.GetAsync(requestUri, HttpCompletionOption.ResponseHeadersRead))
+            {
+                if (response.IsSuccessStatusCode)
+                {
+                    using (var stream = await response.Content.ReadAsStreamAsync())
+                    using (var streamReader = new StreamReader(stream))
+                    using (var jsonReader = new JsonTextReader(streamReader))
+                    {
+                        var serializer = new JsonSerializer();
+                        return serializer.Deserialize<T>(jsonReader);
+                    }
+                }
+                else
+                {
+                    await ParseJsonError(response);                    
+                }
+            }
+
+            return default(T);
         }
-
-        protected async Task<HttpResponseMessage> GetResponseAsync<T>(string requestUri)
-        {
-            await _requestHeaderHelper.ValidateAuthHeaders(_client, _settings);
-
-            _response = await _client.GetAsync(requestUri);
-            if (!_response.IsSuccessStatusCode) await ParseJsonError(_response);    // only return responses with status code success
-            return _response;
-        }
-
+        
         protected async Task<string> GetStringAsync(string requestUri)
         {
             await _requestHeaderHelper.ValidateAuthHeaders(_client, _settings);
 
-            _response = await _client.GetAsync(requestUri);
-            if (!_response.IsSuccessStatusCode) await ParseJsonError(_response);
-            return await _response.Content.ReadAsStringAsync();
+            using (var response = await _client.GetAsync(requestUri, HttpCompletionOption.ResponseHeadersRead))
+            {
+                if (response.IsSuccessStatusCode)
+                {
+                    using (var stream = await response.Content.ReadAsStreamAsync())
+                    using (var streamReader = new StreamReader(stream))
+                    {
+                        return await streamReader.ReadToEndAsync();
+                    }
+                }
+                else
+                {
+                    await ParseJsonError(response);
+                }
+            }
+
+            return string.Empty;
+        }
+
+        protected async Task<HttpResponseMessage> GetResponseAsync(string requestUri)
+        {
+            await _requestHeaderHelper.ValidateAuthHeaders(_client, _settings);
+
+            var response = await _client.GetAsync(requestUri);
+            if (!response.IsSuccessStatusCode) await ParseJsonError(response);    // only return responses with status code success
+            return response;
         }
 
         protected async Task<T> PostAsync<T>(string requestUri, T item)
@@ -168,8 +198,8 @@ namespace Digipolis.ServiceAgents
             await _requestHeaderHelper.ValidateAuthHeaders(_client, _settings);
 
             HttpContent contentPost = new StringContent(JsonConvert.SerializeObject(item, _jsonSerializerSettings), Encoding.UTF8, "application/json");
-            _response = await _client.PostAsync(requestUri, contentPost);
-            return await ParseResult<T>(_response);
+            var response = await _client.PostAsync(requestUri, contentPost);
+            return await ParseResult<T>(response);
         }
 
         protected async Task<TReponse> PostAsync<TRequest, TReponse>(string requestUri, TRequest item)
@@ -177,8 +207,8 @@ namespace Digipolis.ServiceAgents
             await _requestHeaderHelper.ValidateAuthHeaders(_client, _settings);
 
             HttpContent contentPost = new StringContent(JsonConvert.SerializeObject(item, _jsonSerializerSettings), Encoding.UTF8, "application/json");
-            _response = await _client.PostAsync(requestUri, contentPost);
-            return await ParseResult<TReponse>(_response);
+            var response = await _client.PostAsync(requestUri, contentPost);
+            return await ParseResult<TReponse>(response);
         }
 
         protected async Task<T> PutAsync<T>(string requestUri, T item)
@@ -186,8 +216,8 @@ namespace Digipolis.ServiceAgents
             await _requestHeaderHelper.ValidateAuthHeaders(_client, _settings);
 
             HttpContent contentPost = new StringContent(JsonConvert.SerializeObject(item, _jsonSerializerSettings), Encoding.UTF8, "application/json");
-            _response = await _client.PutAsync(requestUri, contentPost);
-            return await ParseResult<T>(_response);
+            var response = await _client.PutAsync(requestUri, contentPost);
+            return await ParseResult<T>(response);
         }
 
         protected async Task<TReponse> PutAsync<TRequest, TReponse>(string requestUri, TRequest item)
@@ -195,8 +225,8 @@ namespace Digipolis.ServiceAgents
             await _requestHeaderHelper.ValidateAuthHeaders(_client, _settings);
 
             HttpContent contentPost = new StringContent(JsonConvert.SerializeObject(item, _jsonSerializerSettings), Encoding.UTF8, "application/json");
-            _response = await _client.PutAsync(requestUri, contentPost);
-            return await ParseResult<TReponse>(_response);
+            var response = await _client.PutAsync(requestUri, contentPost);
+            return await ParseResult<TReponse>(response);
         }
 
         protected async Task PutWithEmptyResultAsync<T>(string requestUri, T item)
@@ -204,18 +234,18 @@ namespace Digipolis.ServiceAgents
             await _requestHeaderHelper.ValidateAuthHeaders(_client, _settings);
 
             HttpContent contentPost = new StringContent(JsonConvert.SerializeObject(item, _jsonSerializerSettings), Encoding.UTF8, "application/json");
-            _response = await _client.PutAsync(requestUri, contentPost);
-            if (!_response.IsSuccessStatusCode)
-                await ParseJsonError(_response);
+            var response = await _client.PutAsync(requestUri, contentPost);
+            if (!response.IsSuccessStatusCode)
+                await ParseJsonError(response);
         }
 
         protected async Task DeleteAsync(string requestUri)
         {
             await _requestHeaderHelper.ValidateAuthHeaders(_client, _settings);
 
-            _response = await _client.DeleteAsync(requestUri);
-            if (!_response.IsSuccessStatusCode)
-                await ParseJsonError(_response);
+            var response = await _client.DeleteAsync(requestUri);
+            if (!response.IsSuccessStatusCode)
+                await ParseJsonError(response);
         }
 
         protected async Task<T> PatchAsync<T>(string requestUri, T item)
@@ -228,8 +258,8 @@ namespace Digipolis.ServiceAgents
             {
                 Content = contentPatch
             };
-            _response = await _client.SendAsync(request);
-            return await ParseResult<T>(_response);
+            var response = await _client.SendAsync(request);
+            return await ParseResult<T>(response);
         }
 
         protected async Task<TReponse> PatchAsync<TRequest, TReponse>(string requestUri, TRequest item)
@@ -242,8 +272,8 @@ namespace Digipolis.ServiceAgents
             {
                 Content = contentPatch
             };
-            _response = await _client.SendAsync(request);
-            return await ParseResult<TReponse>(_response);
+            var response = await _client.SendAsync(request);
+            return await ParseResult<TReponse>(response);
         }
 
         public void Dispose()
