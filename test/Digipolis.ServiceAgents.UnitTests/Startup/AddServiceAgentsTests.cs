@@ -217,13 +217,18 @@ namespace Digipolis.ServiceAgents.UnitTests.Startup
         private void GenericAgentIsRegistratedAsTransient()
         {
             var services = new ServiceCollection();
-            services.AddServiceAgents(settings =>
+            services.AddSingleServiceAgent<GenericAgent<string>>(settings =>
             {
-                settings.FileName = Path.Combine(Directory.GetCurrentDirectory(), "_TestData/serviceagentconfig_4.json");
+                settings.AuthScheme = "None";
+                settings.Host = "test.be";
+                settings.Path = "api";
+                settings.Port = "5001";
+                settings.Scheme = "http";
+                //settings.FileName = Path.Combine(Directory.GetCurrentDirectory(), "_TestData/serviceagentconfig_4.json");
             },
             assembly: typeof(AddServiceAgentsTests).GetTypeInfo().Assembly);
 
-            var registrations = services.Where(sd => sd.ServiceType == typeof(GenericAgent<>))
+            var registrations = services.Where(sd => sd.ServiceType == typeof(GenericAgent<string>))
                                         .ToArray();
 
             Assert.Single(registrations);
@@ -239,9 +244,6 @@ namespace Digipolis.ServiceAgents.UnitTests.Startup
             configOptions.Configure(serviceAgentSettings);
 
             Assert.Equal(1, serviceAgentSettings.Services.Count);
-
-            var serviceSettings = serviceAgentSettings.Services["GenericAgent"];
-            Assert.NotNull(serviceSettings);
         }
 
         [Fact]
