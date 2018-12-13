@@ -191,9 +191,9 @@ namespace Digipolis.ServiceAgents
                                               Action<string, IHttpClientBuilder> clientBuildAction)
         {
             // registering service agents with generic parameters causes an error: "Late bound operations cannot be performed on types or methods for which ContainsGenericParameters is true."
-            if (implementationType.ContainsGenericParameters) throw new Exception($"Error registering service {implementationType.Name}. A service agent with generic parameters can't be registered at runtime and must be registered with the service collection via de AddSingleServiceAgent<T> method");
+            if (implementationType.ContainsGenericParameters) throw new Exception($"Error registering service {implementationType.Name}. A service agent with generic parameters can't be registered at runtime and must be registered with the service collection via the AddSingleServiceAgent<T> method");
 
-            // they type specified will be registered in the service collection as a transient service
+            // the specified type will be registered in the service collection as a transient service
             IHttpClientBuilder builder = services.AddHttpClient(implementationType.Name, (serviceProvider, client) =>
             {
                 var serviceSettings = settings.GetServiceSettings(implementationType.Name);
