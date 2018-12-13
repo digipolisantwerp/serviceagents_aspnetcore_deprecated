@@ -146,7 +146,7 @@ Important notice: the action gets invoked for every service agent when multiple 
     });
 ```
 
-With this overloaded method of **AddSingleServiceAgent&lt;T>** or **AddServiceAgents** it is also possible to pass a "clientBuildAction" parameter of type **Action&lt;string, IHttpClientBuilder>**. This gets invoked after the registration of the Service Agent as a typed client and allows you to add custom behaviour with the provided HttpClientBuilder, ex. adding delegating handers. The String argument is set to the Service Agent's type name.
+With this overloaded method of **AddSingleServiceAgent&lt;T>** or **AddServiceAgents** it is also possible to pass a "clientBuiltAction" parameter of type **Action&lt;string, IHttpClientBuilder>**. This gets invoked after the registration of the Service Agent as a typed client and allows you to add custom behaviour with the provided HttpClientBuilder, ex. adding delegating handers. The String argument is set to the Service Agent's type name.
 
 Important notice: the action gets invoked for every service agent when multiple are registered!
 ``` csharp
