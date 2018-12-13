@@ -1,13 +1,14 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Digipolis.ServiceAgents.Settings;
+using Microsoft.Extensions.Options;
 using System;
-using Digipolis.ServiceAgents.Settings;
+using System.Net.Http;
 
 namespace Digipolis.ServiceAgents.UnitTests.Utilities
 {
     public class OtherTestAgent : AgentBase
     {
-        public OtherTestAgent(IServiceProvider serviceProvider, IOptions<ServiceAgentSettings> options)
-            : base(serviceProvider, options)
+        public OtherTestAgent(HttpClient client, IServiceProvider serviceProvider, IOptions<ServiceAgentSettings> options)
+            : base(client, serviceProvider, options)
         {
         }
     }

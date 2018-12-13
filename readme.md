@@ -2,7 +2,7 @@
 
 Toolbox for ServiceAgents in ASP.NET Core.
 
-This readme is applicable for toolbox version 6.0.x
+This readme is applicable for toolbox version 7.0.x
 
 ## Table of Contents
 
@@ -36,7 +36,7 @@ or if your project still works with project.json :
 
 ``` json
     "dependencies": {
-        "Digipolis.ServiceAgents":  "6.0.6"
+        "Digipolis.ServiceAgents":  "7.0.0"
     }
 ```
 
@@ -46,9 +46,9 @@ In Visual Studio you can also use the NuGet Package Manager to do this.
 
 ## Usage
 
-To add a single service agent in your project simply use the **AddSingleServiceAgent&lt;T>** extension in the **ConfigureServices** method in the **Startup** class.
-The type represents the implementation of your service agent.
-It will be registered as a scoped instance. If the service agent implements an interface of the same name preceded with the letter ‘I’, the interface will be registered as scoped.
+To add a single service agent in your project simply use the **AddSingleServiceAgent&lt;T>** extension in the **ConfigureServices** method in the **Startup** class. The type represents the implementation of your service agent. It will be registered as a typed client, i.e. transient service which expects a HttpClient to be injected in via the constructor. 
+If the service agent implements an interface of the same name preceded with the letter ‘I’, the interface will be registered with the Service Agent as implementation type.
+Generic types must be registered via AddSingleServiceAgent.
 
 ``` csharp
     services.AddSingleServiceAgent<YourServiceAgent>(settings =>
@@ -65,7 +65,7 @@ It will be registered as a scoped instance. If the service agent implements an i
 ```
 The parameter of type **Action&lt;ServiceSettings>** allows you to set the settings for the service agent.
 
-If you want to configure the agent using a configuration file or if you want to register multiple service agents use the **AddServiceAgents** extension instead.
+If you want to configure the agent using a configuration file or if you want to register multiple service agents, use the **AddServiceAgents** extension instead.
 
 ``` csharp
     services.AddServiceAgents(settings =>
@@ -112,8 +112,6 @@ THis section is intended for settings that are common to all the service agents.
 Each other object (section) in the json represents a service agent type. **The object name has to match the service agent type name**.
 See the [Creating a service agent](#creating-a-service-agent) section for more info on creating the service agents.
 
-If you have a generic service agent, the section name must match the class name of the agent, without the generic part. For example, for a generic agent of type **GenericAgent&lt;T&gt;** the section name must be **GenericAgent**.
-
 Following options can be set per section (service agent):
 
 Option              | Description                                                | Default | Mandatory
@@ -133,7 +131,7 @@ OAuthScope | Oauth scopt for OAuth authentication scheme. | "" | With Oauth sche
 
 All the url parts form the basic url for the service agent: {scheme}://{host}:{port}/{path}/
 
-An overload for both **AddSingleServiceAgent&lt;T>** and **AddServiceAgents** is available where you can pass an action of type **Action&lt;IServiceProvider, HttpClient>** that gets invoked when the underlying HttpClient gets created. That way you can customize the created client.
+An overloaded method for both **AddSingleServiceAgent&lt;T>** and **AddServiceAgents** is available where you can pass a "clientCreatedAction" parameter of type **Action&lt;IServiceProvider, HttpClient>** that gets invoked when the underlying HttpClient gets created. That way you can customize the created client.
 
 Important notice: the action gets invoked for every service agent when multiple are registered!
 ``` csharp
@@ -141,10 +139,27 @@ Important notice: the action gets invoked for every service agent when multiple 
     {
         s.FileName = Path.Combine(ConfigPath, "serviceagents.json");
         s.Section = "TestAgent";
-    },
+    }, ...,
     (serviceProvider, client) =>
     {
         //customize the client
+    });
+```
+
+With this overloaded method of **AddSingleServiceAgent&lt;T>** or **AddServiceAgents** it is also possible to pass a "clientBuiltAction" parameter of type **Action&lt;string, IHttpClientBuilder>**. This gets invoked after the registration of the Service Agent as a typed client and allows you to add custom behaviour with the provided HttpClientBuilder, ex. adding delegating handers. The String argument is set to the Service Agent's type name.
+
+Important notice: the action gets invoked for every service agent when multiple are registered!
+``` csharp
+    services.AddServiceAgents(s =>
+    {
+        s.FileName = Path.Combine(ConfigPath, "serviceagents.json");
+        s.Section = "TestAgent";
+    }, 
+	...,
+    (string, httpClientBuilder) =>
+    {
+        //customize the client
+        httpClientBuilder.AddHttpMessageHandler<ValidateHeaderHandler>();
     });
 ```
 
@@ -155,8 +170,8 @@ In order to create a service agent you need to create a type that derives from *
 ``` csharp
     public class DemoAgent : AgentBase
     {
-        public DemoAgent(IServiceProvider serviceProvider, IOptions<ServiceAgentSettings> options)
-            : base(serviceProvider, options)
+        public DemoAgent(HttpClient client, IServiceProvider serviceProvider, IOptions<ServiceAgentSettings> options)
+            : base(client, serviceProvider, options)
         {
         }
     }
@@ -171,8 +186,8 @@ Implement a get operation
 ``` csharp
     public class DemoAgent : AgentBase
     {
-        public DemoAgent(IServiceProvider serviceProvider, IOptions<ServiceAgentSettings> options)
-            : base(serviceProvider, options)
+        public DemoAgent(HttpClient client, IServiceProvider serviceProvider, IOptions<ServiceAgentSettings> options)
+            : base(client, serviceProvider, options)
         {
         }
 
@@ -196,6 +211,15 @@ If you want to return the response as string you can use the **GetStringAsync** 
     public Task<string> GetAddressAsStringAsync(int id)
     {
         return base.GetStringAsync($"adress?id={id}");
+    }
+```
+
+If you want to get the response itself, you can use the **GetResponseAsync** method on the **Agentbase**. Only responses with status success will be returned.
+
+``` csharp
+    public Task<HttpResponseMessage> GetServiceMethodResponseAsync(int id)
+    {
+        return base.GetResponseAsync($"adress?id={id}");
     }
 ```
 
@@ -235,8 +259,8 @@ In that case you need to request an instance of the interface type:
     //The service agent implementation
     public class DemoAgent : AgentBase, IDemoAgent
     {
-        public DemoAgent(IServiceProvider serviceProvider, IOptions<ServiceAgentSettings> options)
-            : base(serviceProvider, options)
+        public DemoAgent(HttpClient client, IServiceProvider serviceProvider, IOptions<ServiceAgentSettings> options)
+            : base(client, serviceProvider, options)
         {
         }
 
@@ -298,6 +322,8 @@ You must also supply following settings in the ServiceSettings:
   OAuthScope = "testoauthDigipolis.v2.all";
   OAuthPathAddition = "oauth2/token";
 ```
+
+Before each call a check occurs to validate the lifetime of the OAuth access token. If no valid token is found, a new one is requested with the provided configuration settings.
 
 See the SampleApi for more info.
 

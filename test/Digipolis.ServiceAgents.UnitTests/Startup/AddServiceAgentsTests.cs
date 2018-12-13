@@ -22,52 +22,33 @@ namespace Digipolis.ServiceAgents.UnitTests.Startup
 
             var ex = Assert.Throws<ArgumentNullException>(() => services.AddServiceAgents(nullAction));
 
-            Assert.Equal("jsonSetupAction", ex.ParamName);
+            Assert.Equal("jsonConfigurationFileSetupAction", ex.ParamName);
         }
-
+        
         [Fact]
-        private void HttpClientFactoryIsRegistratedAsSingleton()
-        {
-            var services = new ServiceCollection();
-            services.AddServiceAgents(settings =>
-                {
-                    settings.FileName = Path.Combine(Directory.GetCurrentDirectory(), "_TestData/serviceagentconfig_1.json");
-                    settings.Section = "TestAgent";
-                },
-                assembly: typeof(AddServiceAgentsTests).GetTypeInfo().Assembly);
-
-            var registrations = services.Where(sd => sd.ServiceType == typeof(IHttpClientFactory))
-                                        .ToArray();
-
-            Assert.Equal(1, registrations.Count());
-            Assert.Equal(ServiceLifetime.Singleton, registrations[0].Lifetime);
-        }
-
-        [Fact]
-        private void HttpClientFactoryClientActionIsPassed()
+        private void HttpClientCreatedActionIsExecuted()
         {
             var serviceAgentSettings = new ServiceAgentSettings();
             HttpClient passedClient = null;
             IServiceProvider passedServiceProvider = null;
+
             var services = new ServiceCollection();
             services.AddServiceAgents(s =>
             {
-                s.FileName = Path.Combine(Directory.GetCurrentDirectory(), "_TestData/serviceagentconfig_1.json");
-                s.Section = "TestAgent";
+                s.FileName = Path.Combine(Directory.GetCurrentDirectory(), "_TestData/serviceagentconfig_3.json");
+                s.Section = "InterfaceImplementingAgent";
             }, (serviceProvider, client) =>
             {
+                // actions for the client created function
                 passedClient = client;
                 passedServiceProvider = serviceProvider;
             },
             assembly: typeof(AddServiceAgentsTests).GetTypeInfo().Assembly
             );
 
-            ///get the registrated HttpFactory
-            var registration = services.Single(sd => sd.ServiceType == typeof(IHttpClientFactory));
-
-            //Manually call the CreateClient on the factory (this normally happens when the service agent gets resolved
-            var factory = registration.ImplementationFactory.Invoke(services.BuildServiceProvider()) as HttpClientFactory;
-            factory.CreateClient(new ServiceSettings { Host = "test.be" });
+            /// get the registrated TestAgent > this also creates an HttpClient and executes the clientCreatedAction
+            var registration = services.Single(sd => sd.ServiceType == typeof(IInterfaceImplementingAgent));
+            var agent = registration.ImplementationFactory.Invoke(services.BuildServiceProvider()) as InterfaceImplementingAgent;
 
             Assert.NotNull(passedClient);
             Assert.NotNull(passedServiceProvider);
@@ -90,7 +71,7 @@ namespace Digipolis.ServiceAgents.UnitTests.Startup
             var registrations = services.Where(sd => sd.ServiceType == typeof(IConfigureOptions<ServiceAgentSettings>))
                                         .ToArray();
 
-            Assert.Equal(1, registrations.Count());
+            Assert.Single(registrations);
             Assert.Equal(ServiceLifetime.Singleton, registrations[0].Lifetime);
 
             var configOptions = registrations[0].ImplementationInstance as IConfigureOptions<ServiceAgentSettings>;
@@ -118,23 +99,22 @@ namespace Digipolis.ServiceAgents.UnitTests.Startup
             var registrations = services.Where(sd => sd.ServiceType == typeof(IConfigureOptions<ServiceAgentSettings>))
                                         .ToArray();
 
-            Assert.Equal(1, registrations.Count());
+            Assert.Single(registrations);
             Assert.Equal(ServiceLifetime.Singleton, registrations[0].Lifetime);
         }
 
         [Fact]
-        private void ServiceAgentIsRegistratedAsScoped()
+        private void ServiceAgentIsRegistratedAsTransient()
         {
             var services = new ServiceCollection();
             services.AddSingleServiceAgent<TestAgent>(settings => { },
             assembly: typeof(AddServiceAgentsTests).GetTypeInfo().Assembly);
 
-            var registrations = services.Where(sd => sd.ServiceType == typeof(TestAgent) &&
-                                                     sd.ImplementationType == typeof(TestAgent))
+            var registrations = services.Where(sd => sd.ServiceType == typeof(TestAgent))
                                         .ToArray();
 
-            Assert.Equal(1, registrations.Count());
-            Assert.Equal(ServiceLifetime.Scoped, registrations[0].Lifetime);
+            Assert.Single(registrations);
+            Assert.Equal(ServiceLifetime.Transient, registrations[0].Lifetime);
         }
 
         [Fact]
@@ -178,7 +158,7 @@ namespace Digipolis.ServiceAgents.UnitTests.Startup
         }
 
         [Fact]
-        private void MultipleServiceAgentsAreRegistratedAsScoped()
+        private void MultipleServiceAgentsAreRegistratedAsTransient()
         {
             var services = new ServiceCollection();
             services.AddServiceAgents(settings =>
@@ -192,15 +172,15 @@ namespace Digipolis.ServiceAgents.UnitTests.Startup
                                         .ToArray();
 
             Assert.Equal(2, registrations.Count());
-            Assert.Equal(ServiceLifetime.Scoped, registrations[0].Lifetime);
+            Assert.Equal(ServiceLifetime.Transient, registrations[0].Lifetime);
             Assert.Equal(nameof(OtherTestAgent), registrations[0].ServiceType.Name);
 
-            Assert.Equal(ServiceLifetime.Scoped, registrations[1].Lifetime);
+            Assert.Equal(ServiceLifetime.Transient, registrations[1].Lifetime);
             Assert.Equal(nameof(TestAgent), registrations[1].ServiceType.Name);
         }
 
         [Fact]
-        private void ServiceAgentInterfaceIsRegistratedAsScoped()
+        private void ServiceAgentInterfaceIsRegistratedAsTransient()
         {
             var services = new ServiceCollection();
             services.AddServiceAgents(settings =>
@@ -209,16 +189,15 @@ namespace Digipolis.ServiceAgents.UnitTests.Startup
             },
             assembly: typeof(AddServiceAgentsTests).GetTypeInfo().Assembly);
 
-            var registrations = services.Where(sd => sd.ServiceType == typeof(IInterfaceImplementingAgent) &&
-                                                     sd.ImplementationType == typeof(InterfaceImplementingAgent))
+            var registrations = services.Where(sd => sd.ServiceType == typeof(IInterfaceImplementingAgent))
                                         .ToArray();
 
-            Assert.Equal(1, registrations.Count());
-            Assert.Equal(ServiceLifetime.Scoped, registrations[0].Lifetime);
+            Assert.Single(registrations);
+            Assert.Equal(ServiceLifetime.Transient, registrations[0].Lifetime);
         }
 
         [Fact]
-        private void AgentWithInheritedBaseIsRegistredAsScoped()
+        private void AgentWithInheritedBaseIsRegistredAsTransient()
         {
             var services = new ServiceCollection();
             services.AddServiceAgents(settings =>
@@ -227,29 +206,33 @@ namespace Digipolis.ServiceAgents.UnitTests.Startup
             },
             assembly: typeof(AddServiceAgentsTests).GetTypeInfo().Assembly);
 
-            var registrations = services.Where(sd => sd.ServiceType == typeof(InheritingFromOtherClassAgent) &&
-                                                     sd.ImplementationType == typeof(InheritingFromOtherClassAgent))
+            var registrations = services.Where(sd => sd.ServiceType == typeof(InheritingFromOtherClassAgent))
                                         .ToArray();
 
-            Assert.Equal(1, registrations.Count());
-            Assert.Equal(ServiceLifetime.Scoped, registrations[0].Lifetime);
+            Assert.Single(registrations);
+            Assert.Equal(ServiceLifetime.Transient, registrations[0].Lifetime);
         }
 
         [Fact]
-        private void GenericAgentIsRegistratedAsScoped()
+        private void GenericAgentIsRegistratedAsTransient()
         {
             var services = new ServiceCollection();
-            services.AddServiceAgents(settings =>
+            services.AddSingleServiceAgent<GenericAgent<string>>(settings =>
             {
-                settings.FileName = Path.Combine(Directory.GetCurrentDirectory(), "_TestData/serviceagentconfig_4.json");
+                settings.AuthScheme = "None";
+                settings.Host = "test.be";
+                settings.Path = "api";
+                settings.Port = "5001";
+                settings.Scheme = "http";
+                //settings.FileName = Path.Combine(Directory.GetCurrentDirectory(), "_TestData/serviceagentconfig_4.json");
             },
             assembly: typeof(AddServiceAgentsTests).GetTypeInfo().Assembly);
 
-            var registrations = services.Where(sd => sd.ServiceType == typeof(GenericAgent<>))
+            var registrations = services.Where(sd => sd.ServiceType == typeof(GenericAgent<string>))
                                         .ToArray();
 
-            Assert.Equal(1, registrations.Count());
-            Assert.Equal(ServiceLifetime.Scoped, registrations[0].Lifetime);
+            Assert.Single(registrations);
+            Assert.Equal(ServiceLifetime.Transient, registrations[0].Lifetime);
 
             registrations = services.Where(sd => sd.ServiceType == typeof(IConfigureOptions<ServiceAgentSettings>))
                                         .ToArray();
@@ -261,9 +244,25 @@ namespace Digipolis.ServiceAgents.UnitTests.Startup
             configOptions.Configure(serviceAgentSettings);
 
             Assert.Equal(1, serviceAgentSettings.Services.Count);
+        }
 
-            var serviceSettings = serviceAgentSettings.Services["GenericAgent"];
-            Assert.NotNull(serviceSettings);
+        [Fact]
+        private void AgentWitGenericParamsIsRegistratedAsTransient()
+        {
+            var services = new ServiceCollection();
+            services.AddSingleServiceAgent<GenericAgent<string>>(settings =>
+            {
+                settings.AuthScheme = "http";
+                settings.Host = "localhost";
+                settings.Path = "api";
+            },
+            assembly: typeof(AddServiceAgentsTests).GetTypeInfo().Assembly);
+
+            var registrations = services.Where(sd => sd.ServiceType == typeof(GenericAgent<string>))
+                                        .ToArray();
+
+            Assert.Single(registrations);
+            Assert.Equal(ServiceLifetime.Transient, registrations[0].Lifetime);
         }
 
         [Fact]
@@ -280,7 +279,7 @@ namespace Digipolis.ServiceAgents.UnitTests.Startup
                                                      sd.ImplementationType == typeof(TokenHelper))
                                         .ToArray();
 
-            Assert.Equal(1, registrations.Count());
+            Assert.Single(registrations);
             Assert.Equal(ServiceLifetime.Scoped, registrations[0].Lifetime);
         }
     }

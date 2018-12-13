@@ -11,72 +11,113 @@ namespace Digipolis.ServiceAgents
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddSingleServiceAgent<T>(this IServiceCollection services, Action<ServiceSettings> setupAction, Assembly assembly = null) where T : AgentBase
+        public static IServiceCollection AddSingleServiceAgent<T>(this IServiceCollection services, 
+                                                                  Action<ServiceSettings> serviceSettingsSetupAction, 
+                                                                  Assembly assembly = null) where T : AgentBase
         {
             assembly = assembly == null ? Assembly.GetEntryAssembly() : assembly;
-            return AddSingleServiceAgent<T>(services, assembly, setupAction, null);
+            return AddSingleServiceAgent<T>(services: services,
+                                            serviceSettingsSetupAction: serviceSettingsSetupAction,
+                                            clientCreatedAction: null, 
+                                            clientBuiltAction : null, 
+                                            callingAssembly: assembly);
         }
 
-        public static IServiceCollection AddSingleServiceAgent<T>(this IServiceCollection services, Action<ServiceSettings> setupAction, Action<IServiceProvider, HttpClient> clientAction, Assembly assembly = null) where T : AgentBase
+        public static IServiceCollection AddSingleServiceAgent<T>(this IServiceCollection services, 
+                                                                  Action<ServiceSettings> serviceSettingsSetupAction, 
+                                                                  Action<IServiceProvider, HttpClient> clientCreatedAction,
+                                                                  Action<string, IHttpClientBuilder> clientBuiltAction = null,
+                                                                  Assembly assembly = null) where T : AgentBase
         {
             assembly = assembly == null ? Assembly.GetEntryAssembly() : assembly;
-            return AddSingleServiceAgent<T>(services, assembly, setupAction, clientAction);
+            return AddSingleServiceAgent<T>(services: services,
+                                            serviceSettingsSetupAction: serviceSettingsSetupAction,
+                                            clientCreatedAction: clientCreatedAction,
+                                            clientBuiltAction: clientBuiltAction,
+                                            callingAssembly: assembly);
         }
 
         private static IServiceCollection AddSingleServiceAgent<T>(this IServiceCollection services,
-            Assembly callingAssembly, 
-            Action<ServiceSettings> setupAction, 
-            Action<IServiceProvider, HttpClient> clientAction) where T : AgentBase
+                                                                   Assembly callingAssembly,
+                                                                   Action<ServiceSettings> serviceSettingsSetupAction, 
+                                                                   Action<IServiceProvider, HttpClient> clientCreatedAction,
+                                                                   Action<string, IHttpClientBuilder> clientBuiltAction = null) where T : AgentBase
         {
-            if (setupAction == null) throw new ArgumentNullException(nameof(setupAction), $"{nameof(setupAction)} cannot be null.");
+            if (serviceSettingsSetupAction == null) throw new ArgumentNullException(nameof(serviceSettingsSetupAction), $"{nameof(serviceSettingsSetupAction)} cannot be null.");
 
+            // read service agent settings in local variable
             var serviceSettings = new ServiceSettings();
-            setupAction.Invoke(serviceSettings);
+            serviceSettingsSetupAction.Invoke(serviceSettings);
 
-            var type = typeof(T);
-
+            // configure service agent settings for DI container
             services.Configure<ServiceAgentSettings>(s =>
             {
-                s.Services.Add(type.Name, serviceSettings);
+                s.Services.Add(typeof(T).Name, serviceSettings);
             });
 
-            RegisterServices<T>(services, callingAssembly, clientAction);
+            ServiceAgentSettings serviceAgentSettings = new ServiceAgentSettings();
+            serviceAgentSettings.Services.Add(typeof(T).Name, serviceSettings);
+
+            RegisterServices<T>(services, serviceAgentSettings, callingAssembly, clientCreatedAction, clientBuiltAction);
 
             return services;
         }
-
-        public static IServiceCollection AddServiceAgents(this IServiceCollection services, Action<ServiceSettingsJsonFile> setupAction, Assembly assembly = null)
+        
+        public static IServiceCollection AddServiceAgents(this IServiceCollection services, 
+                                                          Action<ServiceSettingsJsonFile> jsonConfigurationFileSetupAction, 
+                                                          Assembly assembly = null)
         {
             assembly = assembly == null ? Assembly.GetEntryAssembly() : assembly;
-            return AddServiceAgents(services, assembly, setupAction, null, null);
+            return AddServiceAgents(services: services,
+                                    jsonConfigurationFileSetupAction: jsonConfigurationFileSetupAction,
+                                    settingsSetupAction: null,
+                                    clientCreatedAction: null,
+                                    clientBuiltAction: null,
+                                    callingAssembly: assembly);
         }
-
-        public static IServiceCollection AddServiceAgents(this IServiceCollection services, Action<ServiceSettingsJsonFile> setupAction, Action<IServiceProvider, HttpClient> clientAction, Assembly assembly = null)
+                
+        public static IServiceCollection AddServiceAgents(this IServiceCollection services,
+                                                          Action<ServiceSettingsJsonFile> jsonConfigurationFileSetupAction,
+                                                          Action<IServiceProvider, HttpClient> clientCreatedAction,
+                                                          Action<string, IHttpClientBuilder> clientBuiltAction = null,
+                                                          Assembly assembly = null)
         {
             assembly = assembly == null ? Assembly.GetEntryAssembly() : assembly;
-            return AddServiceAgents(services, assembly, setupAction, null, clientAction);
+            return AddServiceAgents(services: services,
+                                    jsonConfigurationFileSetupAction: jsonConfigurationFileSetupAction,
+                                    settingsSetupAction: null,
+                                    clientCreatedAction: clientCreatedAction,
+                                    clientBuiltAction: clientBuiltAction,
+                                    callingAssembly: assembly);
         }
 
         public static IServiceCollection AddServiceAgents(this IServiceCollection services, 
-            Action<ServiceSettingsJsonFile> jsonSetupAction,
-            Action<ServiceAgentSettings> settingsSetupAction,
-            Action<IServiceProvider, HttpClient> clientAction,
-            Assembly assembly = null)
+                                                          Action<ServiceSettingsJsonFile> jsonConfigurationFileSetupAction,
+                                                          Action<ServiceAgentSettings> serviceSettingsSetupAction,
+                                                          Action<IServiceProvider, HttpClient> clientCreatedAction,
+                                                          Action<string, IHttpClientBuilder> clientBuiltAction = null,
+                                                          Assembly assembly = null)
         {
             assembly = assembly == null ? Assembly.GetEntryAssembly() : assembly;
-            return AddServiceAgents(services, assembly, jsonSetupAction, settingsSetupAction, clientAction);
+            return AddServiceAgents(services: services,
+                                    jsonConfigurationFileSetupAction: jsonConfigurationFileSetupAction,
+                                    settingsSetupAction: serviceSettingsSetupAction,
+                                    clientCreatedAction: clientCreatedAction,
+                                    clientBuiltAction: clientBuiltAction,
+                                    callingAssembly: assembly);
         }
 
         private static IServiceCollection AddServiceAgents(this IServiceCollection services,
             Assembly callingAssembly,
-            Action<ServiceSettingsJsonFile> jsonSetupAction,
+            Action<ServiceSettingsJsonFile> jsonConfigurationFileSetupAction,
             Action<ServiceAgentSettings> settingsSetupAction,
-            Action<IServiceProvider, HttpClient> clientAction)
+            Action<IServiceProvider, HttpClient> clientCreatedAction,
+            Action<string, IHttpClientBuilder> clientBuiltAction)
         {
-            if (jsonSetupAction == null) throw new ArgumentNullException(nameof(jsonSetupAction), $"{nameof(jsonSetupAction)} cannot be null.");
+            if (jsonConfigurationFileSetupAction == null) throw new ArgumentNullException(nameof(jsonConfigurationFileSetupAction), $"{nameof(jsonConfigurationFileSetupAction)} cannot be null.");
 
             var serviceSettingsJsonFile = new ServiceSettingsJsonFile();
-            jsonSetupAction.Invoke(serviceSettingsJsonFile);
+            jsonConfigurationFileSetupAction.Invoke(serviceSettingsJsonFile);
 
             var serviceAgentSettings = ConfigureServiceAgentSettings(services, serviceSettingsJsonFile);
 
@@ -91,7 +132,7 @@ namespace Digipolis.ServiceAgents
                 }
             });
 
-            RegisterServices(services, serviceAgentSettings, callingAssembly, clientAction);
+            RegisterServices(services, serviceAgentSettings, callingAssembly, clientCreatedAction, clientBuiltAction);
 
             return services;
         }
@@ -107,20 +148,23 @@ namespace Digipolis.ServiceAgents
             return serviceAgentSettings;
         }
 
-        private static void RegisterServices<T>(IServiceCollection services, Assembly assembly, Action<IServiceProvider, HttpClient> clientAction) where T : AgentBase
+        private static void RegisterServices<T>(IServiceCollection services, 
+                                    ServiceAgentSettings settings, 
+                                    Assembly assembly, 
+                                    Action<IServiceProvider, HttpClient> clientCreatedAction,
+                                    Action<string, IHttpClientBuilder> clientBuiltAction) where T : AgentBase
         {
-            RegisterClientFactory(services, clientAction);
+            RegisterAgentType<T>(services, settings, clientCreatedAction, clientBuiltAction);
 
-            RegisterAgentType(services, assembly.GetTypes(), typeof(T));
-
-            services.AddScoped<ITokenHelper, TokenHelper>();
-            services.AddScoped<IRequestHeaderHelper, RequestHeaderHelper>();
+            RegisterCommonServices(services);
         }
 
-        private static void RegisterServices(IServiceCollection services, ServiceAgentSettings settings, Assembly assembly, Action<IServiceProvider, HttpClient> clientAction)
+        private static void RegisterServices(IServiceCollection services, 
+                                ServiceAgentSettings settings, 
+                                Assembly assembly, 
+                                Action<IServiceProvider, HttpClient> clientCreatedAction,
+                                Action<string, IHttpClientBuilder> clientBuiltAction)
         {
-            RegisterClientFactory(services, clientAction);
-
             var assemblyTypes = assembly.GetTypes();
 
             foreach (var item in settings.Services)
@@ -128,46 +172,105 @@ namespace Digipolis.ServiceAgents
                 var type = assemblyTypes.Single(t => typeof(AgentBase).IsAssignableFrom(t.GetTypeInfo().BaseType) &&
                                                      t.Name.StartsWith(item.Key));
 
-                RegisterAgentType(services, assemblyTypes, type);
+                RegisterAgentType(services, type, settings, clientCreatedAction, clientBuiltAction);
             }
 
+            RegisterCommonServices(services);
+        }
+
+        private static void RegisterCommonServices(IServiceCollection services)
+        {
             services.AddScoped<ITokenHelper, TokenHelper>();
             services.AddScoped<IRequestHeaderHelper, RequestHeaderHelper>();
         }
 
-        private static void RegisterClientFactory(IServiceCollection services, Action<IServiceProvider, HttpClient> clientAction)
+        private static void RegisterAgentType(IServiceCollection services, 
+                                              Type implementationType, 
+                                              ServiceAgentSettings settings, 
+                                              Action<IServiceProvider, HttpClient> clientCreatedAction,
+                                              Action<string, IHttpClientBuilder> clientBuiltAction)
         {
-            services.AddSingleton<IHttpClientFactory, HttpClientFactory>(sp =>
+            // registering service agents with generic parameters causes an error: "Late bound operations cannot be performed on types or methods for which ContainsGenericParameters is true."
+            if (implementationType.ContainsGenericParameters) throw new Exception($"Error registering service {implementationType.Name}. A service agent with generic parameters can't be registered at runtime and must be registered with the service collection via the AddSingleServiceAgent<T> method");
+
+            // the specified type will be registered in the service collection as a transient service
+            IHttpClientBuilder builder = services.AddHttpClient(implementationType.Name, (serviceProvider, client) =>
             {
-                var factory = new HttpClientFactory(sp);
+                var serviceSettings = settings.GetServiceSettings(implementationType.Name);
 
-                if (clientAction != null)
-                    factory.AfterClientCreated += clientAction;
-
-                return factory;
+                ConfigureHttpClient(serviceProvider, client, serviceSettings, clientCreatedAction);
             });
-        }
-
-        private static void RegisterAgentType(IServiceCollection services, Type[] assemblyTypes, Type implementationType)
-        {
-            var interfaceTypeName = $"I{implementationType.Name}";
-            var interfaceType = assemblyTypes.SingleOrDefault(t => t.Name == interfaceTypeName && t.GetTypeInfo().IsInterface);
-
+            
+            var interfaceType = implementationType.FindInterfaces(new TypeFilter(MyInterfaceFilter), implementationType.Name).SingleOrDefault();
+            
             if (interfaceType != null)
             {
-                services.AddScoped(interfaceType, implementationType);
+                // find the desired generic method for creating a typed HttpClient
+                var genericMethods = typeof(HttpClientBuilderExtensions).GetMethods()
+                    .Where(m => m.Name == "AddTypedClient"
+                                && m.IsGenericMethod == true
+                                && m.GetParameters().Count() == 1
+                                && m.GetGenericArguments().Count() == 2).ToList();
+
+                if (genericMethods == null || genericMethods.Count != 1) throw new Exception("Unable to find suitable method for constructing a typed HttpClient");
+                
+                var genericMethod = genericMethods.First().MakeGenericMethod(interfaceType, implementationType);
+                genericMethod.Invoke(builder, new object[] { builder });
             }
             else
-            {
-                services.AddScoped(implementationType);
+            { 
+                // find the desired generic method for creating a typed HttpClient
+                var genericMethods = typeof(HttpClientBuilderExtensions).GetMethods()
+                    .Where(m => m.Name == "AddTypedClient"
+                                && m.IsGenericMethod == true
+                                && m.GetParameters().Count() == 1
+                                && m.GetGenericArguments().Count() == 1).ToList();
+
+                if (genericMethods == null || genericMethods.Count != 1) throw new Exception("Unable to find suitable method for constructing a typed HttpClient");
+
+                var genericMethod = genericMethods.First().MakeGenericMethod(implementationType);
+                genericMethod.Invoke(builder, new object[] { builder });
             }
+
+            // invoke additional actions for HttpClientBuilder ex. attaching DelegatingHandlers
+            clientBuiltAction?.Invoke(implementationType.Name, builder);
         }
 
-        private static Type TryGetInterface(Type[] assemblyTypes, Type type)
+        private static void RegisterAgentType<T>(IServiceCollection services,
+                                              ServiceAgentSettings settings,
+                                              Action<IServiceProvider, HttpClient> clientCreatedAction,
+                                              Action<string, IHttpClientBuilder> clientBuiltAction) where T: class
         {
-            var interfaceTypeName = $"I{type.Name}";
-            var interfaceType = assemblyTypes.SingleOrDefault(t => t.Name == interfaceTypeName && t.GetTypeInfo().IsInterface);
-            return interfaceType;
+            // the type specified will be registered in the service collection as a transient service
+            IHttpClientBuilder builder = services.AddHttpClient<T>(typeof(T).Name, (serviceProvider, client) =>
+            {
+                var serviceSettings = settings.GetServiceSettings(typeof(T).Name);
+
+                ConfigureHttpClient(serviceProvider, client, serviceSettings, clientCreatedAction);
+            });
+
+            // invoke additional actions for HttpClientBuilder ex. attaching DelegatingHandlers
+            clientBuiltAction?.Invoke(typeof(T).Name, builder);
         }
+
+        private static void ConfigureHttpClient(IServiceProvider serviceProvider, HttpClient client, ServiceSettings serviceSettings, Action<IServiceProvider, HttpClient> clientCreatedAction)
+        {
+            client.BaseAddress = new Uri(serviceSettings.Url);
+
+            IRequestHeaderHelper requestHeaderHelper = serviceProvider.GetService<IRequestHeaderHelper>();
+            requestHeaderHelper.InitializeHeaders(client, serviceSettings).Wait();
+
+            // invoke event
+            clientCreatedAction?.Invoke(serviceProvider, client);
+        }
+
+        private static bool MyInterfaceFilter(Type typeObj, Object criteriaObj)
+        {
+            if (typeObj.ToString().EndsWith(criteriaObj.ToString()))
+                return true;
+            else
+                return false;
+        }
+
     }
 }
