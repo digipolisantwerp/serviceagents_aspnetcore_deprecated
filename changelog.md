@@ -1,5 +1,11 @@
 # ServiceAgents Toolbox
 
+## 7.0.1
+- revert package versions for resolving compatibility errors with netcoreapp2.1 (2.1.6)
+
+## 7.0.0
+- Use of HttpClientFactory
+
 ## 6.0.6
 - Expose response from an HttpClient call to classes that inherit AgentBase (useful when for ex. returned data model has not a fixed format )
 
