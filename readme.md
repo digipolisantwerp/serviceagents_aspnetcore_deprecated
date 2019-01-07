@@ -131,7 +131,7 @@ OAuthScope | Oauth scopt for OAuth authentication scheme. | "" | With Oauth sche
 
 All the url parts form the basic url for the service agent: {scheme}://{host}:{port}/{path}/
 
-An overloaded method for both **AddSingleServiceAgent&lt;T>** and **AddServiceAgents** is available where you can pass an "clientCreatedAction" parameter of type **Action&lt;IServiceProvider, HttpClient>** that gets invoked when the underlying HttpClient gets created. That way you can customize the created client.
+An overloaded method for both **AddSingleServiceAgent&lt;T>** and **AddServiceAgents** is available where you can pass a "clientCreatedAction" parameter of type **Action&lt;IServiceProvider, HttpClient>** that gets invoked when the underlying HttpClient gets created. That way you can customize the created client.
 
 Important notice: the action gets invoked for every service agent when multiple are registered!
 ``` csharp
@@ -146,7 +146,7 @@ Important notice: the action gets invoked for every service agent when multiple 
     });
 ```
 
-With this overloaded method of **AddSingleServiceAgent&lt;T>** or **AddServiceAgents** is also possible to pass an "clientBuildAction" parameter of type **Action&lt;string, IHttpClientBuilder>**. This gets invoked after the registration of the Service Agent as a typed client and allows you to add custom behaviour with the provided HttpClientBuilder, ex. adding delegating handers. The String argument is set to the Service Agent's type name.
+With this overloaded method of **AddSingleServiceAgent&lt;T>** or **AddServiceAgents** it is also possible to pass a "clientBuiltAction" parameter of type **Action&lt;string, IHttpClientBuilder>**. This gets invoked after the registration of the Service Agent as a typed client and allows you to add custom behaviour with the provided HttpClientBuilder, ex. adding delegating handers. The String argument is set to the Service Agent's type name.
 
 Important notice: the action gets invoked for every service agent when multiple are registered!
 ``` csharp
@@ -159,7 +159,7 @@ Important notice: the action gets invoked for every service agent when multiple 
     (string, httpClientBuilder) =>
     {
         //customize the client
-		httpClientBuilder.AddHttpMessageHandler<ValidateHeaderHandler>();
+        httpClientBuilder.AddHttpMessageHandler<ValidateHeaderHandler>();
     });
 ```
 
@@ -324,6 +324,7 @@ You must also supply following settings in the ServiceSettings:
 ```
 
 Before each call a check occurs to validate the lifetime of the OAuth access token. If no valid token is found, a new one is requested with the provided configuration settings.
+
 See the SampleApi for more info.
 
 ### Basic
