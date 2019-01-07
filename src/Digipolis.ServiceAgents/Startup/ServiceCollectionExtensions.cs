@@ -242,7 +242,7 @@ namespace Digipolis.ServiceAgents
                                               Action<string, IHttpClientBuilder> clientBuildAction) where T: class
         {
             // the type specified will be registered in the service collection as a transient service
-            IHttpClientBuilder builder = services.AddHttpClient<T>(typeof(T).Name, (serviceProvider, client) =>
+            IHttpClientBuilder builder = services.AddHttpClient<T>(typeof(T).Name).ConfigureHttpClient((serviceProvider, client) =>
             {
                 var serviceSettings = settings.GetServiceSettings(typeof(T).Name);
 
