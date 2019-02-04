@@ -1,15 +1,14 @@
 ﻿using Digipolis.ServiceAgents.Settings;
 using Microsoft.Extensions.Options;
 using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Net.Http;
 
 namespace Digipolis.ServiceAgents.UnitTests.Utilities
 {
     class InheritingFromOtherClassAgent : InheritingFromBaseAgent
     {
-        public InheritingFromOtherClassAgent(IServiceProvider serviceProvider, IOptions<ServiceAgentSettings> options)
-            : base(serviceProvider, options)
+        public InheritingFromOtherClassAgent(HttpClient client, IServiceProvider serviceProvider, IOptions<ServiceAgentSettings> options)
+            : base(client, serviceProvider, options)
         {
         }
     }
@@ -17,8 +16,8 @@ namespace Digipolis.ServiceAgents.UnitTests.Utilities
 
     public class InheritingFromBaseAgent : AgentBase
     {
-        public InheritingFromBaseAgent(IServiceProvider serviceProvider, IOptions<ServiceAgentSettings> options)
-            :base(serviceProvider, options)
+        public InheritingFromBaseAgent(HttpClient client, IServiceProvider serviceProvider, IOptions<ServiceAgentSettings> options)
+            :base(client, serviceProvider, options)
         {
         }
     }

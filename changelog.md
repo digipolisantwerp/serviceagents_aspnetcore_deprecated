@@ -1,4 +1,25 @@
 # ServiceAgents Toolbox
+
+## 7.0.1
+- revert package versions for resolving compatibility errors with netcoreapp2.1 (2.1.6)
+
+## 7.0.0
+- Use of HttpClientFactory
+
+## 6.0.6
+- Expose response from an HttpClient call to classes that inherit AgentBase (useful when for ex. returned data model has not a fixed format )
+
+## 6.0.5
+- RequestHeaders are evaluated before each service agent request. If an OAuth access token has expired, a new one will be requested.
+
+## 6.0.4
+- AgentBase: initialization of _client (HttpClient) happens on first use instead of during constructor execution to avoid unnecessary calls to retrieve an access token for OAuth-authentication scheme
+
+## 6.0.3
+- ParseJsonError: fixed Exception handling - ExtraParameters always null
+- OnParseJsonErrorException: Added hook for custom exception handling
+- Ensure Statuscode is included
+
 ## 6.0.2
  - Bugfix : Improved error mapping
  - Bugfix : Added Content-Type: application/x-www-form-urlencoded header to oauth content to fix issues after Kong upgrade 

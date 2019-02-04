@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.PlatformAbstractions;
 
 namespace Digipolis.ServiceAgents.UnitTests.Utilities
 {
@@ -17,7 +16,6 @@ namespace Digipolis.ServiceAgents.UnitTests.Utilities
 
         public ServiceAgentTestBase()
         {
-            var appEnv = PlatformServices.Default.Application;
             _startup = new TestStartup();
 
             _configureAppAction = (app =>

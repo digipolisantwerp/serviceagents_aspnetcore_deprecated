@@ -6,34 +6,29 @@ using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Digipolis.ServiceAgents
 {
-    public class HttpClientFactory : IHttpClientFactory
+    public class RequestHeaderHelper : IRequestHeaderHelper
     {
-        private IServiceProvider _serviceProvider;
+        protected IServiceProvider _serviceProvider;
+        protected ITokenHelper _tokenHelper = null;
 
-        public event Action<IServiceProvider, HttpClient> AfterClientCreated;
-
-        public HttpClientFactory(IServiceProvider serviceProvider)
+        public RequestHeaderHelper(IServiceProvider serviceProvider)
         {
-            _serviceProvider = serviceProvider;           
+            _serviceProvider = serviceProvider;
         }
 
-        public HttpClient CreateClient(ServiceAgentSettings serviceAgentSettings, ServiceSettings settings)
+        public async Task InitializeHeaders(HttpClient client, ServiceSettings settings)
         {
-            var client = new HttpClient
-            {
-                BaseAddress = new Uri(settings.Url)
-            };
-
             client.DefaultRequestHeaders.Accept.Clear();
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
             switch (settings.AuthScheme)
             {
                 case AuthScheme.OAuthClientCredentials:
-                    SetOAuthClientCredentialsAuthHeader(client, settings);
+                    await SetOAuthClientCredentialsAuthHeader(client, settings);
                     break;
                 case AuthScheme.Bearer:
                     SetBearerAuthHeader(client);
@@ -52,11 +47,25 @@ namespace Digipolis.ServiceAgents
                     client.DefaultRequestHeaders.Add(header.Key, header.Value);
                 }
             }
+        }
 
-            if (AfterClientCreated != null)
-                AfterClientCreated(_serviceProvider, client);
-
-            return client;
+        public async Task ValidateAuthHeaders(HttpClient client, ServiceSettings settings)
+        {
+            switch (settings.AuthScheme)
+            {
+                case AuthScheme.OAuthClientCredentials:
+                    // validate lifetime OAuth access token 
+                    await SetOAuthClientCredentialsAuthHeader(client, settings);
+                    break;
+                case AuthScheme.Bearer:
+                    // no change required
+                    break;
+                case AuthScheme.Basic:
+                    // no change required
+                    break;
+                default:
+                    break;
+            }
         }
 
         private void SetBasicAuthHeader(HttpClient client, ServiceSettings settings)
@@ -77,13 +86,18 @@ namespace Digipolis.ServiceAgents
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(AuthScheme.Bearer, authContext.UserToken);
         }
 
-        private void SetOAuthClientCredentialsAuthHeader(HttpClient client, ServiceSettings settings)
+        private async Task SetOAuthClientCredentialsAuthHeader(HttpClient client, ServiceSettings settings)
         {
-            
-            var tokenHelper = _serviceProvider.GetService<ITokenHelper>();
-            if (tokenHelper == null) throw new NullReferenceException($"{nameof(ITokenHelper)} cannot be null.");
-            var token = tokenHelper.ReadOrRetrieveToken(settings).Result.access_token;
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(AuthScheme.Bearer, token);
+            // tokenHelper is only needed for OAuth
+            if (_tokenHelper == null)
+            {
+                _tokenHelper = _serviceProvider.GetService<ITokenHelper>();
+                if (_tokenHelper == null) throw new NullReferenceException($"{nameof(ITokenHelper)} cannot be null.");
+            }
+
+            var token = await _tokenHelper.ReadOrRetrieveToken(settings);
+            var accessToken = token.access_token;
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(AuthScheme.Bearer, accessToken);
         }
 
         private bool IsDevelopmentEnvironment()

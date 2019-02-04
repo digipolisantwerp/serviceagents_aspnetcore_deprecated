@@ -5,6 +5,6 @@ namespace Digipolis.ServiceAgents
 {
     public interface IHttpClientFactory
     {
-        HttpClient CreateClient(ServiceAgentSettings serviceAgentSettings, ServiceSettings settings);
+        HttpClient CreateClient(ServiceSettings settings);
     }
 }

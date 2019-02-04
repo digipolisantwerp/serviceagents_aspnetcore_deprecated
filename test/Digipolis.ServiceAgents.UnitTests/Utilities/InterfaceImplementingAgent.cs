@@ -1,13 +1,14 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Digipolis.ServiceAgents.Settings;
+using Microsoft.Extensions.Options;
 using System;
-using Digipolis.ServiceAgents.Settings;
+using System.Net.Http;
 
 namespace Digipolis.ServiceAgents.UnitTests.Utilities
 {
     public class InterfaceImplementingAgent : AgentBase, IInterfaceImplementingAgent
     {
-        public InterfaceImplementingAgent(IServiceProvider serviceProvider, IOptions<ServiceAgentSettings> options)
-            :base(serviceProvider, options)
+        public InterfaceImplementingAgent(HttpClient client, IServiceProvider serviceProvider, IOptions<ServiceAgentSettings> options)
+            :base(client, serviceProvider, options)
         {
 
         }

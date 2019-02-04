@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 using Moq;
 using System;
 using System.Linq;
+using System.Net.Http;
 using Xunit;
 
 namespace Digipolis.ServiceAgents.UnitTests.Settings
@@ -13,11 +14,19 @@ namespace Digipolis.ServiceAgents.UnitTests.Settings
         [Fact]
         public void ShouldLoadSettings()
         {
+            var client = CreateHttpClient();
             var settings = CreateServiceAgentSettings();
             var serviceProvider = CreateServiceProvider(settings);
-            var agent = new GenericAgent<TestModel>(serviceProvider, Options.Create(settings));
+            var agent = new GenericAgent<TestModel>(client, serviceProvider, Options.Create(settings));
 
             Assert.Same(settings.Services.First().Value, agent.ServiceSettings);
+        }
+
+        private HttpClient CreateHttpClient()
+        {
+            var client = new HttpClient();
+            client.BaseAddress = new Uri(@"http://localhost");
+            return client;
         }
 
         private ServiceAgentSettings CreateServiceAgentSettings()
@@ -33,8 +42,6 @@ namespace Digipolis.ServiceAgents.UnitTests.Settings
 
             if (settings != null)
                 serviceProviderMock.Setup(p => p.GetService(typeof(IOptions<ServiceAgentSettings>))).Returns(Options.Create(settings));
-
-            serviceProviderMock.Setup(p => p.GetService(typeof(IHttpClientFactory))).Returns(new HttpClientFactory(serviceProviderMock.Object));
 
             return serviceProviderMock.Object;
         }

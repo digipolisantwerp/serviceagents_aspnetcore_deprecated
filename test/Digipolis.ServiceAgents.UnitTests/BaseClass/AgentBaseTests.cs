@@ -1,14 +1,15 @@
-﻿using Microsoft.Extensions.Options;
-using Moq;
-using System;
-using System.Linq;
+﻿using Digipolis.Errors.Exceptions;
 using Digipolis.ServiceAgents.Settings;
 using Digipolis.ServiceAgents.UnitTests.Utilities;
-using Xunit;
-using System.Net.Http;
-using Digipolis.Errors.Exceptions;
-using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
+using Moq;
 using Newtonsoft.Json;
+using System;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
+using Xunit;
 
 namespace Digipolis.ServiceAgents.UnitTests.BaseClass
 {
@@ -17,11 +18,12 @@ namespace Digipolis.ServiceAgents.UnitTests.BaseClass
         [Fact]
         public async Task Get()
         {
+            var client = CreateClient();
             var settings = CreateServiceAgentSettings();
             var serviceProvider = CreateServiceProvider(settings);
-            var agent = new TestAgent(serviceProvider, Options.Create(settings));
-            agent.HttpClient = CreateClient();
 
+            var agent = new TestAgent(client, serviceProvider, Options.Create(settings));
+            
             var response = await agent.GetTestDataAsync();
 
             Assert.NotNull(response);
@@ -32,10 +34,11 @@ namespace Digipolis.ServiceAgents.UnitTests.BaseClass
         [Fact]
         public async Task GetAsString()
         {
+            var client = CreateClient();
             var settings = CreateServiceAgentSettings();
             var serviceProvider = CreateServiceProvider(settings);
-            var agent = new TestAgent(serviceProvider, Options.Create(settings));
-            agent.HttpClient = CreateClient();
+
+            var agent = new TestAgent(client, serviceProvider, Options.Create(settings));
 
             var response = await agent.GetTestDataAsStringAsync();
 
@@ -46,11 +49,12 @@ namespace Digipolis.ServiceAgents.UnitTests.BaseClass
         [Fact]
         public async Task Post()
         {
+            var client = CreateClient();
             var settings = CreateServiceAgentSettings();
             var serviceProvider = CreateServiceProvider(settings);
-            var agent = new TestAgent(serviceProvider, Options.Create(settings));
-            agent.HttpClient = CreateClient();
 
+            var agent = new TestAgent(client, serviceProvider, Options.Create(settings));
+            
             var response = await agent.PostTestDataAsync(new TestModel { Name = "Name2", Number = 250 });
 
             Assert.NotNull(response);
@@ -61,11 +65,12 @@ namespace Digipolis.ServiceAgents.UnitTests.BaseClass
         [Fact]
         public async Task PostWithOtherReturnType()
         {
+            var client = CreateClient();
             var settings = CreateServiceAgentSettings();
             var serviceProvider = CreateServiceProvider(settings);
-            var agent = new TestAgent(serviceProvider, Options.Create(settings));
-            agent.HttpClient = CreateClient();
 
+            var agent = new TestAgent(client, serviceProvider, Options.Create(settings));
+            
             var response = await agent.PostTestDataWithOtherReturnTypeAsync(new TestModel { Name = "Name2", Number = 250 });
 
             Assert.NotNull(response);
@@ -76,11 +81,12 @@ namespace Digipolis.ServiceAgents.UnitTests.BaseClass
         [Fact]
         public async Task Patch()
         {
+            var client = CreateClient();
             var settings = CreateServiceAgentSettings();
             var serviceProvider = CreateServiceProvider(settings);
-            var agent = new TestAgent(serviceProvider, Options.Create(settings));
-            agent.HttpClient = CreateClient();
 
+            var agent = new TestAgent(client, serviceProvider, Options.Create(settings));
+            
             var response = await agent.PatchTestDataAsync(new TestModel { Name = "Name2", Number = 250 });
 
             Assert.NotNull(response);
@@ -91,11 +97,12 @@ namespace Digipolis.ServiceAgents.UnitTests.BaseClass
         [Fact]
         public async Task Put()
         {
+            var client = CreateClient();
             var settings = CreateServiceAgentSettings();
             var serviceProvider = CreateServiceProvider(settings);
-            var agent = new TestAgent(serviceProvider, Options.Create(settings));
-            agent.HttpClient = CreateClient();
 
+            var agent = new TestAgent(client, serviceProvider, Options.Create(settings));
+            
             var response = await agent.PutTestDataAsync(new TestModel { Name = "Name2", Number = 250 });
 
             Assert.NotNull(response);
@@ -106,10 +113,11 @@ namespace Digipolis.ServiceAgents.UnitTests.BaseClass
         [Fact]
         public async Task PutWithEmptyResult()
         {
+            var client = CreateClient();
             var settings = CreateServiceAgentSettings();
             var serviceProvider = CreateServiceProvider(settings);
-            var agent = new TestAgent(serviceProvider, Options.Create(settings));
-            agent.HttpClient = CreateClient();
+
+            var agent = new TestAgent(client, serviceProvider, Options.Create(settings));
 
             await agent.PutWithEmptyResultAsync(new TestModel { Name = "Name3", Number = 350 });
 
@@ -122,10 +130,12 @@ namespace Digipolis.ServiceAgents.UnitTests.BaseClass
         [Fact]
         public async Task JsonParserErrorWithMissingTitleAndStatusCode()
         {
+            var client = CreateClient();
             var settings = CreateServiceAgentSettings();
             var serviceProvider = CreateServiceProvider(settings);
-            var agent = new TestAgent(serviceProvider, Options.Create(settings));
-            agent.HttpClient = CreateClient();
+
+            var agent = new TestAgent(client, serviceProvider, Options.Create(settings));
+
             var message = new HttpResponseMessage();
             var body = JsonConvert.SerializeObject(new
             {
@@ -138,8 +148,6 @@ namespace Digipolis.ServiceAgents.UnitTests.BaseClass
 
             Assert.True(result.Messages.Count() == 1);
             var extraParam = result.Messages.FirstOrDefault();
-
-            Assert.NotNull(extraParam);
             Assert.Equal("json", extraParam.Key);
             Assert.True(extraParam.Value.Count() == 1);
             var errorMessage = extraParam.Value.FirstOrDefault();
@@ -150,10 +158,12 @@ namespace Digipolis.ServiceAgents.UnitTests.BaseClass
         [Fact]
         public async Task JsonParserErrorWith1Param()
         {
+            var client = CreateClient();
             var settings = CreateServiceAgentSettings();
             var serviceProvider = CreateServiceProvider(settings);
-            var agent = new TestAgent(serviceProvider, Options.Create(settings));
-            agent.HttpClient = CreateClient();
+
+            var agent = new TestAgent(client, serviceProvider, Options.Create(settings));
+
             var message = new HttpResponseMessage();
             message.Content = new StringContent(@"
             {""identifier"": ""dbcd3004-3af0-4862-bad1-2c4013dec85f"",
@@ -169,7 +179,6 @@ namespace Digipolis.ServiceAgents.UnitTests.BaseClass
             Assert.True(result.Messages.Count() == 1);
             var extraParam = result.Messages.FirstOrDefault();
 
-            Assert.NotNull(extraParam);
             Assert.Equal("naam", extraParam.Key);
             Assert.True(extraParam.Value.Count() == 2);
             var errorMessage = extraParam.Value.FirstOrDefault();
@@ -183,10 +192,12 @@ namespace Digipolis.ServiceAgents.UnitTests.BaseClass
         [Fact]
         public async Task JsonParserErrorWith2Param()
         {
+            var client = CreateClient();
             var settings = CreateServiceAgentSettings();
             var serviceProvider = CreateServiceProvider(settings);
-            var agent = new TestAgent(serviceProvider, Options.Create(settings));
-            agent.HttpClient = CreateClient();
+
+            var agent = new TestAgent(client, serviceProvider, Options.Create(settings));
+
             var message = new HttpResponseMessage();
 
             message.Content = new StringContent(@"
@@ -200,19 +211,22 @@ namespace Digipolis.ServiceAgents.UnitTests.BaseClass
                         }");
 
             var result = await Assert.ThrowsAsync<ServiceAgentException>(async () => await agent.ParseJsonWithError(message));
-
             Assert.True(result.Messages.Count() == 2);
+
             var extraParam = result.Messages.FirstOrDefault();
             Assert.NotNull(extraParam);
             Assert.Equal("naam", extraParam.Key);
             Assert.True(extraParam.Value.Count() == 2);
+
             var errorMessage = extraParam.Value.FirstOrDefault();
             Assert.NotNull(errorMessage);
             Assert.Equal("Naam moet uniek zijn", errorMessage);
+
             extraParam = result.Messages.LastOrDefault();
             Assert.NotNull(extraParam);
             Assert.Equal("test", extraParam.Key);
             Assert.True(extraParam.Value.Count() == 2);
+
             errorMessage = extraParam.Value.LastOrDefault();
             Assert.NotNull(errorMessage);
             Assert.Equal("Test2", errorMessage);
@@ -221,10 +235,12 @@ namespace Digipolis.ServiceAgents.UnitTests.BaseClass
         [Fact]
         public async Task JsonParserError400()
         {
+            var client = CreateClient();
             var settings = CreateServiceAgentSettings();
             var serviceProvider = CreateServiceProvider(settings);
-            var agent = new TestAgent(serviceProvider, Options.Create(settings));
-            agent.HttpClient = CreateClient();
+
+            var agent = new TestAgent(client, serviceProvider, Options.Create(settings));
+
             var message = new HttpResponseMessage();
             message.StatusCode = System.Net.HttpStatusCode.BadRequest;
             message.Content = new StringContent(@"
@@ -244,8 +260,6 @@ namespace Digipolis.ServiceAgents.UnitTests.BaseClass
 
             Assert.True(result.Messages.Count() == 1);
             var extraParam = result.Messages.FirstOrDefault();
-
-            Assert.NotNull(extraParam);
             Assert.Equal("naam", extraParam.Key);
             Assert.True(extraParam.Value.Count() == 2);
             var errorMessage = extraParam.Value.FirstOrDefault();
@@ -254,16 +268,17 @@ namespace Digipolis.ServiceAgents.UnitTests.BaseClass
             errorMessage = extraParam.Value.LastOrDefault();
             Assert.NotNull(errorMessage);
             Assert.Equal("Test", errorMessage);
-
         }
 
         [Fact]
         public async Task JsonParserError404()
         {
+            var client = CreateClient();
             var settings = CreateServiceAgentSettings();
             var serviceProvider = CreateServiceProvider(settings);
-            var agent = new TestAgent(serviceProvider, Options.Create(settings));
-            agent.HttpClient = CreateClient();
+
+            var agent = new TestAgent(client, serviceProvider, Options.Create(settings));
+
             var message = new HttpResponseMessage();
             message.Content = new StringContent("");
             message.StatusCode = System.Net.HttpStatusCode.NotFound;
@@ -276,10 +291,12 @@ namespace Digipolis.ServiceAgents.UnitTests.BaseClass
         [Fact]
         public async Task JsonParserError401()
         {
+            var client = CreateClient();
             var settings = CreateServiceAgentSettings();
             var serviceProvider = CreateServiceProvider(settings);
-            var agent = new TestAgent(serviceProvider, Options.Create(settings));
-            agent.HttpClient = CreateClient();
+
+            var agent = new TestAgent(client, serviceProvider, Options.Create(settings));
+
             var message = new HttpResponseMessage();
             message.Content = new StringContent("");
             message.StatusCode = System.Net.HttpStatusCode.Unauthorized;
@@ -292,10 +309,12 @@ namespace Digipolis.ServiceAgents.UnitTests.BaseClass
         [Fact]
         public async Task JsonParserError403()
         {
+            var client = CreateClient();
             var settings = CreateServiceAgentSettings();
             var serviceProvider = CreateServiceProvider(settings);
-            var agent = new TestAgent(serviceProvider, Options.Create(settings));
-            agent.HttpClient = CreateClient();
+
+            var agent = new TestAgent(client, serviceProvider, Options.Create(settings));
+
             var message = new HttpResponseMessage();
             message.Content = new StringContent("");
             message.StatusCode = System.Net.HttpStatusCode.Forbidden;
@@ -306,12 +325,34 @@ namespace Digipolis.ServiceAgents.UnitTests.BaseClass
         }
 
         [Fact]
-        public async Task Delete()
+        public async Task JsonParserErrorOtherStatus()
         {
+            var client = CreateClient();
             var settings = CreateServiceAgentSettings();
             var serviceProvider = CreateServiceProvider(settings);
-            var agent = new TestAgent(serviceProvider, Options.Create(settings));
-            agent.HttpClient = CreateClient();
+
+            var agent = new TestAgent(client, serviceProvider, Options.Create(settings));
+
+            var message = new HttpResponseMessage();
+            message.Content = new StringContent(@"<HTML><h1>STATUS 500</h1></HTML>");
+            message.StatusCode = HttpStatusCode.InternalServerError;
+
+            var result = await Assert.ThrowsAsync<ServiceAgentException>(async () => await agent.ParseJsonWithError(message));
+
+            Assert.NotNull(result);
+            Assert.Equal(await message.Content.ReadAsStringAsync(), result.Messages.FirstOrDefault().Value.FirstOrDefault());
+            Assert.Equal(result.Code, $"Status: {HttpStatusCode.InternalServerError.ToString()}");
+        }
+
+        [Fact]
+        public async Task Delete()
+        {
+            var client = CreateClient();
+            var settings = CreateServiceAgentSettings();
+            var serviceProvider = CreateServiceProvider(settings);
+
+            var agent = new TestAgent(client, serviceProvider, Options.Create(settings));
+
             await agent.DeleteAsync();
 
             var sentData = await agent.GetPreviousDataAsync();
@@ -319,7 +360,7 @@ namespace Digipolis.ServiceAgents.UnitTests.BaseClass
             Assert.Equal("Deleted", sentData.Name);
             Assert.Equal(123, sentData.Number);
         }
-
+        
         private ServiceAgentSettings CreateServiceAgentSettings()
         {
             var settings = new ServiceAgentSettings();
@@ -338,9 +379,8 @@ namespace Digipolis.ServiceAgents.UnitTests.BaseClass
             authContextMock.Setup(c => c.UserToken).Returns("TokenValue");
 
             serviceProviderMock.Setup(p => p.GetService(typeof(IAuthContext))).Returns(authContextMock.Object);
-            serviceProviderMock.Setup(p => p.GetService(typeof(IHttpClientFactory))).Returns(new HttpClientFactory(serviceProviderMock.Object));
-
-
+            serviceProviderMock.Setup(p => p.GetService(typeof(IRequestHeaderHelper))).Returns(new RequestHeaderHelper(serviceProviderMock.Object));
+            
             return serviceProviderMock.Object;
         }
     }
