@@ -213,21 +213,21 @@ namespace Digipolis.ServiceAgents.UnitTests.BaseClass
             var result = await Assert.ThrowsAsync<ServiceAgentException>(async () => await agent.ParseJsonWithError(message));
             Assert.True(result.Messages.Count() == 2);
 
-            var extraParam = result.Messages.FirstOrDefault();
-            Assert.NotNull(extraParam);
-            Assert.Equal("naam", extraParam.Key);
-            Assert.True(extraParam.Value.Count() == 2);
+            var (key, value) = result.Messages.FirstOrDefault();
+            Assert.NotNull(key);
+            Assert.Equal("naam",key);
+            Assert.True(value.Count() == 2);
 
-            var errorMessage = extraParam.Value.FirstOrDefault();
+            var errorMessage = value.FirstOrDefault();
             Assert.NotNull(errorMessage);
             Assert.Equal("Naam moet uniek zijn", errorMessage);
 
-            extraParam = result.Messages.LastOrDefault();
-            Assert.NotNull(extraParam);
-            Assert.Equal("test", extraParam.Key);
-            Assert.True(extraParam.Value.Count() == 2);
+            (key, value) = result.Messages.LastOrDefault();
+            Assert.NotNull(key);
+            Assert.Equal("test", key);
+            Assert.True(value.Count() == 2);
 
-            errorMessage = extraParam.Value.LastOrDefault();
+            errorMessage = value.LastOrDefault();
             Assert.NotNull(errorMessage);
             Assert.Equal("Test2", errorMessage);
         }
