@@ -1,5 +1,13 @@
 # ServiceAgents Toolbox
 
+## 7.1.0
+- removed obsolete interface IHttpClientFactory
+- removed obsolete CreateClientTests
+- removed unnecessary usings
+- updated Digipolis.Errors to 5.2.0
+- updated ParseJsonError to throw bad gateway an gateway timeout exceptions
+- refactoring
+
 ## 7.0.1
 - revert package versions for resolving compatibility errors with netcoreapp2.1 (2.1.6)
 
