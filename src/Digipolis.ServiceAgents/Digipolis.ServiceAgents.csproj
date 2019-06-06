@@ -34,7 +34,7 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="2.1.1" />
     <PackageReference Include="Digipolis.Json" Version="3.0.0" />
     <PackageReference Include="Digipolis.Common" Version="3.0.0" />
-    <PackageReference Include="Digipolis.Errors" Version="5.1.0" />
+    <PackageReference Include="Digipolis.Errors" Version="5.2.0" />
   </ItemGroup>
 
 </Project>

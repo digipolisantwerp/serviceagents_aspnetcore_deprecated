@@ -23,7 +23,7 @@ namespace Digipolis.ServiceAgents
         protected readonly IRequestHeaderHelper _requestHeaderHelper;
 
         private IServiceProvider _serviceProvider;
-        
+
         protected HttpClient _client { get; set; }
 
         protected AgentBase(HttpClient client, IServiceProvider serviceProvider, IOptions<ServiceAgentSettings> options)
@@ -34,7 +34,7 @@ namespace Digipolis.ServiceAgents
             _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider), $"Service provider cannot be null.");
 
             _settings = GetServiceSettings(options.Value);
-            
+
             _requestHeaderHelper = _serviceProvider.GetService<IRequestHeaderHelper>();
         }
 
@@ -53,12 +53,6 @@ namespace Digipolis.ServiceAgents
             throw new Exception($"Settings not found for service agent {GetType().Name}");
         }
 
-        protected async Task<T> ParseResult<T>(HttpResponseMessage response)
-        {
-            if (!response.IsSuccessStatusCode) await ParseJsonError(response);
-            return JsonConvert.DeserializeObject<T>(await response.Content.ReadAsStringAsync(), _jsonSerializerSettings);
-        }
-
         protected async Task ParseJsonError(HttpResponseMessage response)
         {
             var errorJson = await response.Content.ReadAsStringAsync();
@@ -71,16 +65,14 @@ namespace Digipolis.ServiceAgents
                 {
                     // Try to get Error object from JSON
                     errorResponse = JsonConvert.DeserializeObject<Error>(errorJson, _jsonSerializerSettings);
-
-                    if (errorResponse?.ExtraParameters == null)
-                    {
-                        errorResponse.ExtraParameters = new Dictionary<string, IEnumerable<string>>();
-                    }
-
-                    if (errorResponse == null || (String.IsNullOrWhiteSpace(errorResponse.Title) && errorResponse.Status == 0))
+                    if (errorResponse == null || (string.IsNullOrWhiteSpace(errorResponse.Title) && errorResponse.Status == 0))
                     {
                         // Json couldn't be parsed -> create new error object with custom json
                         throw new Exception();
+                    }
+                    if (errorResponse.ExtraParameters == null)
+                    {
+                        errorResponse.ExtraParameters = new Dictionary<string, IEnumerable<string>>();
                     }
                 }
             }
@@ -91,100 +83,82 @@ namespace Digipolis.ServiceAgents
                 {
                     Title = "Json parse error exception.",
                     Status = (int)response.StatusCode,
-                    ExtraParameters = new Dictionary<string, IEnumerable<string>> { { "json", new List<string> { errorJson } } }
+                    ExtraParameters = new Dictionary<string, IEnumerable<string>> { { "json", new[] { errorJson } }}
                 };
             }
 
             // Throw proper exception based on HTTP status
-            var errorTitle = errorResponse?.Title;
-            var errorCode = errorResponse?.Code;
-            var extraParameters = errorResponse?.ExtraParameters;
-
             switch (response.StatusCode)
             {
                 case HttpStatusCode.NotFound:
                     throw new NotFoundException(
-                                message: errorTitle ?? "Not found",
-                                code: errorCode ?? "NFOUND001",
-                                messages: extraParameters);
+                        message: errorResponse?.Title ?? "Not found",
+                        code: errorResponse?.Code ?? "NFOUND001",
+                        messages: errorResponse?.ExtraParameters);
 
                 case HttpStatusCode.BadRequest:
                     throw new ValidationException(
-                                message: errorTitle ?? "Bad request",
-                                code: errorCode ?? "UNVALI001",
-                                messages: extraParameters);
+                        message: errorResponse?.Title ?? "Bad request",
+                        code: errorResponse?.Code ?? "UNVALI001",
+                        messages: errorResponse?.ExtraParameters);
 
                 case HttpStatusCode.Unauthorized:
                     throw new UnauthorizedException(
-                                message: errorTitle ?? "Access denied",
-                                code: errorCode ?? "UNAUTH001",
-                                messages: extraParameters);
+                        message: errorResponse?.Title ?? "Access denied",
+                        code: errorResponse?.Code ?? "UNAUTH001",
+                        messages: errorResponse?.ExtraParameters);
 
                 case HttpStatusCode.Forbidden:
                     throw new ForbiddenException(
-                                message: errorTitle ?? "Forbidden",
-                                code: errorCode ?? "FORBID001",
-                                messages: extraParameters);
+                        message: errorResponse?.Title ?? "Forbidden",
+                        code: errorResponse?.Code ?? "FORBID001",
+                        messages: errorResponse?.ExtraParameters);
 
+                case HttpStatusCode.BadGateway:
+                    throw new BadGatewayException(
+                        message: "The server could not be located",
+                        code: "GTWAY001",
+                        messages: errorResponse?.ExtraParameters);
+
+                case HttpStatusCode.GatewayTimeout:
+                    throw new GatewayTimeoutException(
+                        message: "The connection to the server timed out",
+                        code: "GTWAY002",
+                        messages: errorResponse?.ExtraParameters);
                 default:
                     throw new ServiceAgentException(
-                               message: errorTitle,
-                               code: errorCode ?? $"Status: {response.StatusCode}",
-                               messages: extraParameters);
+                        message: errorResponse?.Title,
+                        code: errorResponse?.Code ?? $"Status: {response.StatusCode}",
+                        messages: errorResponse?.ExtraParameters);
             }
         }
 
         protected virtual void OnParseJsonErrorException(Exception ex, HttpResponseMessage response) { }
-        
+
         protected async Task<T> GetAsync<T>(string requestUri)
         {
             await _requestHeaderHelper.ValidateAuthHeaders(_client, _settings);
 
             using (var response = await _client.GetAsync(requestUri, HttpCompletionOption.ResponseHeadersRead))
             {
-                if (response.IsSuccessStatusCode)
-                {
-                    using (var stream = await response.Content.ReadAsStreamAsync())
-                    {
-                        return DeserializeJsonFromStream<T>(stream);
-                    }
-                }
-                else
-                {
-                    await ParseJsonError(response);                    
-                }
+                return await ParseResult<T>(response);
             }
-
-            return default(T);
         }
-        
+
         protected async Task<string> GetStringAsync(string requestUri)
         {
-            await _requestHeaderHelper.ValidateAuthHeaders(_client, _settings);
-
-            using (var response = await _client.GetAsync(requestUri, HttpCompletionOption.ResponseHeadersRead))
+            using (var response = await GetResponseAsync(requestUri))
+            using (var stream = await response.Content.ReadAsStreamAsync())
             {
-                if (response.IsSuccessStatusCode)
-                {
-                    using (var stream = await response.Content.ReadAsStreamAsync())
-                    {
-                        return await StreamToStringAsync(stream);
-                    }
-                }
-                else
-                {
-                    await ParseJsonError(response);
-                }
+                return await StreamToStringAsync(stream) ?? string.Empty;
             }
-
-            return string.Empty;
         }
 
         protected async Task<HttpResponseMessage> GetResponseAsync(string requestUri)
         {
             await _requestHeaderHelper.ValidateAuthHeaders(_client, _settings);
 
-            var response = await _client.GetAsync(requestUri);
+            var response = await _client.GetAsync(requestUri, HttpCompletionOption.ResponseHeadersRead);
             if (!response.IsSuccessStatusCode) await ParseJsonError(response);    // only return responses with status code success
             return response;
         }
@@ -272,6 +246,16 @@ namespace Digipolis.ServiceAgents
             return await ParseResult<TReponse>(response);
         }
 
+        protected async Task<T> ParseResult<T>(HttpResponseMessage response)
+        {
+            if (!response.IsSuccessStatusCode) await ParseJsonError(response);
+
+            using (var stream = await response.Content.ReadAsStreamAsync())
+            {
+                return DeserializeJsonFromStream<T>(stream);
+            }
+        }
+
         protected static T DeserializeJsonFromStream<T>(Stream stream)
         {
             if (stream == null || stream.CanRead == false)
@@ -287,23 +271,18 @@ namespace Digipolis.ServiceAgents
 
         protected static async Task<string> StreamToStringAsync(Stream stream)
         {
-            string content = null;
-
-            if (stream != null)
+            if (stream == null) return null;
+            string content;
+            using (var streamReader = new StreamReader(stream))
             {
-                using (var streamReader = new StreamReader(stream))
-                {
-                    content = await streamReader.ReadToEndAsync();
-                }
+                content = await streamReader.ReadToEndAsync();
             }
-
             return content;
         }
 
         public void Dispose()
         {
-            if (_client != null)
-                _client.Dispose();
+            _client?.Dispose();
         }
     }
 }
